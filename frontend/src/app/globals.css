@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+:root {
+  --color-warm-50: #fef9f3;
+  --color-warm-100: #fdf0e0;
+  --color-warm-200: #fbd9b5;
+  --color-warm-300: #f7bb7e;
+  --color-warm-400: #f29a48;
+  --color-warm-500: #e87d1e;
+  --color-warm-600: #d46514;
+  --color-warm-700: #b04d13;
+  --color-warm-800: #8e3e17;
+  --color-warm-900: #743516;
+
+  --color-sage-50: #f4f7f4;
+  --color-sage-100: #e0e8e0;
+  --color-sage-500: #6b8c6b;
+  --color-sage-700: #4a6b4a;
+
+  --color-danger: #dc2626;
+  --color-caution: #f59e0b;
+  --color-safe: #16a34a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: var(--color-warm-50);
+  color: #1a1a1a;
+  margin: 0;
+}
+
+/* Paw print background pattern */
+.paw-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60' opacity='0.03'%3E%3Ctext x='15' y='35' font-size='24'%3E🐾%3C/text%3E%3C/svg%3E");
+}

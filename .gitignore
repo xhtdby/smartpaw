@@ -1,0 +1,14 @@
+# SmartPaw
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local

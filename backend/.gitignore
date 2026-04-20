@@ -1,0 +1,29 @@
+# SmartPaw Backend
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Models cache
+*.pt
+*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
