@@ -27,3 +27,9 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# SQLite database (generated at runtime)
+*.db
+
+# Uploaded images (user-generated)
+uploads/
