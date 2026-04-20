@@ -36,13 +36,12 @@ export default function AnalyzePage() {
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
   useEffect(() => {
     return () => {
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
-      }
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -59,24 +58,29 @@ export default function AnalyzePage() {
   };
 
   const startCamera = async () => {
+    setError("");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setCameraActive(true);
-      }
+      streamRef.current = stream;
+      setCameraActive(true);
     } catch {
       setError("Camera access denied. Please upload a photo instead.");
     }
   };
 
-  const stopCamera = () => {
-    if (videoRef.current?.srcObject) {
-      (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
-      videoRef.current.srcObject = null;
+  // Attach the stream once the <video> element is in the DOM
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
     }
+  }, [cameraActive]);
+
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
     setCameraActive(false);
   };
 
@@ -186,20 +190,23 @@ export default function AnalyzePage() {
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full rounded-xl"
           />
-          <button
-            onClick={capturePhoto}
-            className="flex-1 bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold"
-          >
-            📸 Capture
-          </button>
-          <button
-            onClick={stopCamera}
-            className="px-4 bg-gray-100 rounded-xl text-gray-600"
-          >
-            ✕
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={capturePhoto}
+              className="flex-1 bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold"
+            >
+              📸 Capture
+            </button>
+            <button
+              onClick={stopCamera}
+              className="px-4 bg-gray-100 rounded-xl text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
 

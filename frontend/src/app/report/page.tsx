@@ -37,6 +37,7 @@ export default function ReportPage() {
   const [filterUrgency, setFilterUrgency] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraFileRef = useRef<HTMLInputElement>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
@@ -154,18 +155,33 @@ export default function ReportPage() {
                 >✕</button>
               </div>
             ) : (
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-200 rounded-lg p-3 text-sm text-gray-400 hover:border-[var(--color-warm-300)]"
-              >
-                📷 {t("report.form.photo")}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => cameraFileRef.current?.click()}
+                  className="flex-1 border-2 border-dashed border-gray-200 rounded-lg p-3 text-sm text-gray-400 hover:border-[var(--color-warm-300)]"
+                >
+                  📷 {t("report.form.camera")}
+                </button>
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  className="flex-1 border-2 border-dashed border-gray-200 rounded-lg p-3 text-sm text-gray-400 hover:border-[var(--color-warm-300)]"
+                >
+                  🖼️ {t("report.form.gallery")}
+                </button>
+              </div>
             )}
+            <input
+              ref={cameraFileRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageSelect(f); }}
+            />
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
-              capture="environment"
               className="hidden"
               onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageSelect(f); }}
             />
