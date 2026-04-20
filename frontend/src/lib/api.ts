@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const _raw = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = _raw.startsWith("http") ? _raw : `https://${_raw}`;
 
 async function fetchWithRetry(
   input: RequestInfo,
