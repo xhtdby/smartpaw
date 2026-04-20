@@ -13,6 +13,7 @@ import httpx
 from PIL import Image
 
 from app.config import get_settings
+from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +44,14 @@ async def detect_dog(image_bytes: bytes, confidence_threshold: float = 0.4) -> d
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
+            response = await groq_post_with_retry(
+                client,
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {settings.groq_api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
+                json_body={
                     "model": settings.groq_vision_model,
                     "messages": [
                         {
@@ -69,6 +71,8 @@ async def detect_dog(image_bytes: bytes, confidence_threshold: float = 0.4) -> d
                     "max_tokens": 150,
                 },
             )
+            if response.status_code != 200:
+                logger.error(f"Groq API error {response.status_code}: {response.text[:500]}")
             response.raise_for_status()
             data = response.json()
             content = data["choices"][0]["message"]["content"].strip()
@@ -92,5 +96,3 @@ async def detect_dog(image_bytes: bytes, confidence_threshold: float = 0.4) -> d
     except Exception as e:
         logger.error(f"Dog detection failed: {e}")
         return None
-
-    return best_dog

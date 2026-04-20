@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     # Groq (free tier) — primary LLM/VLM provider
     groq_api_key: str = ""
-    groq_vision_model: str = "llama-3.2-90b-vision-preview"
+    groq_vision_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
     groq_text_model: str = "llama-3.1-8b-instant"
 
     # HuggingFace Inference API — fallback

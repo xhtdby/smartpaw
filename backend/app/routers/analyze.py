@@ -3,7 +3,9 @@
 POST /api/analyze — upload a dog photo, receive a full empathetic assessment.
 """
 
+import io
 import logging
+from PIL import Image
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
 from app.config import get_settings
@@ -16,6 +18,44 @@ from app.services.response_generator import generate_empathetic_response
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["analyze"])
 
+# Formats we accept and auto-convert
+SUPPORTED_CONTENT_TYPES = {
+    "image/jpeg", "image/png", "image/webp", "image/gif",
+    "image/bmp", "image/tiff", "image/heic", "image/heif",
+    "image/avif", "image/svg+xml", "image/x-icon",
+}
+
+
+def normalize_image(image_bytes: bytes) -> bytes:
+    """Convert any supported image format to JPEG for consistent API processing."""
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        # Handle animated GIFs — take first frame
+        if hasattr(img, "n_frames") and img.n_frames > 1:
+            img.seek(0)
+        # Convert RGBA/P/LA to RGB (strip alpha)
+        if img.mode in ("RGBA", "P", "LA", "PA"):
+            background = Image.new("RGB", img.size, (255, 255, 255))
+            if img.mode == "P":
+                img = img.convert("RGBA")
+            background.paste(img, mask=img.split()[-1] if "A" in img.mode else None)
+            img = background
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+        # Auto-orient based on EXIF data
+        from PIL import ImageOps
+        img = ImageOps.exif_transpose(img)
+        # Resize if too large (max 2048px on longest side) — reduces API latency
+        max_dim = 2048
+        if max(img.size) > max_dim:
+            img.thumbnail((max_dim, max_dim), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=90)
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning(f"Image normalization failed: {e}")
+        return image_bytes
+
 
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_dog_image(
@@ -25,9 +65,10 @@ async def analyze_dog_image(
     """Analyze a dog image for emotion, condition, safety, and first aid guidance."""
     settings = get_settings()
 
-    # Validate file
-    if not image.content_type or not image.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Please upload an image file (JPEG, PNG, etc.)")
+    # Accept any image type — we'll auto-convert
+    content_type = (image.content_type or "").lower()
+    if not content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Please upload an image file (JPEG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF, etc.)")
 
     image_bytes = await image.read()
 
@@ -36,6 +77,11 @@ async def analyze_dog_image(
 
     if len(image_bytes) == 0:
         raise HTTPException(status_code=400, detail="Empty file uploaded.")
+
+    # Auto-convert to JPEG for consistent processing
+    logger.info(f"Received image: {image.filename} ({content_type}, {len(image_bytes)} bytes)")
+    image_bytes = normalize_image(image_bytes)
+    logger.info(f"Normalized to JPEG: {len(image_bytes)} bytes")
 
     # Step 1: Detect dog
     logger.info("Step 1: Detecting dog in image...")

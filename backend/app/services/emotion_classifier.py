@@ -13,6 +13,7 @@ import httpx
 from PIL import Image
 
 from app.config import get_settings
+from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -44,13 +45,14 @@ async def classify_emotion(image_bytes: bytes) -> dict:
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
+            response = await groq_post_with_retry(
+                client,
                 "https://api.groq.com/openai/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {settings.groq_api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
+                json_body={
                     "model": settings.groq_vision_model,
                     "messages": [
                         {
