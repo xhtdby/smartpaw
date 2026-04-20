@@ -1,15 +1,48 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { sendChatMessage, type ChatMessage } from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import { sendChatMessage, type ChatMessage, type ChatResponse } from "@/lib/api";
+import { useLanguage, LanguageSelector } from "@/lib/language";
 
-export default function ChatPage() {
+const STORAGE_KEY = "smartpaw-chat-history";
+const ANALYSIS_KEY = "smartpaw-analysis-context";
+
+function ChatInner() {
+  const { language, t } = useLanguage();
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [sources, setSources] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState("en");
+  const [analysisContext, setAnalysisContext] = useState<string | undefined>();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
+
+  // Load history + analysis context on mount
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setMessages(JSON.parse(saved));
+    } catch { /* ignore */ }
+    const ctx = localStorage.getItem(ANALYSIS_KEY);
+    if (ctx) setAnalysisContext(ctx);
+    // Auto-send context message if coming from analysis
+    if (searchParams.get("from") === "analysis" && ctx) {
+      const autoMsg = `I just analyzed a dog photo. Here's what was found:\n${ctx}\n\nWhat should I do next?`;
+      setInput(autoMsg);
+    }
+  }, [searchParams]);
+
+  // Save history
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
+    }
+  }, [messages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,19 +58,21 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const data = await sendChatMessage(text, language, messages);
-      const assistantMsg: ChatMessage = {
-        role: "assistant",
-        content: data.response,
-      };
+      const data: ChatResponse = await sendChatMessage(text, language, messages, analysisContext);
+      const assistantMsg: ChatMessage = { role: "assistant", content: data.response };
       setMessages((prev) => [...prev, assistantMsg]);
+      if (data.sources?.length) setSources(data.sources);
+      // Clear analysis context after first use
+      if (analysisContext) {
+        setAnalysisContext(undefined);
+        localStorage.removeItem(ANALYSIS_KEY);
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "I'm sorry, I'm having trouble connecting right now. For immediate help, please call the AWBI helpline at 1962.",
+          content: "I'm sorry, I'm having trouble connecting right now. For immediate help, please call the AWBI helpline at 1962.",
         },
       ]);
     } finally {
@@ -45,54 +80,43 @@ export default function ChatPage() {
     }
   };
 
+  const clearHistory = () => {
+    setMessages([]);
+    setSources([]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   return (
     <main className="min-h-screen flex flex-col max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
-        <Link href="/" className="text-2xl">
-          ←
-        </Link>
+        <Link href="/" className="text-2xl">←</Link>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-[var(--color-warm-700)]">
-            🐾 SmartPaw Chat
+            🐾 {t("chat.title")}
           </h1>
-          <p className="text-xs text-gray-400">
-            Ask about dog first aid &amp; care
-          </p>
+          <p className="text-xs text-gray-400">{t("chat.subtitle")}</p>
         </div>
-        <div className="flex gap-1">
-          {[
-            { code: "en", label: "EN" },
-            { code: "hi", label: "हि" },
-            { code: "mr", label: "म" },
-          ].map((l) => (
-            <button
-              key={l.code}
-              onClick={() => setLanguage(l.code)}
-              className={`w-8 h-8 rounded-full text-xs font-bold ${
-                language === l.code
-                  ? "bg-[var(--color-warm-500)] text-white"
-                  : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {l.label}
+        <div className="flex items-center gap-2">
+          {messages.length > 0 && (
+            <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500" title="Clear chat">
+              🗑️
             </button>
-          ))}
+          )}
+          <LanguageSelector compact />
         </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {/* Welcome message */}
         {messages.length === 0 && (
           <div className="text-center py-8">
             <div className="text-5xl mb-4">🐾</div>
             <h2 className="text-lg font-semibold text-[var(--color-warm-700)] mb-2">
-              Hi, I&apos;m SmartPaw!
+              {t("chat.welcome")}
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              I can help you with first aid for stray dogs, understanding dog
-              behavior, and finding resources in Mumbai.
+              {t("chat.welcome.desc")}
             </p>
             <div className="space-y-2">
               {[
@@ -103,9 +127,7 @@ export default function ChatPage() {
               ].map((q) => (
                 <button
                   key={q}
-                  onClick={() => {
-                    setInput(q);
-                  }}
+                  onClick={() => setInput(q)}
                   className="block w-full bg-white border border-gray-200 rounded-lg p-3 text-left text-sm text-gray-600 hover:bg-[var(--color-warm-50)] hover:border-[var(--color-warm-300)]"
                 >
                   {q}
@@ -116,10 +138,7 @@ export default function ChatPage() {
         )}
 
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[85%] rounded-2xl p-3 text-sm whitespace-pre-wrap ${
                 msg.role === "user"
@@ -132,19 +151,20 @@ export default function ChatPage() {
           </div>
         ))}
 
+        {/* Sources */}
+        {sources.length > 0 && messages.length > 0 && (
+          <div className="text-xs text-gray-400 px-2">
+            Sources: {sources.join(", ")}
+          </div>
+        )}
+
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-md p-3 shadow-sm">
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" />
-                <span
-                  className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.1s" }}
-                />
-                <span
-                  className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                />
+                <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
               </div>
             </div>
           </div>
@@ -161,7 +181,7 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Ask about dog care or first aid..."
+            placeholder={t("chat.placeholder")}
             className="flex-1 border border-gray-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--color-warm-400)]"
           />
           <button
@@ -172,10 +192,16 @@ export default function ChatPage() {
             ↑
           </button>
         </div>
-        <p className="text-center text-xs text-gray-300 mt-2">
-          Not a vet. Always consult a professional for serious cases.
-        </p>
+        <p className="text-center text-xs text-gray-300 mt-2">{t("disclaimer")}</p>
       </div>
     </main>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense>
+      <ChatInner />
+    </Suspense>
   );
 }

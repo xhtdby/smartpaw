@@ -54,9 +54,17 @@ class ReportResponse(BaseModel):
     longitude: float
     description: str
     urgency: str
-    image_url: Optional[str]
+    image_url: Optional[str] = None
+    image_filename: Optional[str] = None
     created_at: str
     status: str
+    resolved_at: Optional[str] = None
+    resolved_note: Optional[str] = None
+
+
+class ReportStatusUpdate(BaseModel):
+    status: str  # "open", "in_progress", "resolved", "closed"
+    note: str = ""
 
 
 class NearbyQuery(BaseModel):

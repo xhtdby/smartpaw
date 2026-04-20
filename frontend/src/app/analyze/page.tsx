@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { analyzeImage, type AnalysisResult } from "@/lib/api";
+import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const SAFETY_COLORS: Record<string, string> = {
   safe: "bg-green-100 text-green-800 border-green-300",
@@ -25,17 +27,31 @@ const EMOTION_ICONS: Record<string, string> = {
 };
 
 export default function AnalyzePage() {
+  const { language, t } = useLanguage();
+  const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [language, setLanguage] = useState("en");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (videoRef.current?.srcObject) {
+        (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => { if (preview) URL.revokeObjectURL(preview); };
+  }, [preview]);
+
   const handleFile = (file: File) => {
+    if (preview) URL.revokeObjectURL(preview);
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setResult(null);
@@ -56,6 +72,14 @@ export default function AnalyzePage() {
     }
   };
 
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      videoRef.current.srcObject = null;
+    }
+    setCameraActive(false);
+  };
+
   const capturePhoto = () => {
     if (!videoRef.current) return;
     const canvas = document.createElement("canvas");
@@ -66,10 +90,7 @@ export default function AnalyzePage() {
       if (blob) {
         const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
         handleFile(file);
-        // Stop camera
-        const stream = videoRef.current?.srcObject as MediaStream;
-        stream?.getTracks().forEach((t) => t.stop());
-        setCameraActive(false);
+        stopCamera();
       }
     }, "image/jpeg", 0.85);
   };
@@ -81,11 +102,32 @@ export default function AnalyzePage() {
     try {
       const data = await analyzeImage(image, language);
       setResult(data);
+      if (data.dog_detected) {
+        const ctx = [
+          data.emotion ? `Emotion: ${data.emotion.label}` : "",
+          data.condition?.breed_guess ? `Breed: ${data.condition.breed_guess}` : "",
+          data.condition?.physical_condition || "",
+          data.condition?.visible_injuries?.length ? `Injuries: ${data.condition.visible_injuries.join(", ")}` : "",
+          data.condition?.health_concerns?.length ? `Concerns: ${data.condition.health_concerns.join(", ")}` : "",
+          data.safety ? `Safety: ${data.safety.level} - ${data.safety.reason}` : "",
+        ].filter(Boolean).join("\n");
+        localStorage.setItem("smartpaw-analysis-context", ctx);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const goToChat = () => router.push("/chat?from=analysis");
+
+  const reset = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview("");
+    setImage(null);
+    setResult(null);
+    setError("");
   };
 
   return (
@@ -95,14 +137,13 @@ export default function AnalyzePage() {
         <Link href="/" className="text-2xl">
           ←
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold text-[var(--color-warm-700)]">
-            Help a Dog
+            {t("analyze.title")}
           </h1>
-          <p className="text-sm text-gray-500">
-            Take or upload a photo for assessment
-          </p>
+          <p className="text-sm text-gray-500">{t("analyze.subtitle")}</p>
         </div>
+        <LanguageSelector compact />
       </div>
 
       {/* Camera / Upload */}
@@ -113,7 +154,7 @@ export default function AnalyzePage() {
             className="w-full bg-[var(--color-warm-500)] text-white rounded-xl p-5 text-center"
           >
             <div className="text-3xl mb-2">📷</div>
-            <div className="font-semibold">Open Camera</div>
+            <div className="font-semibold">{t("analyze.camera")}</div>
           </button>
 
           <button
@@ -121,7 +162,7 @@ export default function AnalyzePage() {
             className="w-full bg-white border-2 border-dashed border-gray-300 rounded-xl p-5 text-center text-gray-600 hover:border-[var(--color-warm-400)]"
           >
             <div className="text-3xl mb-2">🖼️</div>
-            <div className="font-semibold">Upload Photo</div>
+            <div className="font-semibold">{t("analyze.upload")}</div>
             <div className="text-xs text-gray-400 mt-1">JPEG, PNG — max 10 MB</div>
           </button>
 
@@ -149,9 +190,15 @@ export default function AnalyzePage() {
           />
           <button
             onClick={capturePhoto}
-            className="w-full bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold"
+            className="flex-1 bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold"
           >
-            📸 Capture Photo
+            📸 Capture
+          </button>
+          <button
+            onClick={stopCamera}
+            className="px-4 bg-gray-100 rounded-xl text-gray-600"
+          >
+            ✕
           </button>
         </div>
       )}
@@ -165,27 +212,6 @@ export default function AnalyzePage() {
             className="w-full rounded-xl shadow-md max-h-80 object-cover"
           />
 
-          {/* Language Selection */}
-          <div className="flex gap-2 justify-center">
-            {[
-              { code: "en", label: "English" },
-              { code: "hi", label: "हिन्दी" },
-              { code: "mr", label: "मराठी" },
-            ].map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setLanguage(lang.code)}
-                className={`px-3 py-1 rounded-full text-sm ${
-                  language === lang.code
-                    ? "bg-[var(--color-warm-500)] text-white"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {lang.label}
-              </button>
-            ))}
-          </div>
-
           {!result && (
             <div className="flex gap-3">
               <button
@@ -193,16 +219,9 @@ export default function AnalyzePage() {
                 disabled={loading}
                 className="flex-1 bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold disabled:opacity-50"
               >
-                {loading ? "Analyzing..." : "🔍 Analyze"}
+                {loading ? t("analyze.analyzing") : `🔍 ${t("analyze.analyze")}`}
               </button>
-              <button
-                onClick={() => {
-                  setPreview("");
-                  setImage(null);
-                  setResult(null);
-                }}
-                className="px-4 bg-gray-100 rounded-xl text-gray-600"
-              >
+              <button onClick={reset} className="px-4 bg-gray-100 rounded-xl text-gray-600">
                 ✕
               </button>
             </div>
@@ -215,7 +234,7 @@ export default function AnalyzePage() {
         <div className="mt-6 text-center p-8 bg-white rounded-xl shadow-sm">
           <div className="text-4xl animate-bounce mb-4">🐾</div>
           <p className="text-[var(--color-warm-600)] font-medium">
-            Analyzing the photo...
+            {t("analyze.analyzing")}
           </p>
           <p className="text-sm text-gray-400 mt-2">
             Let&apos;s see how we can help this pup
@@ -358,14 +377,14 @@ export default function AnalyzePage() {
                   href="/nearby"
                   className="bg-[var(--color-sage-500)] text-white rounded-xl p-3 text-center text-sm font-semibold"
                 >
-                  🏥 Find Nearest Help
+                  🏥 {t("home.nearby")}
                 </Link>
-                <Link
-                  href="/chat"
+                <button
+                  onClick={goToChat}
                   className="bg-[var(--color-warm-500)] text-white rounded-xl p-3 text-center text-sm font-semibold"
                 >
                   💬 Ask Follow-up
-                </Link>
+                </button>
               </div>
 
               {/* Disclaimer */}
@@ -377,14 +396,10 @@ export default function AnalyzePage() {
 
           {/* New Analysis Button */}
           <button
-            onClick={() => {
-              setPreview("");
-              setImage(null);
-              setResult(null);
-            }}
+            onClick={reset}
             className="w-full bg-gray-100 text-gray-600 rounded-xl p-3 font-medium"
           >
-            Analyze Another Photo
+            {t("analyze.new")}
           </button>
         </div>
       )}

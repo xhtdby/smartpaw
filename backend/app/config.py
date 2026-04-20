@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     # HuggingFace Inference API — fallback
     hf_api_token: str = ""
 
-    # Supabase
+    # Supabase (optional)
     supabase_url: str = ""
     supabase_key: str = ""
 
@@ -23,6 +24,18 @@ class Settings(BaseSettings):
 
     # Max image size (bytes) — 10 MB
     max_image_size: int = 10 * 1024 * 1024
+
+    # SQLite database path
+    db_path: str = str(Path(__file__).parent.parent / "data" / "smartpaw.db")
+
+    # Upload directory for report images
+    uploads_dir: str = str(Path(__file__).parent.parent / "uploads")
+
+    # Allowed CORS origins
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "https://smartpaw.vercel.app",
+    ]
 
     class Config:
         env_file = ".env"

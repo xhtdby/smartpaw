@@ -2,76 +2,91 @@
   {
     "id": "fa1",
     "title": "How to Safely Approach a Stray Dog",
+    "tags": ["approach", "safety", "body language", "stray", "growl", "bite", "calm", "corner"],
     "content": "1. Stay calm and move slowly. Avoid sudden movements or loud noises.\n2. Turn your body slightly sideways — facing a dog head-on can feel threatening.\n3. Avoid direct eye contact. Look at the dog's body, not its eyes.\n4. Crouch down to appear smaller and less threatening.\n5. Extend the back of your hand slowly for the dog to sniff.\n6. Let the dog come to you — never chase or corner a stray.\n7. Watch the tail: a low, slow wag is cautious; tucked tail means fear; stiff upright tail means alert/agitated.\n8. If the dog growls or backs away, stop and give it space. Do not force interaction."
   },
   {
     "id": "fa2",
     "title": "Basic First Aid for Bleeding Wounds",
+    "tags": ["bleeding", "wound", "injury", "first aid", "cut", "blood", "bandage", "emergency"],
     "content": "1. If you can safely approach the dog, wear gloves if available.\n2. Apply gentle pressure with a clean cloth to stop bleeding.\n3. Do NOT try to remove objects embedded in a wound.\n4. Keep the wound clean — rinse gently with clean water if available.\n5. Do NOT apply human antiseptics like Dettol or hydrogen peroxide — they can harm dogs.\n6. Wrap loosely with a clean cloth bandage.\n7. Get the dog to a vet as soon as possible. Call a rescue helpline if you can't transport.\n8. For heavy bleeding that won't stop, apply firm pressure and rush to emergency vet."
   },
   {
     "id": "fa3",
     "title": "Helping a Dog with Mange (Skin Disease)",
+    "tags": ["mange", "skin", "hair loss", "scratching", "ivermectin", "treatment", "contagious", "itch"],
     "content": "Mange is very common in Mumbai's strays. Signs: patches of hair loss, red/irritated skin, excessive scratching, crusty/scaly skin.\n\n1. Do NOT apply home remedies like kerosene, engine oil, or turmeric paste — these are harmful myths.\n2. Mange is treatable. Contact a local NGO or vet for proper Ivermectin treatment.\n3. You can help by providing nutritious food (rice + boiled chicken/egg) to build immunity.\n4. Mange treatment takes 2-3 months. The dog needs consistent medication.\n5. Sarcoptic mange is contagious to humans (temporary rash). Wash hands after contact.\n6. Demodectic mange is NOT contagious but indicates low immunity.\n7. Report severely mangy dogs to WSD, IDA, or World For All for treatment."
   },
   {
     "id": "fa4",
     "title": "What to Do If You Find a Hit-by-Vehicle Dog",
+    "tags": ["accident", "hit", "vehicle", "car", "road", "fracture", "emergency", "move", "transport"],
     "content": "Road accidents are a leading cause of injury for Mumbai's strays.\n\n1. SAFETY FIRST: Make sure the road is safe before approaching.\n2. Do NOT move the dog unless it's in immediate danger of being hit again.\n3. If you must move it, slide a flat board or stiff cloth under the dog to use as a stretcher.\n4. Do NOT pick up the dog by its limbs — there may be internal injuries or fractures.\n5. Keep the dog warm with a cloth or blanket.\n6. Call the nearest 24hr emergency vet or rescue helpline immediately.\n7. If the dog is conscious and in pain, approach from behind slowly. An injured dog may bite out of pain.\n8. Stay with the dog until help arrives if possible — your presence is comforting.\n9. Note the exact location (Google Maps pin) so rescuers can find you."
   },
   {
     "id": "fa5",
     "title": "Dehydration and Heatstroke in Dogs",
+    "tags": ["dehydration", "heatstroke", "heat", "water", "summer", "panting", "collapse", "temperature"],
     "content": "Mumbai's heat is brutal for strays, especially in April-June.\n\nSigns of dehydration: dry gums, sunken eyes, lethargy, loss of skin elasticity.\nSigns of heatstroke: excessive panting, drooling, vomiting, collapse, bright red tongue.\n\n1. Offer clean, cool (not ice cold) water immediately.\n2. Move the dog to shade.\n3. Wet the dog's paws and belly with cool water. Do NOT douse with ice water.\n4. Place wet towels on the neck and armpits.\n5. Fan the dog if possible.\n6. If the dog won't drink, wet its lips and gums with water.\n7. Get to a vet urgently for severe heatstroke — it can be fatal within minutes.\n8. Prevention: Keep water bowls outside your building for strays. An earthen pot (matka) keeps water cool."
   },
   {
     "id": "fa6",
     "title": "Feeding Stray Dogs Safely",
+    "tags": ["feeding", "food", "nutrition", "diet", "puppy", "milk", "poison", "chocolate", "kibble"],
     "content": "Thank you for feeding strays! Here's how to do it responsibly:\n\n1. Feed at the same time and place daily — this reduces roaming and conflicts.\n2. Good foods: rice with boiled chicken/egg, roti with dal, curd rice, dog kibble.\n3. Avoid: chocolate, onion, garlic, grapes, raisins, cooked bones (they splinter), very spicy food.\n4. Always provide water alongside food.\n5. Clean up leftover food after 20-30 minutes to avoid attracting rats.\n6. Feed in groups if possible — community feeding reduces territorial aggression.\n7. If a dog seems to have difficulty eating, check for mouth injuries or dental issues.\n8. Puppies under 4 weeks need milk (Lactol or diluted cow milk), NOT buffalo milk."
   },
   {
     "id": "fa7",
     "title": "Rabies: What You Need to Know",
+    "tags": ["rabies", "bite", "vaccine", "vaccination", "scratch", "fatal", "PEP", "foam"],
     "content": "India accounts for 36% of global rabies deaths. Awareness saves lives.\n\n1. Rabies is 100% fatal once symptoms appear, but 100% preventable with timely vaccination.\n2. ANY dog bite or scratch that breaks skin needs immediate action.\n3. Wash the wound thoroughly with soap and running water for 15 minutes.\n4. Apply povidone-iodine (Betadine) if available.\n5. Go to the nearest hospital for post-exposure prophylaxis (PEP) — anti-rabies vaccine.\n6. Do NOT apply chilli, turmeric, or other folk remedies.\n7. Complete the full course of vaccines (usually 4-5 doses over a month).\n8. Report the biting dog to local authorities for observation (do NOT kill the dog).\n9. Vaccinated stray dogs (identifiable by an ear notch) are much lower risk, but still get PEP.\n10. Signs of rabies in dogs: excessive drooling, aggression, disorientation, paralysis, fear of water."
   },
   {
     "id": "fa8",
     "title": "Tick and Flea Infestation",
+    "tags": ["tick", "flea", "parasite", "blood", "anaemia", "fipronil", "monsoon", "ear"],
     "content": "Ticks are extremely common on Mumbai strays, especially during monsoon.\n\n1. Large ticks are visible to the naked eye — check ears, neck, between toes, and groin area.\n2. Do NOT pull ticks with bare fingers — use tweezers and pull straight out, close to the skin.\n3. Heavy tick infestations can cause anaemia (pale gums, lethargy, weakness).\n4. A vet can provide Fipronil spray or Bravecto tablets for treatment.\n5. For community dogs you feed regularly, ask a vet about monthly preventive treatment.\n6. Tick fever (Ehrlichiosis) is a serious complication — symptoms include fever, loss of appetite, bleeding from nose.\n7. If you suspect tick fever, rush to a vet immediately. It's treatable but can be fatal if delayed."
   },
   {
     "id": "fa9",
     "title": "Caring for Orphaned Puppies",
+    "tags": ["puppy", "orphan", "newborn", "milk", "feeding", "warm", "syringe", "foster"],
     "content": "Finding orphaned puppies is common. Here's how to help:\n\n1. FIRST: Make sure the mother is truly gone. Mother dogs often leave pups to forage and return. Wait 4-6 hours and observe.\n2. If pups are cold, crying continuously, or look thin, they likely need help.\n3. Keep puppies warm — a hot water bottle wrapped in cloth, or a warm (not hot) pad.\n4. Feed with a small syringe or pet nursing bottle. Use Lactol powder mixed with warm water.\n5. Never feed cow or buffalo milk directly — it causes diarrhoea. Dilute with equal parts water if nothing else is available.\n6. Feed every 2-3 hours for newborns, every 4 hours for pups over 2 weeks.\n7. After feeding, gently rub the puppy's belly and genital area with a warm damp cloth to stimulate urination/defecation.\n8. Contact a rescue NGO for proper fostering — hand-raising neonatal pups is very difficult alone."
   },
   {
     "id": "fa10",
     "title": "Dog Body Language Guide",
+    "tags": ["body language", "behavior", "tail", "ears", "aggressive", "scared", "happy", "growl", "bark"],
     "content": "Understanding body language keeps both you and the dog safe.\n\nHAPPY/FRIENDLY: Relaxed body, wagging tail (wide sweeps), soft eyes, open mouth (like a smile), may play-bow (front down, rear up).\n\nSCARED/ANXIOUS: Tail tucked between legs, ears flat, body low/crouching, lip licking, yawning (stress signal), may try to flee. A scared dog can bite if cornered.\n\nAGGRESSIVE/THREATENED: Stiff body, raised hackles (fur along spine), showing teeth, direct stare, growling, forward-leaning posture. GIVE SPACE immediately.\n\nSUBMISSIVE: Rolling on back showing belly, avoiding eye contact, ears back, tail low and possibly wagging slightly. This dog is not a threat but is very nervous.\n\nIN PAIN: Whimpering, limping, licking a specific area obsessively, reluctance to move, snapping when touched (pain response, not aggression)."
   },
   {
     "id": "fa11",
     "title": "Monsoon Health Risks for Stray Dogs",
+    "tags": ["monsoon", "rain", "flood", "leptospirosis", "infection", "wet", "fungal", "drown"],
     "content": "Mumbai's monsoon (June-September) creates unique health risks for strays.\n\n1. Waterlogged areas breed mosquitoes — dogs can get heartworm and leptospirosis.\n2. Wet conditions worsen skin infections, fungal infections, and ear infections.\n3. Stagnant water carries bacteria — dogs drinking from puddles may get gastro infections.\n4. Many strays drown in flooded areas or open drains during heavy rains.\n5. How to help: Provide dry shelters (even a raised platform with a tarp), clean water, and food.\n6. If you see a dog with persistent diarrhoea during monsoon, it may have lepto — get it to a vet.\n7. After floods, watch for dogs showing limping or wound infections from contaminated water."
   },
   {
     "id": "fa12",
     "title": "Legal Rights of Stray Dogs in India",
+    "tags": ["legal", "law", "rights", "cruelty", "feeding", "society", "FIR", "ABC", "relocate"],
     "content": "Stray dogs are protected under Indian law.\n\n1. The Prevention of Cruelty to Animals Act, 1960 makes it illegal to harm, poison, or kill stray dogs.\n2. ABC Rules, 2023 mandate that stray dogs can only be sterilized and vaccinated, NOT relocated or killed.\n3. Feeding strays is NOT illegal. No housing society can ban feeding. (Supreme Court and various High Court orders)\n4. Relocating strays from their territory is illegal under ABC Rules.\n5. If someone harms a stray, you can file an FIR under Section 428/429 IPC (now BNS 2023 equivalent).\n6. Report animal cruelty to: local police, AWBI (Animal Welfare Board of India), or PFA (People for Animals).\n7. Municipal corporations are legally required to run ABC programs."
   },
   {
     "id": "fa13",
     "title": "Distemper in Stray Dogs",
+    "tags": ["distemper", "virus", "cough", "seizure", "fever", "nasal", "vaccination", "fatal"],
     "content": "Canine distemper is common and often fatal in unvaccinated strays.\n\nSigns: Fever, nasal discharge, coughing, lethargy, loss of appetite, vomiting, diarrhoea. In later stages: seizures, muscle twitching, hardened paw pads.\n\n1. Distemper is viral — there is NO cure, only supportive care.\n2. If you suspect distemper, keep the dog isolated from other dogs (it's highly contagious).\n3. Get to a vet immediately for supportive treatment (fluids, anti-nausea, antibiotics for secondary infections).\n4. Many dogs survive distemper with good nursing care. Don't give up.\n5. Dogs that survive may have lifelong neurological twitches — this is normal.\n6. Prevention: ABC programs include vaccination. Support your local ABC NGO."
   },
   {
     "id": "fa14",
     "title": "How to Report Animal Cruelty",
+    "tags": ["cruelty", "report", "police", "FIR", "AWBI", "helpline", "abuse", "poison"],
     "content": "If you witness animal cruelty in Mumbai:\n\n1. Document with photos/videos from a safe distance.\n2. Note the location, time, and description of the perpetrator.\n3. File a complaint at the nearest police station. They are legally required to register it.\n4. Call AWBI helpline: 1962 (national animal helpline)\n5. Contact local NGOs: WSD (+91-22-2307-0773), BSPCA (+91-22-2415-0774)\n6. You can also file a complaint online through the AWBI portal.\n7. Under BNS 2023, animal cruelty can lead to fines and imprisonment.\n8. For poisoning cases, try to identify the substance and inform the vet treating the dog.\n9. You have the right to take the animal to a vet for treatment even before legal proceedings."
   },
   {
     "id": "fa15",
     "title": "What to Do If a Dog Won't Eat",
+    "tags": ["appetite", "eating", "vomiting", "diarrhoea", "parvovirus", "dehydration", "sick"],
     "content": "Loss of appetite in a stray dog can indicate several issues.\n\n1. First, check if the dog can physically eat — look for mouth injuries, broken teeth, or swelling.\n2. Try offering strong-smelling food like boiled chicken or wet dog food.\n3. If the dog has vomiting/diarrhoea along with appetite loss, it could be parvovirus (especially in puppies), distemper, or gastro issues — see a vet urgently.\n4. In hot weather, reduced appetite is normal. Ensure water is available.\n5. A dog that hasn't eaten for more than 24 hours needs veterinary attention.\n6. Dehydration from not eating/drinking can become critical quickly — look for dry gums and skin tenting."
   }
 ]

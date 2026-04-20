@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { fetchNearby, type ShelterVet } from "@/lib/api";
+import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const TYPE_ICONS: Record<string, string> = {
   vet: "🏥",
@@ -11,28 +12,19 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 export default function NearbyPage() {
+  const { t } = useLanguage();
   const [shelters, setShelters] = useState<ShelterVet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterType, setFilterType] = useState<string>("");
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const [radius, setRadius] = useState(10);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserLocation({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
-        },
-        () => {
-          // Default to Mumbai centre if geolocation fails
-          setUserLocation({ lat: 19.076, lng: 72.8777 });
-        }
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => setUserLocation({ lat: 19.076, lng: 72.8777 })
       );
     } else {
       setUserLocation({ lat: 19.076, lng: 72.8777 });
@@ -41,16 +33,10 @@ export default function NearbyPage() {
 
   useEffect(() => {
     if (!userLocation) return;
-
     const load = async () => {
       setLoading(true);
       try {
-        const data = await fetchNearby(
-          userLocation.lat,
-          userLocation.lng,
-          10,
-          filterType || undefined
-        );
+        const data = await fetchNearby(userLocation.lat, userLocation.lng, radius, filterType || undefined);
         setShelters(data);
       } catch {
         setError("Could not load nearby help. Please try again.");
@@ -59,23 +45,34 @@ export default function NearbyPage() {
       }
     };
     load();
-  }, [userLocation, filterType]);
+  }, [userLocation, filterType, radius]);
 
   return (
     <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="text-2xl">
-          ←
-        </Link>
-        <div>
-          <h1 className="text-xl font-bold text-[var(--color-warm-700)]">
-            Find Help Nearby
-          </h1>
-          <p className="text-sm text-gray-500">
-            Vets, shelters &amp; NGOs near you
-          </p>
+        <Link href="/" className="text-2xl">←</Link>
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-[var(--color-warm-700)]">{t("nearby.title")}</h1>
+          <p className="text-sm text-gray-500">{t("nearby.subtitle")}</p>
         </div>
+        <LanguageSelector compact />
+      </div>
+
+      {/* Radius Slider */}
+      <div className="mb-4 bg-white rounded-xl p-3 border border-gray-100">
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-500">Search radius</span>
+          <span className="font-semibold text-[var(--color-warm-600)]">{radius} km</span>
+        </div>
+        <input
+          type="range"
+          min={1}
+          max={50}
+          value={radius}
+          onChange={(e) => setRadius(Number(e.target.value))}
+          className="w-full accent-[var(--color-warm-500)]"
+        />
       </div>
 
       {/* Filters */}

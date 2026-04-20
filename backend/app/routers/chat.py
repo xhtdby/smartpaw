@@ -6,6 +6,9 @@ Uses a curated first aid knowledge base for retrieval-augmented generation.
 
 import json
 import logging
+import math
+import re
+from collections import Counter
 from pathlib import Path
 
 import httpx
@@ -20,42 +23,96 @@ router = APIRouter(prefix="/api", tags=["chat"])
 
 # Load first aid knowledge base
 _knowledge_base: list[dict] = []
+_idf_cache: dict[str, float] = {}
 _KB_FILE = Path(__file__).parent.parent.parent / "data" / "first_aid_kb.json"
+
+# Common stop words to filter out
+_STOP_WORDS = frozenset(
+    "a an the is are was were be been being have has had do does did "
+    "will would shall should may might can could to of in for on with "
+    "at by from it its this that these those i me my we our you your "
+    "he she they them their what which who whom how and or but not no".split()
+)
+
+
+def _tokenize(text: str) -> list[str]:
+    """Lowercase tokenization with stop word removal."""
+    words = re.findall(r"[a-z]+", text.lower())
+    return [w for w in words if w not in _STOP_WORDS and len(w) > 1]
 
 
 def _load_kb():
-    global _knowledge_base
+    global _knowledge_base, _idf_cache
     if not _knowledge_base and _KB_FILE.exists():
         with open(_KB_FILE, encoding="utf-8") as f:
             _knowledge_base = json.load(f)
         logger.info(f"Loaded {len(_knowledge_base)} first aid articles.")
 
+        # Pre-compute IDF scores
+        n_docs = len(_knowledge_base)
+        doc_freq: Counter = Counter()
+        for article in _knowledge_base:
+            text = article.get("title", "") + " " + article.get("content", "")
+            tags = " ".join(article.get("tags", []))
+            tokens = set(_tokenize(text + " " + tags))
+            for token in tokens:
+                doc_freq[token] += 1
 
-def _retrieve_relevant(query: str, top_k: int = 3) -> str:
-    """Simple keyword-based retrieval from the knowledge base.
+        _idf_cache = {
+            word: math.log((n_docs + 1) / (freq + 1)) + 1
+            for word, freq in doc_freq.items()
+        }
 
-    In production, replace with proper vector embeddings + similarity search.
+
+def _retrieve_relevant(query: str, top_k: int = 3) -> tuple[str, list[str]]:
+    """TF-IDF-inspired retrieval with tag boosting from the knowledge base.
+
+    Returns (context_text, source_titles).
     """
     _load_kb()
-    query_words = set(query.lower().split())
+    query_tokens = _tokenize(query)
+    if not query_tokens:
+        return "No specific first aid articles found for this query.", []
+
+    query_tf = Counter(query_tokens)
 
     scored = []
     for article in _knowledge_base:
-        text = (article.get("title", "") + " " + article.get("content", "")).lower()
-        overlap = sum(1 for w in query_words if w in text)
-        if overlap > 0:
-            scored.append((overlap, article))
+        text = article.get("title", "") + " " + article.get("content", "")
+        tags = article.get("tags", [])
+
+        # TF-IDF score for content
+        doc_tokens = _tokenize(text)
+        doc_tf = Counter(doc_tokens)
+        score = 0.0
+        for word, q_count in query_tf.items():
+            if word in doc_tf:
+                tf = 1 + math.log(doc_tf[word]) if doc_tf[word] > 0 else 0
+                idf = _idf_cache.get(word, 1.0)
+                score += q_count * tf * idf
+
+        # Tag boost: exact tag match gets a 3x bonus
+        for tag in tags:
+            tag_lower = tag.lower()
+            for qt in query_tokens:
+                if qt in tag_lower:
+                    score += 5.0
+
+        if score > 0:
+            scored.append((score, article))
 
     scored.sort(key=lambda x: x[0], reverse=True)
     top = scored[:top_k]
 
     if not top:
-        return "No specific first aid articles found for this query."
+        return "No specific first aid articles found for this query.", []
 
     context_parts = []
+    sources = []
     for _, article in top:
         context_parts.append(f"**{article['title']}**\n{article['content']}")
-    return "\n\n---\n\n".join(context_parts)
+        sources.append(article["title"])
+    return "\n\n---\n\n".join(context_parts), sources
 
 
 SYSTEM_PROMPT = """You are SmartPaw, a warm and compassionate AI assistant helping people care for stray dogs in Mumbai. You provide first aid guidance, emotional support, and practical advice.
@@ -85,7 +142,7 @@ async def chat(request: ChatRequest):
     settings = get_settings()
 
     # Retrieve relevant knowledge
-    context = _retrieve_relevant(request.message)
+    context, sources = _retrieve_relevant(request.message)
 
     # Add analysis context if provided
     if request.context_from_analysis:
@@ -103,7 +160,7 @@ async def chat(request: ChatRequest):
     if not settings.groq_api_key:
         return {
             "response": _fallback_chat(request.message, context),
-            "sources": [],
+            "sources": sources,
         }
 
     try:
@@ -125,13 +182,13 @@ async def chat(request: ChatRequest):
             data = response.json()
             reply = data["choices"][0]["message"]["content"]
 
-            return {"response": reply, "sources": []}
+            return {"response": reply, "sources": sources}
 
     except Exception as e:
         logger.error(f"Chat failed: {e}")
         return {
             "response": _fallback_chat(request.message, context),
-            "sources": [],
+            "sources": sources,
         }
 
 

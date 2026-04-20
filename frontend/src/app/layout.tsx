@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SWRegister from "./sw-register";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "SmartPaw — Help Mumbai's Stray Dogs",
@@ -26,7 +27,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="paw-bg min-h-screen">
         <SWRegister />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
