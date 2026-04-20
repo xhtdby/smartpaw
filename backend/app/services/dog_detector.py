@@ -1,61 +1,96 @@
-"""Dog detection service using YOLOv10-nano (COCO pre-trained).
+"""Dog detection service using Groq Vision API.
 
 Validates that a dog is present in the uploaded image before running
-further analysis. Returns bounding box + confidence for the best detection.
+further analysis. Replaces local YOLOv8 to avoid heavy PyTorch dependency.
 """
 
+import base64
 import io
+import json
 import logging
+
+import httpx
 from PIL import Image
+
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-# Lazy-loaded model singleton
-_model = None
+DETECTION_PROMPT = """Look at this image carefully. Is there a dog visible in this image?
+
+Respond ONLY with valid JSON in this exact format:
+{"dog_detected": true, "confidence": 0.95, "description": "brief description of the dog"}
+
+If no dog is visible, respond:
+{"dog_detected": false, "confidence": 0.0, "description": "what is in the image instead"}"""
 
 
-def _get_model():
-    global _model
-    if _model is None:
-        from ultralytics import YOLO
+async def detect_dog(image_bytes: bytes, confidence_threshold: float = 0.4) -> dict | None:
+    """Detect a dog in the image using Groq Vision API.
 
-        logger.info("Loading YOLOv8n model (COCO pre-trained)...")
-        _model = YOLO("yolov8n.pt")
-    return _model
-
-
-# COCO class index for "dog"
-DOG_CLASS_ID = 16
-
-
-def detect_dog(image_bytes: bytes, confidence_threshold: float = 0.4) -> dict | None:
-    """Detect a dog in the image.
-
-    Returns dict with keys: confidence, bbox (xyxy list) if a dog is found,
+    Returns dict with keys: confidence, description if a dog is found,
     otherwise returns None.
     """
-    model = _get_model()
+    settings = get_settings()
+    if not settings.groq_api_key:
+        logger.warning("Groq API key not configured, skipping detection.")
+        return None
+
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=85)
+    b64_image = base64.b64encode(buf.getvalue()).decode("utf-8")
 
-    results = model.predict(source=image, conf=confidence_threshold, verbose=False)
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {settings.groq_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": settings.groq_vision_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": DETECTION_PROMPT},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{b64_image}"
+                                    },
+                                },
+                            ],
+                        }
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 150,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"].strip()
 
-    best_dog = None
-    best_conf = 0.0
+            # Extract JSON
+            if content.startswith("```"):
+                content = content.split("\n", 1)[1].rsplit("```", 1)[0]
 
-    for result in results:
-        for box in result.boxes:
-            cls_id = int(box.cls[0])
-            conf = float(box.conf[0])
-            if cls_id == DOG_CLASS_ID and conf > best_conf:
-                best_conf = conf
-                best_dog = {
-                    "confidence": round(conf, 3),
-                    "bbox": [round(c, 1) for c in box.xyxy[0].tolist()],
+            result = json.loads(content)
+
+            if result.get("dog_detected") and result.get("confidence", 0) >= confidence_threshold:
+                logger.info(f"Dog detected with confidence {result['confidence']}")
+                return {
+                    "confidence": round(result["confidence"], 3),
+                    "description": result.get("description", ""),
                 }
 
-    if best_dog:
-        logger.info(f"Dog detected with confidence {best_dog['confidence']}")
-    else:
-        logger.info("No dog detected in the image.")
+            logger.info("No dog detected in the image.")
+            return None
+
+    except Exception as e:
+        logger.error(f"Dog detection failed: {e}")
+        return None
 
     return best_dog

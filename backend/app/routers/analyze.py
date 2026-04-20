@@ -39,7 +39,7 @@ async def analyze_dog_image(
 
     # Step 1: Detect dog
     logger.info("Step 1: Detecting dog in image...")
-    detection = detect_dog(image_bytes, settings.yolo_confidence)
+    detection = await detect_dog(image_bytes, settings.yolo_confidence)
 
     if not detection:
         return AnalysisResponse(
@@ -54,7 +54,7 @@ async def analyze_dog_image(
     # Step 2: Classify emotion
     logger.info("Step 2: Classifying dog emotion...")
     try:
-        emotion_result = classify_emotion(image_bytes)
+        emotion_result = await classify_emotion(image_bytes)
     except Exception as e:
         logger.error(f"Emotion classification failed: {e}")
         emotion_result = {"label": "unknown", "confidence": 0.0, "description": "Could not determine emotion"}
