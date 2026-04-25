@@ -11,19 +11,18 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center px-4 py-8">
       {/* Hero */}
       <div className="text-center max-w-md mx-auto mb-8">
-        <div className="flex justify-center mb-4">
+        <div className="flex items-center justify-center gap-3 mb-2">
           <Image
             src="/logo.png"
             alt="IndieAid logo"
-            width={120}
-            height={173}
+            width={52}
+            height={75}
             priority
-            className="drop-shadow-md"
           />
+          <h1 className="text-3xl font-bold text-[var(--color-warm-700)]">
+            {t("app.name")}
+          </h1>
         </div>
-        <h1 className="text-3xl font-bold text-[var(--color-warm-700)] mb-2">
-          {t("app.name")}
-        </h1>
         <p className="text-lg text-[var(--color-warm-600)]">
           {t("app.tagline")}
         </p>
