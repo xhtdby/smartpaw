@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { sendChatMessage, type ChatMessage, type ChatResponse } from "@/lib/api";
@@ -92,8 +93,9 @@ function ChatInner() {
       <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100 bg-white sticky top-0 z-10">
         <Link href="/" className="text-2xl">←</Link>
         <div className="flex-1">
-          <h1 className="text-lg font-bold text-[var(--color-warm-700)]">
-            🐾 {t("chat.title")}
+          <h1 className="text-lg font-bold text-[var(--color-warm-700)] flex items-center gap-2">
+            <Image src="/logo.png" alt="IndieAid" width={28} height={40} className="inline-block" />
+            {t("chat.title")}
           </h1>
           <p className="text-xs text-gray-400">{t("chat.subtitle")}</p>
         </div>

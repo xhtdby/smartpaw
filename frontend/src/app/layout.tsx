@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "AI-powered assistant to assess stray dog conditions, provide first aid guidance, and connect you with shelters and vets in India.",
   manifest: "/manifest.json",
-  icons: { icon: "/icon-192.svg", apple: "/icon-192.svg" },
+  icons: { icon: "/logo-192.png", apple: "/logo-192.png" },
 };
 
 export const viewport: Viewport = {

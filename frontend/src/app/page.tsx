@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
@@ -10,7 +11,16 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center px-4 py-8">
       {/* Hero */}
       <div className="text-center max-w-md mx-auto mb-8">
-        <div className="text-6xl mb-4">🐾</div>
+        <div className="flex justify-center mb-4">
+          <Image
+            src="/logo.png"
+            alt="IndieAid logo"
+            width={120}
+            height={173}
+            priority
+            className="drop-shadow-md"
+          />
+        </div>
         <h1 className="text-3xl font-bold text-[var(--color-warm-700)] mb-2">
           {t("app.name")}
         </h1>
