@@ -115,12 +115,13 @@ def _retrieve_relevant(query: str, top_k: int = 3) -> tuple[str, list[str]]:
     return "\n\n---\n\n".join(context_parts), sources
 
 
-SYSTEM_PROMPT = """You are SmartPaw, a warm and compassionate AI assistant helping people care for stray dogs in Mumbai. You provide first aid guidance, emotional support, and practical advice.
+SYSTEM_PROMPT = """You are IndieAid, a warm and compassionate AI assistant helping people care for stray dogs in India. You provide first aid guidance, emotional support, and practical advice using Indian-specific treatments and resources.
 
 IMPORTANT RULES:
 - You are NOT a veterinarian. Always remind users to consult a professional for serious cases.
+- Suggest India-specific remedies like diluted Betadine, Neosporin, or Arnica 200 when appropriate.
 - Be warm, empathetic, and encouraging. The user is worried about a dog.
-- Keep answers clear, practical, and culturally sensitive to Mumbai context.
+- Keep answers clear, practical, and culturally sensitive to the Indian context.
 - If the user speaks in Hindi or Marathi, respond in that language.
 - Use the knowledge base context below to give accurate first aid information.
 
@@ -138,7 +139,7 @@ LANGUAGE_INSTRUCTIONS = {
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
-    """Chat with SmartPaw about dog first aid and care."""
+    """Chat with IndieAid about dog first aid and care."""
     settings = get_settings()
 
     # Retrieve relevant knowledge

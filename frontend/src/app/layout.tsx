@@ -4,9 +4,9 @@ import SWRegister from "./sw-register";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "SmartPaw — Help Mumbai's Stray Dogs",
+  title: "IndieAid — Help India's Stray Dogs",
   description:
-    "AI-powered assistant to assess stray dog conditions, provide first aid guidance, and connect you with shelters and vets in Mumbai.",
+    "AI-powered assistant to assess stray dog conditions, provide first aid guidance, and connect you with shelters and vets in India.",
   manifest: "/manifest.json",
   icons: { icon: "/icon-192.svg", apple: "/icon-192.svg" },
 };

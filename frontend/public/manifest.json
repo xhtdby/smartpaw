@@ -1,7 +1,7 @@
 {
-  "name": "SmartPaw — Help Mumbai's Stray Dogs",
-  "short_name": "SmartPaw",
-  "description": "AI-powered first aid guidance and rescue coordination for stray dogs in Mumbai",
+  "name": "IndieAid — Help India's Stray Dogs",
+  "short_name": "IndieAid",
+  "description": "AI-powered first aid guidance and rescue coordination for stray dogs in India",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fef9f3",

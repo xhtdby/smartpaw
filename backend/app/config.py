@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class Settings(BaseSettings):
-    app_name: str = "SmartPaw"
+    app_name: str = "IndieAid"
     debug: bool = False
 
     # Groq (free tier) — primary LLM/VLM provider

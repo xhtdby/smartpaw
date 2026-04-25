@@ -198,7 +198,7 @@ const GUIDES: Guide[] = [
       hi: [
         "खुश: शिथिल शरीर, चौड़ी पूंछ हिलाना, खुले मुंह की मुस्कान",
         "डरा: दबी पूंछ, चपटे कान, सिकुड़ा हुआ, होंठ चाटना",
-        "आक्रामक: तना शरीर, उभे बाल, दांत दिखाना",
+        "आक्रामक: तना शरीर, उभे बाल, दात दिखाना",
         "दर्द में: कराहना, लंगड़ाना, एक जगह बार-बार चाटना",
       ],
       mr: [
@@ -346,7 +346,7 @@ const GUIDES: Guide[] = [
     title: {
       en: "Dog Caught in Wire, Rope, or Manja",
       hi: "तार, रस्सी या मांझा में फंसा कुत्ता",
-      mr: "तार, दोरी किंवा मांजात अडकलेला कुत्रा",
+      mr: "तार, दोरी किंवा मांझा में फंसलेला कुत्रा",
     },
     summary: {
       en: "Don't pull embedded wire out. Cut loose entanglements carefully. Deep wire wounds need a vet.",
@@ -367,7 +367,7 @@ const GUIDES: Guide[] = [
         "मुंह/पैरों पर रबर बैंड रक्त प्रवाह रोकते हैं — तुरंत हटाएं",
       ],
       mr: [
-        "मांजा (पतंगाची दोरी) चे कट मुंबईत मोठी समस्या आहे",
+        "मांझा (पतंगाची दोरी) चे कट मुंबईत मोठी समस्या आहे",
         "जाड हातमोजे वापरा — अडकलेले कुत्रे भीतीने चावू शकतात",
         "माश्यांना अंडी घालण्यापासून रोखण्यासाठी जखम झाका",
         "तोंड/पायांवरील रबर बॅंड रक्तप्रवाह थांबवतात — ताबडतोब काढा",
@@ -430,7 +430,7 @@ const GUIDES: Guide[] = [
         "नमक का पानी (सेलाइन) घाव से कीड़ों को बाहर निकालता है",
         "तारपीन, केरोसिन या रसायन का उपयोग न करें",
         "सफाई के बाद मक्खियों से बचाने के लिए घाव ढकें",
-        "मुफ्त इलाज के लिए Bombay SPCA या WSD से संपर्क करें",
+        "मोफत इलाज के लिए Bombay SPCA या WSD से संपर्क करें",
       ],
       mr: [
         "मिठाचे पाणी (सलाईन) जखमेतून अळ्या बाहेर काढते",
@@ -548,7 +548,7 @@ const GUIDES: Guide[] = [
     },
     summary: {
       en: "Most strays aren't aggressive. Stop, stand still sideways, avoid eye contact. Never run.",
-      hi: "ज़्यादातर आवारा कुत्ते आक्रामक नहीं होते। रुकें, बगल में खड़े हों, आंख न मिलाएं। कभी न भागें।",
+      hi: "ज़्यादातर आवारा कुत्ते आक्रामक नहीं होते। रुकें, बग़ल में खड़े हों, आंख न मिलाएं। कभी न भागें।",
       mr: "बहुतेक भटके कुत्रे आक्रमक नसतात. थांबा, बाजूला उभे राहा, डोळ्यांत पाहू नका. कधीही पळू नका.",
     },
     tips: {
@@ -561,7 +561,7 @@ const GUIDES: Guide[] = [
       hi: [
         "भागने से पीछा करने की प्रवृत्ति जागती है — रुकें और डटे रहें",
         "कुत्ते रात में ज़्यादा क्षेत्रीय होते हैं — टॉर्च रखें",
-        "आक्रामकता आमतौर पर डर या दर्द से होती है, दुष्टता से नहीं",
+        "आक्रामकता आमतौर पर डर या दर्द से होती है, दुष्टपणामुळे नाही",
         "सच में खतरनाक कुत्तों की सूचना स्थानीय ABC केंद्र को दें",
       ],
       mr: [
@@ -572,6 +572,23 @@ const GUIDES: Guide[] = [
       ],
     },
   },
+];
+
+const EXTERNAL_LINKS = [
+  { url: "https://www.vosd.in/faqs/", label: "VOSD Rescue FAQs" },
+  { url: "https://jaagruti.org/first-aid-for-dogs/", label: "Jaagruti: First Aid for Dogs" },
+  { url: "https://thebetterindia.com/328239/animal-rescue-and-rehabilitation-centres-in-india/", label: "Animal Rescue & Rehab Centres (Better India)" },
+  { url: "https://in.virbac.com/all-diseases", label: "Dog Diseases Guide (Virbac)" },
+  { url: "https://cdsco.gov.in/opencms/export/sites/CDSCO_WEB/Pdf-documents/listofveDrugs.pdf", label: "List of Veterinary Drugs (CDSCO)" },
+  { url: "https://lbb.in/mumbai/animal-shelters-mumbai/", label: "Animal Shelters in Mumbai (LBB)" },
+  { url: "https://supertails.com/collections/dog-medicines", label: "Dog Medicines (Supertails)" },
+  { url: "https://peepalfarm.org/animal-rescue-training", label: "Animal Rescue Training (Peepal Farm)" },
+  { url: "https://www.animalscharities.co.uk/animal-charities-in-india.html", label: "Animal Charities in India" },
+  { url: "https://vetstudy.journeywithasr.com/p/veterinary-drug-index-pdf.html", label: "Veterinary Drug Index" },
+  { url: "https://helplocal.in/blog/best-foods-for-street-dogs/", label: "Best Foods for Street Dogs" },
+  { url: "https://legalbots.in/blog/how-to-report-animal-abuse-in-india", label: "How to Report Animal Abuse" },
+  { url: "https://www.caninebible.com/homemade-dog-treat-recipes/", label: "Homemade Dog Treat Recipes" },
+  { url: "https://www.woofdoctor.vet/calming-music/", label: "Calming Music for Dogs" }
 ];
 
 export default function LearnPage() {
@@ -639,6 +656,34 @@ export default function LearnPage() {
             </div>
           </details>
         ))}
+      </div>
+
+      {/* External Resources */}
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-[var(--color-warm-700)] mb-3">
+          {language === "hi"
+            ? "उपयोगी संसाधन और लिंक"
+            : language === "mr"
+            ? "उपयुक्त संसाधने आणि दुवे"
+            : "Useful Resources & Links"}
+        </h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <ul className="divide-y divide-gray-100">
+            {EXTERNAL_LINKS.map((link, i) => (
+              <li key={i}>
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-3 hover:bg-gray-50 transition-colors flex items-center justify-between text-sm text-[var(--color-warm-600)]"
+                >
+                  <span>{link.label}</span>
+                  <span className="text-gray-400">↗</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Emergency Banner */}

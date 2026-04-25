@@ -1,6 +1,6 @@
-"""SmartPaw — Backend API
+"""IndieAid — Backend API
 
-An empathetic AI assistant for helping stray dogs in Mumbai.
+An empathetic AI assistant for helping stray dogs in India.
 """
 
 import logging
@@ -26,21 +26,21 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle."""
-    logger.info("SmartPaw API starting up...")
+    logger.info("IndieAid API starting up...")
     await init_db()
     uploads = Path(get_settings().uploads_dir)
     uploads.mkdir(parents=True, exist_ok=True)
     yield
-    logger.info("SmartPaw API shutting down.")
+    logger.info("IndieAid API shutting down.")
 
 
 settings = get_settings()
 
 app = FastAPI(
-    title="SmartPaw API",
+    title="IndieAid API",
     description=(
         "AI-powered assistant for assessing stray dog conditions, "
-        "providing first aid guidance, and connecting rescuers with shelters in Mumbai."
+        "providing first aid guidance, and connecting rescuers with shelters in India."
     ),
     version="2.0.0",
     lifespan=lifespan,
@@ -80,9 +80,9 @@ app.include_router(chat.router)
 @app.get("/")
 async def root():
     return {
-        "name": "SmartPaw API",
+        "name": "IndieAid API",
         "version": "2.0.0",
-        "message": "Helping Mumbai's stray dogs, one photo at a time. 🐾",
+        "message": "Helping India's stray dogs, one photo at a time. 🐾",
     }
 
 

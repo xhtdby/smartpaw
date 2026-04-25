@@ -12,8 +12,8 @@ interface LanguageContextType {
 
 const translations: Record<Language, Record<string, string>> = {
   en: {
-    "app.name": "SmartPaw",
-    "app.tagline": "Helping Mumbai's stray dogs, one photo at a time",
+    "app.name": "IndieAid",
+    "app.tagline": "Helping India's stray dogs, one photo at a time",
     "app.subtitle": "AI-powered first aid guidance, emotion assessment, and rescue coordination",
     "home.help": "Help a Dog",
     "home.help.desc": "Take a photo to assess condition & get first aid guidance",
@@ -21,7 +21,7 @@ const translations: Record<Language, Record<string, string>> = {
     "home.nearby.desc": "Vets & shelters near you",
     "home.report": "Report",
     "home.report.desc": "Log a stray needing help",
-    "home.chat": "Ask SmartPaw",
+    "home.chat": "Ask IndieAid",
     "home.chat.desc": "First aid chat assistant",
     "home.learn": "Learn",
     "home.learn.desc": "Dog care & first aid guides",
