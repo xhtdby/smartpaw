@@ -15,8 +15,8 @@ export default function Home() {
           <Image
             src="/logo.png"
             alt="IndieAid logo"
-            width={52}
-            height={75}
+            width={48}
+            height={48}
             priority
           />
           <h1 className="text-3xl font-bold text-[var(--color-warm-700)]">

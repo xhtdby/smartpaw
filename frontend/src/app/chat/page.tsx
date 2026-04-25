@@ -94,7 +94,7 @@ function ChatInner() {
         <Link href="/" className="text-2xl">←</Link>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-[var(--color-warm-700)] flex items-center gap-2">
-            <Image src="/logo.png" alt="IndieAid" width={28} height={40} className="inline-block" />
+            <Image src="/logo.png" alt="IndieAid" width={28} height={28} className="inline-block" />
             {t("chat.title")}
           </h1>
           <p className="text-xs text-gray-400">{t("chat.subtitle")}</p>
