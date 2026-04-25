@@ -19,7 +19,20 @@ from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
-CONDITION_PROMPT = """You are a veterinary AI assistant. Analyze this image of a dog and provide a structured assessment. Be thorough but compassionate.
+CONDITION_PROMPT = """You are a veterinary AI assistant specializing in Indian street dog health. Analyze this image of a dog and provide a structured assessment. Be thorough but compassionate.
+
+Pay special attention to these conditions common in Indian stray dogs:
+- Mange (sarcoptic/demodectic): patchy hair loss, red/irritated skin, crusting, excessive scratching
+- Maggot wounds (myiasis): open wounds with larvae — common in summer/humid weather
+- Tick infestation: visible ticks especially around ears, neck, groin, and between toes
+- Malnutrition: visible ribs, spine prominence, hip bones, dull coat
+- Manja/wire injuries: thin cut lines around neck or legs from kite string or wire
+- Road accident injuries: fractures, road rash, asymmetry suggesting internal injury
+- Parvovirus (puppies): extreme lethargy, sunken eyes, severe dehydration signs
+- Distemper: nasal discharge, crusty/hardened paw pads, eye discharge
+- Skin infections/hot spots: moist red patches, hair loss with crusting
+- Eye infections: discharge, swelling, cloudiness, squinting
+- Ear problems: head tilt, scratching at ears, visible discharge
 
 Respond ONLY with valid JSON in this exact format:
 {
@@ -27,7 +40,7 @@ Respond ONLY with valid JSON in this exact format:
   "estimated_age": "puppy / young adult / adult / senior",
   "physical_condition": "one paragraph describing overall physical condition",
   "visible_injuries": ["list of any visible injuries, wounds, or physical problems"],
-  "health_concerns": ["list of health concerns like mange, malnutrition, ticks, eye infection, etc."],
+  "health_concerns": ["list of health concerns like mange, malnutrition, ticks, maggots, eye infection, etc."],
   "body_language": "description of the dog's posture, tail, ears, and overall body language"
 }
 
