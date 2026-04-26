@@ -73,7 +73,7 @@ function ChatInner() {
         ...prev,
         {
           role: "assistant",
-          content: "I'm sorry, I'm having trouble connecting right now. For immediate help, please call the AWBI helpline at 1962.",
+          content: t("chat.error.network"),
         },
       ]);
     } finally {
@@ -101,7 +101,7 @@ function ChatInner() {
         </div>
         <div className="flex items-center gap-2">
           {messages.length > 0 && (
-            <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500" title="Clear chat">
+            <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500" title={t("chat.action.clear")} aria-label={t("chat.action.clear")}>
               🗑️
             </button>
           )}
@@ -154,7 +154,7 @@ function ChatInner() {
         {/* Sources */}
         {sources.length > 0 && messages.length > 0 && (
           <div className="text-xs text-gray-400 px-2">
-            Sources: {sources.join(", ")}
+            {t("chat.sources")}: {sources.join(", ")}
           </div>
         )}
 

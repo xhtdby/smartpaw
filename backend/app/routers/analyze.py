@@ -73,15 +73,15 @@ async def analyze_dog_image(
     # Accept any image type — we'll auto-convert
     content_type = (image.content_type or "").lower()
     if not content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Please upload an image file (JPEG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF, etc.)")
+        raise HTTPException(status_code=400, detail="image_invalid_format")
 
     image_bytes = await image.read()
 
     if len(image_bytes) > settings.max_image_size:
-        raise HTTPException(status_code=400, detail="Image too large. Please upload an image under 10 MB.")
+        raise HTTPException(status_code=400, detail="image_too_large")
 
     if len(image_bytes) == 0:
-        raise HTTPException(status_code=400, detail="Empty file uploaded.")
+        raise HTTPException(status_code=400, detail="image_empty")
 
     # Auto-convert to JPEG for consistent processing
     logger.info(f"Received image: {image.filename} ({content_type}, {len(image_bytes)} bytes)")
@@ -93,12 +93,24 @@ async def analyze_dog_image(
     detection = await detect_dog(image_bytes, settings.yolo_confidence)
 
     if not detection:
-        return AnalysisResponse(
-            dog_detected=False,
-            empathetic_summary=(
+        # Localized "no dog detected" message — frontend can also override this if needed
+        no_dog_messages = {
+            "en": (
                 "We couldn't detect a dog in this photo. Could you try again with a clearer image? "
                 "Make sure the dog is visible and well-lit. We're here to help! 🐾"
             ),
+            "hi": (
+                "इस फोटो में हमें कुत्ता नहीं मिला। कृपया और साफ़ फोटो के साथ फिर से कोशिश करें। "
+                "सुनिश्चित करें कि कुत्ता दिख रहा हो और रोशनी ठीक हो। हम मदद के लिए तैयार हैं! 🐾"
+            ),
+            "mr": (
+                "या फोटोत आम्हाला कुत्रा सापडला नाही. कृपया अधिक स्पष्ट फोटोसह पुन्हा प्रयत्न करा. "
+                "कुत्रा दिसत असल्याची आणि प्रकाश पुरेसा असल्याची खात्री करा. आम्ही मदतीसाठी तयार आहोत! 🐾"
+            ),
+        }
+        return AnalysisResponse(
+            dog_detected=False,
+            empathetic_summary=no_dog_messages.get(language, no_dog_messages["en"]),
             language=language,
         )
 
@@ -172,15 +184,15 @@ async def analyze_dog_image_multilingual(
 
     content_type = (image.content_type or "").lower()
     if not content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Please upload an image file (JPEG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF, etc.)")
+        raise HTTPException(status_code=400, detail="image_invalid_format")
 
     image_bytes = await image.read()
 
     if len(image_bytes) > settings.max_image_size:
-        raise HTTPException(status_code=400, detail="Image too large. Please upload an image under 10 MB.")
+        raise HTTPException(status_code=400, detail="image_too_large")
 
     if len(image_bytes) == 0:
-        raise HTTPException(status_code=400, detail="Empty file uploaded.")
+        raise HTTPException(status_code=400, detail="image_empty")
 
     logger.info(f"Multilingual: received {image.filename} ({content_type}, {len(image_bytes)} bytes)")
     image_bytes = normalize_image(image_bytes)

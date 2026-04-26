@@ -202,7 +202,7 @@ async def chat(request: ChatRequest):
 
     if not settings.groq_api_key:
         return {
-            "response": _fallback_chat(request.message, context),
+            "response": _fallback_chat(request.message, context, request.language),
             "sources": sources,
         }
 
@@ -230,21 +230,29 @@ async def chat(request: ChatRequest):
     except Exception as e:
         logger.error(f"Chat failed: {e}")
         return {
-            "response": _fallback_chat(request.message, context),
+            "response": _fallback_chat(request.message, context, request.language),
             "sources": sources,
         }
 
 
-def _fallback_chat(message: str, context: str) -> str:
-    """Simple fallback when LLM is unavailable."""
-    if context and "No specific first aid articles" not in context:
-        return (
-            "I'm having trouble connecting to my AI brain right now, but here's "
-            "what I found in my knowledge base:\n\n"
-            f"{context}\n\n"
-            "If you need immediate help, please call an animal rescue helpline or visit the nearest vet."
-        )
-    return (
+_FALLBACK_WITH_KB = {
+    "en": (
+        "I'm having trouble connecting to my AI brain right now, but here's "
+        "what I found in my knowledge base:\n\n{context}\n\n"
+        "If you need immediate help, please call an animal rescue helpline or visit the nearest vet."
+    ),
+    "hi": (
+        "अभी मेरे AI से कनेक्ट होने में दिक्कत हो रही है, लेकिन मेरे ज्ञानकोष में यह मिला:\n\n{context}\n\n"
+        "तत्काल मदद के लिए कृपया किसी पशु बचाव हेल्पलाइन पर कॉल करें या नज़दीकी पशु चिकित्सक के पास जाएं।"
+    ),
+    "mr": (
+        "सध्या माझ्या AI शी कनेक्ट होण्यात अडचण येत आहे, परंतु माझ्या ज्ञानकोशात हे सापडले:\n\n{context}\n\n"
+        "त्वरित मदतीसाठी कृपया एखाद्या प्राणी बचाव हेल्पलाइनवर कॉल करा किंवा जवळच्या पशुवैद्यकाकडे जा."
+    ),
+}
+
+_FALLBACK_GENERIC = {
+    "en": (
         "I'm sorry, I'm having trouble connecting right now. "
         "For immediate help with an injured dog, please:\n\n"
         "1. Keep the dog calm and avoid sudden movements\n"
@@ -252,4 +260,31 @@ def _fallback_chat(message: str, context: str) -> str:
         "3. Call a local animal rescue helpline\n"
         "4. Contact the nearest veterinary clinic\n\n"
         "You're doing a great thing by caring. The dog is lucky you stopped. 🐾"
-    )
+    ),
+    "hi": (
+        "क्षमा करें, अभी कनेक्ट होने में दिक्कत हो रही है। "
+        "घायल कुत्ते की तत्काल मदद के लिए, कृपया:\n\n"
+        "1. कुत्ते को शांत रखें और अचानक हरकत से बचें\n"
+        "2. सुरक्षित दूरी से पानी दें\n"
+        "3. स्थानीय पशु बचाव हेल्पलाइन पर कॉल करें\n"
+        "4. नज़दीकी पशु चिकित्सालय से संपर्क करें\n\n"
+        "आप एक बहुत अच्छा काम कर रहे हैं। यह कुत्ता खुशनसीब है कि आप रुके। 🐾"
+    ),
+    "mr": (
+        "क्षमस्व, सध्या कनेक्ट होण्यात अडचण येत आहे. "
+        "जखमी कुत्र्याच्या त्वरित मदतीसाठी, कृपया:\n\n"
+        "1. कुत्र्याला शांत ठेवा आणि अचानक हालचाली टाळा\n"
+        "2. सुरक्षित अंतरावरून पाणी द्या\n"
+        "3. स्थानिक प्राणी बचाव हेल्पलाइनवर कॉल करा\n"
+        "4. जवळच्या पशुवैद्यकीय दवाखान्याशी संपर्क साधा\n\n"
+        "तुम्ही खूप चांगले काम करत आहात. या कुत्र्याला सुदैवाने तुम्ही थांबला. 🐾"
+    ),
+}
+
+
+def _fallback_chat(message: str, context: str, language: str = "en") -> str:
+    """Simple fallback when LLM is unavailable, localized to the requested language."""
+    lang = language if language in ("en", "hi", "mr") else "en"
+    if context and "No specific first aid articles" not in context:
+        return _FALLBACK_WITH_KB[lang].format(context=context)
+    return _FALLBACK_GENERIC[lang]

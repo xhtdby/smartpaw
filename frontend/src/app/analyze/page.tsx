@@ -56,7 +56,7 @@ export default function AnalyzePage() {
             language,
           } as AnalysisResult;
         })()
-      : { dog_detected: false, first_aid: [], empathetic_summary: "", disclaimer: "", language } as AnalysisResult
+      : { dog_detected: false, first_aid: [], empathetic_summary: t("analyze.no_dog"), disclaimer: "", language } as AnalysisResult
     : null;
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function AnalyzePage() {
       streamRef.current = stream;
       setCameraActive(true);
     } catch {
-      setError("Camera access denied. Please upload a photo instead.");
+      setError(t("analyze.error.camera"));
     }
   };
 
@@ -140,7 +140,13 @@ export default function AnalyzePage() {
 
       if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
+      const code = err instanceof Error ? err.message : "";
+      const key =
+        code === "image_too_large" ? "analyze.error.too_large" :
+        code === "image_invalid_format" ? "analyze.error.invalid_format" :
+        code === "image_empty" ? "analyze.error.empty" :
+        "analyze.error.failed";
+      setError(t(key));
     } finally {
       setLoading(false);
     }
@@ -195,7 +201,7 @@ export default function AnalyzePage() {
           >
             <div className="text-3xl mb-2">🖼️</div>
             <div className="font-semibold">{t("analyze.upload")}</div>
-            <div className="text-xs text-gray-400 mt-1">JPEG, PNG — max 10 MB</div>
+            <div className="text-xs text-gray-400 mt-1">{t("analyze.upload.format")}</div>
           </button>
 
           <input
@@ -226,7 +232,7 @@ export default function AnalyzePage() {
               onClick={capturePhoto}
               className="flex-1 bg-[var(--color-warm-500)] text-white rounded-xl p-4 font-semibold"
             >
-              📸 Capture
+              📸 {t("analyze.capture")}
             </button>
             <button
               onClick={stopCamera}

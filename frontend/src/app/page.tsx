@@ -91,13 +91,13 @@ export default function Home() {
               {t("home.emergency")}
             </div>
             <div className="text-xs text-red-600 mt-1">
-              AWBI Helpline:{" "}
+              {t("home.helpline.awbi")}:{" "}
               <a href="tel:1962" className="underline font-bold">
                 1962
               </a>
             </div>
             <div className="text-xs text-red-600">
-              RESQ 24x7:{" "}
+              {t("home.helpline.resq")}:{" "}
               <a href="tel:+919820233633" className="underline">
                 +91 98202 33633
               </a>
@@ -111,7 +111,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="mt-8 text-center text-xs text-gray-400">
-        <p>SmartPaw — AI for compassion</p>
+        <p>{t("app.footer")}</p>
         <p className="mt-1">{t("disclaimer")}</p>
       </footer>
     </main>
