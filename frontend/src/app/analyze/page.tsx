@@ -322,7 +322,7 @@ export default function AnalyzePage() {
                     </span>
                     <div>
                       <div className="font-semibold capitalize">
-                        {result.emotion.label}
+                        {t(`emotion.${result.emotion.label}`)}
                       </div>
                       <div className="text-xs text-gray-400">
                         {t("analyze.emotion.confidence")}: {Math.round(result.emotion.confidence * 100)}%
