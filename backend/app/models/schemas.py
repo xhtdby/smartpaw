@@ -97,3 +97,20 @@ class ChatRequest(BaseModel):
     language: str = "en"
     history: list[ChatMessage] = []
     context_from_analysis: Optional[str] = None
+
+
+class LanguageResult(BaseModel):
+    safety: Optional[SafetyLevel] = None
+    first_aid: list[FirstAidStep] = []
+    empathetic_summary: str = ""
+    disclaimer: str = (
+        "This is AI-based guidance, not a veterinary diagnosis. "
+        "When in doubt, please contact a veterinary professional immediately."
+    )
+
+
+class MultilingualAnalysisResponse(BaseModel):
+    dog_detected: bool
+    emotion: Optional[EmotionResult] = None
+    condition: Optional[ConditionAssessment] = None
+    languages: dict[str, LanguageResult] = {}

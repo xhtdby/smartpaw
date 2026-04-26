@@ -42,6 +42,25 @@ export async function analyzeImage(
   return res.json();
 }
 
+export async function analyzeImageMultilingual(
+  imageFile: File
+): Promise<MultilingualAnalysisResult> {
+  const formData = new FormData();
+  formData.append("image", imageFile);
+
+  const res = await fetchWithRetry(`${API_BASE}/api/analyze-multilingual`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Analysis failed" }));
+    throw new Error(err.detail || "Analysis failed");
+  }
+
+  return res.json();
+}
+
 export async function fetchNearby(
   lat: number,
   lng: number,
@@ -143,6 +162,27 @@ export interface AnalysisResult {
   empathetic_summary: string;
   disclaimer: string;
   language: string;
+}
+
+export interface MultilingualAnalysisResult {
+  dog_detected: boolean;
+  emotion?: { label: string; confidence: number };
+  condition?: {
+    breed_guess: string;
+    estimated_age: string;
+    physical_condition: string;
+    visible_injuries: string[];
+    health_concerns: string[];
+    body_language: string;
+  };
+  languages: {
+    [lang: string]: {
+      safety?: { level: string; reason: string };
+      first_aid: { step_number: number; instruction: string }[];
+      empathetic_summary: string;
+      disclaimer: string;
+    };
+  };
 }
 
 export interface ShelterVet {

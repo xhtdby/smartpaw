@@ -168,6 +168,14 @@ LANGUAGE_INSTRUCTIONS = {
     ),
 }
 
+# In-script per-message reminders appended to each user message to anchor the language
+# requirement next to the content being responded to, overriding learned patterns from history.
+LANGUAGE_REMINDERS = {
+    "en": "",
+    "hi": "\n\nकृपया हिंदी में उत्तर दें।",
+    "mr": "\n\nकृपया मराठीत उत्तर द्या।",
+}
+
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
@@ -185,10 +193,12 @@ async def chat(request: ChatRequest):
     system = SYSTEM_PROMPT.format(language_instruction=lang_instruction, context=context)
 
     # Build message history
+    reminder = LANGUAGE_REMINDERS.get(request.language, "")
     messages = [{"role": "system", "content": system}]
     for msg in request.history[-10:]:  # Keep last 10 messages for context
         messages.append({"role": msg.role, "content": msg.content})
-    messages.append({"role": "user", "content": request.message})
+    # Append in-script reminder to anchor language requirement next to the user's content
+    messages.append({"role": "user", "content": request.message + reminder})
 
     if not settings.groq_api_key:
         return {
