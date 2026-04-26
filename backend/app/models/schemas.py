@@ -100,9 +100,12 @@ class ChatRequest(BaseModel):
 
 
 class LanguageResult(BaseModel):
+    condition: Optional[ConditionAssessment] = None
     safety: Optional[SafetyLevel] = None
     first_aid: list[FirstAidStep] = []
     empathetic_summary: str = ""
+    when_to_call_professional: str = ""
+    approach_tips: str = ""
     disclaimer: str = (
         "This is AI-based guidance, not a veterinary diagnosis. "
         "When in doubt, please contact a veterinary professional immediately."

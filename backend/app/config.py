@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from functools import lru_cache
 from pathlib import Path
 
@@ -36,6 +37,15 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "https://smartpaw.vercel.app",
     ]
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def normalize_debug(cls, value):
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in {"release", "prod", "production"}:
+                return False
+        return value
 
     class Config:
         env_file = ".env"

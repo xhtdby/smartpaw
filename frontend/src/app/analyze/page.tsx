@@ -43,12 +43,12 @@ export default function AnalyzePage() {
   const result: AnalysisResult | null = mlResult
     ? mlResult.dog_detected
       ? (() => {
-          const langData = mlResult.languages[language];
+          const langData = mlResult.languages[language] || mlResult.languages.en;
           if (!langData) return null;
           return {
             dog_detected: true,
             emotion: mlResult.emotion,
-            condition: mlResult.condition,
+            condition: langData.condition || mlResult.condition,
             safety: langData.safety,
             first_aid: langData.first_aid,
             empathetic_summary: langData.empathetic_summary,

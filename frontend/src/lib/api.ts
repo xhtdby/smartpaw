@@ -177,9 +177,19 @@ export interface MultilingualAnalysisResult {
   };
   languages: {
     [lang: string]: {
+      condition?: {
+        breed_guess: string;
+        estimated_age: string;
+        physical_condition: string;
+        visible_injuries: string[];
+        health_concerns: string[];
+        body_language: string;
+      };
       safety?: { level: string; reason: string };
       first_aid: { step_number: number; instruction: string }[];
       empathetic_summary: string;
+      when_to_call_professional?: string;
+      approach_tips?: string;
       disclaimer: string;
     };
   };

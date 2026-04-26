@@ -1,0 +1,191 @@
+"""Combined dog vision analysis using a single Groq multimodal call."""
+
+import base64
+import io
+import json
+import logging
+
+import httpx
+from PIL import Image
+
+from app.config import get_settings
+from app.services.groq_retry import groq_post_with_retry
+
+logger = logging.getLogger(__name__)
+
+VISION_PROMPT = """You are a veterinary AI assistant specializing in Indian street dogs.
+
+Analyze this image in ONE pass and respond ONLY with valid JSON in this exact shape:
+{
+  "dog_detected": true,
+  "dog_confidence": 0.95,
+  "dog_description": "brief description of what is visible",
+  "emotion": {
+    "label": "happy",
+    "confidence": 0.85,
+    "description": "brief explanation of the dog's emotional state"
+  },
+  "condition": {
+    "breed_guess": "best guess of breed or mix, or 'Indian pariah / mixed breed' if unclear",
+    "estimated_age": "puppy / young adult / adult / senior",
+    "physical_condition": "one paragraph describing overall physical condition",
+    "visible_injuries": ["list of visible injuries, wounds, or physical problems"],
+    "health_concerns": ["list of likely health concerns like mange, malnutrition, ticks, maggots, eye infection, etc."],
+    "body_language": "description of posture, tail, ears, and overall body language"
+  }
+}
+
+Rules:
+- First decide if a dog is actually visible.
+- If no dog is visible, set "dog_detected" to false and use:
+  - "dog_confidence": a number between 0 and 1
+  - "dog_description": what is visible instead
+  - "emotion": {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}
+  - "condition": {
+      "breed_guess": "Unable to determine (no dog visible)",
+      "estimated_age": "Unknown",
+      "physical_condition": "No dog was visible in the image.",
+      "visible_injuries": [],
+      "health_concerns": [],
+      "body_language": "No dog visible"
+    }
+- Emotion label must be exactly one of: happy, sad, angry, relaxed, fearful, unknown
+- Be cautious and India-specific when identifying stray-dog health issues
+- Do not wrap the JSON in markdown
+"""
+
+VALID_EMOTIONS = {"happy", "sad", "angry", "relaxed", "fearful", "unknown"}
+
+
+def _default_condition() -> dict:
+    return {
+        "breed_guess": "Unable to determine (analysis unavailable)",
+        "estimated_age": "Unknown",
+        "physical_condition": "Could not analyze - please consult a veterinarian.",
+        "visible_injuries": [],
+        "health_concerns": [],
+        "body_language": "Could not analyze",
+    }
+
+
+def _strip_code_fences(content: str) -> str:
+    text = content.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1]
+        text = text.rsplit("```", 1)[0]
+    return text.strip()
+
+
+def _extract_json_object(content: str) -> str:
+    text = _strip_code_fences(content)
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return text[start : end + 1]
+    return text
+
+
+def _normalize_string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    items: list[str] = []
+    for item in value:
+        if isinstance(item, str):
+            cleaned = item.strip()
+            if cleaned:
+                items.append(cleaned)
+    return items
+
+
+def _normalize_confidence(value: object, default: float) -> float:
+    try:
+        confidence = float(value)
+    except (TypeError, ValueError):
+        return default
+    return max(0.0, min(1.0, round(confidence, 3)))
+
+
+def _normalize_result(payload: dict) -> dict:
+    dog_detected = bool(payload.get("dog_detected"))
+    emotion_payload = payload.get("emotion") if isinstance(payload.get("emotion"), dict) else {}
+    condition_payload = payload.get("condition") if isinstance(payload.get("condition"), dict) else {}
+
+    label = str(emotion_payload.get("label", "unknown")).strip().lower()
+    if label not in VALID_EMOTIONS:
+        label = "unknown"
+
+    condition = {
+        "breed_guess": str(condition_payload.get("breed_guess") or _default_condition()["breed_guess"]).strip(),
+        "estimated_age": str(condition_payload.get("estimated_age") or _default_condition()["estimated_age"]).strip(),
+        "physical_condition": str(
+            condition_payload.get("physical_condition") or _default_condition()["physical_condition"]
+        ).strip(),
+        "visible_injuries": _normalize_string_list(condition_payload.get("visible_injuries")),
+        "health_concerns": _normalize_string_list(condition_payload.get("health_concerns")),
+        "body_language": str(condition_payload.get("body_language") or _default_condition()["body_language"]).strip(),
+    }
+
+    if not dog_detected:
+        condition = _default_condition()
+
+    return {
+        "dog_detected": dog_detected,
+        "dog_confidence": _normalize_confidence(payload.get("dog_confidence"), 0.0),
+        "dog_description": str(payload.get("dog_description", "")).strip(),
+        "emotion": {
+            "label": label if dog_detected else "unknown",
+            "confidence": _normalize_confidence(emotion_payload.get("confidence"), 0.0 if not dog_detected else 0.5),
+            "description": str(emotion_payload.get("description") or "Could not determine emotion").strip(),
+        },
+        "condition": condition,
+    }
+
+
+async def analyze_vision(image_bytes: bytes) -> dict | None:
+    """Analyze dog presence, emotion, and condition in one call."""
+    settings = get_settings()
+    if not settings.groq_api_key:
+        logger.warning("Groq API key not configured, skipping combined vision analysis.")
+        return None
+
+    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=85)
+    b64_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    try:
+        async with httpx.AsyncClient(timeout=40.0) as client:
+            response = await groq_post_with_retry(
+                client,
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {settings.groq_api_key}",
+                    "Content-Type": "application/json",
+                },
+                json_body={
+                    "model": settings.groq_vision_model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": [
+                                {"type": "text", "text": VISION_PROMPT},
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{b64_image}"
+                                    },
+                                },
+                            ],
+                        }
+                    ],
+                    "temperature": 0.1,
+                    "max_tokens": 1000,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
+            return _normalize_result(json.loads(_extract_json_object(content)))
+    except Exception as exc:
+        logger.error(f"Combined vision analysis failed: {exc}")
+        return None
