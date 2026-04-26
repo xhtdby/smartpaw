@@ -121,20 +121,18 @@ function ChatInner() {
               {t("chat.welcome.desc")}
             </p>
             <div className="space-y-2">
-              {[
-                "How do I help a dog with mange?",
-                "What should I do if I find injured puppies?",
-                "Is it safe to approach a growling dog?",
-                "What are the signs of rabies?",
-              ].map((q) => (
-                <button
-                  key={q}
-                  onClick={() => setInput(q)}
-                  className="block w-full bg-white border border-gray-200 rounded-lg p-3 text-left text-sm text-gray-600 hover:bg-[var(--color-warm-50)] hover:border-[var(--color-warm-300)]"
-                >
-                  {q}
-                </button>
-              ))}
+              {(["chat.example.1", "chat.example.2", "chat.example.3", "chat.example.4"] as const).map((key) => {
+                const q = t(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setInput(q)}
+                    className="block w-full bg-white border border-gray-200 rounded-lg p-3 text-left text-sm text-gray-600 hover:bg-[var(--color-warm-50)] hover:border-[var(--color-warm-300)]"
+                  >
+                    {q}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

@@ -26,18 +26,23 @@ const EMOTION_ICONS: Record<string, string> = {
   fearful: "😨",
 };
 
+type AllResults = Partial<Record<string, AnalysisResult>>;
+
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [allResults, setAllResults] = useState<AllResults>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
+
+  // The result to display is always the one for the current language
+  const result = allResults[language] ?? null;
 
   useEffect(() => {
     return () => {
@@ -53,7 +58,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setResult(null);
+    setAllResults({});
     setError("");
   };
 
@@ -70,7 +75,6 @@ export default function AnalyzePage() {
     }
   };
 
-  // Attach the stream once the <video> element is in the DOM
   useEffect(() => {
     if (cameraActive && videoRef.current && streamRef.current) {
       videoRef.current.srcObject = streamRef.current;
@@ -104,19 +108,27 @@ export default function AnalyzePage() {
     setLoading(true);
     setError("");
     try {
-      const data = await analyzeImage(image, language);
-      setResult(data);
-      if (data.dog_detected) {
-        const ctx = [
-          data.emotion ? `Emotion: ${data.emotion.label}` : "",
-          data.condition?.breed_guess ? `Breed: ${data.condition.breed_guess}` : "",
-          data.condition?.physical_condition || "",
-          data.condition?.visible_injuries?.length ? `Injuries: ${data.condition.visible_injuries.join(", ")}` : "",
-          data.condition?.health_concerns?.length ? `Concerns: ${data.condition.health_concerns.join(", ")}` : "",
-          data.safety ? `Safety: ${data.safety.level} - ${data.safety.reason}` : "",
-        ].filter(Boolean).join("\n");
-        localStorage.setItem("smartpaw-analysis-context", ctx);
-      }
+      // Fetch all 3 languages concurrently so switching is instant
+      const [enData, hiData, mrData] = await Promise.all([
+        analyzeImage(image, "en"),
+        analyzeImage(image, "hi"),
+        analyzeImage(image, "mr"),
+      ]);
+
+      const gathered: AllResults = { en: enData, hi: hiData, mr: mrData };
+      setAllResults(gathered);
+
+      // Save English context for chat (condition data is always English from the vision model)
+      const ctx = enData.dog_detected ? [
+        enData.emotion ? `Emotion: ${enData.emotion.label}` : "",
+        enData.condition?.breed_guess ? `Breed: ${enData.condition.breed_guess}` : "",
+        enData.condition?.physical_condition || "",
+        enData.condition?.visible_injuries?.length ? `Injuries: ${enData.condition.visible_injuries.join(", ")}` : "",
+        enData.condition?.health_concerns?.length ? `Concerns: ${enData.condition.health_concerns.join(", ")}` : "",
+        enData.safety ? `Safety: ${enData.safety.level} - ${enData.safety.reason}` : "",
+      ].filter(Boolean).join("\n") : null;
+
+      if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
@@ -130,8 +142,14 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setPreview("");
     setImage(null);
-    setResult(null);
+    setAllResults({});
     setError("");
+  };
+
+  const safetyLabel = (level: string) => {
+    if (level === "safe") return t("analyze.safety.safe");
+    if (level === "danger") return t("analyze.safety.danger");
+    return t("analyze.safety.caution");
   };
 
   return (
@@ -244,7 +262,7 @@ export default function AnalyzePage() {
             {t("analyze.analyzing")}
           </p>
           <p className="text-sm text-gray-400 mt-2">
-            Let&apos;s see how we can help this pup
+            {t("analyze.loading.desc")}
           </p>
         </div>
       )}
@@ -279,7 +297,7 @@ export default function AnalyzePage() {
                 >
                   <div className="flex items-center gap-2 font-bold text-lg mb-1">
                     <span>{SAFETY_ICONS[result.safety.level] || "⚠️"}</span>
-                    <span className="capitalize">{result.safety.level} to Approach</span>
+                    <span>{safetyLabel(result.safety.level)}</span>
                   </div>
                   <p className="text-sm">{result.safety.reason}</p>
                 </div>
@@ -297,7 +315,7 @@ export default function AnalyzePage() {
                         {result.emotion.label}
                       </div>
                       <div className="text-xs text-gray-400">
-                        Confidence: {Math.round(result.emotion.confidence * 100)}%
+                        {t("analyze.emotion.confidence")}: {Math.round(result.emotion.confidence * 100)}%
                       </div>
                     </div>
                   </div>
@@ -316,14 +334,14 @@ export default function AnalyzePage() {
               {/* Condition Details */}
               {result.condition && (
                 <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                  <h3 className="font-bold text-gray-700">Condition Assessment</h3>
+                  <h3 className="font-bold text-gray-700">{t("analyze.condition.title")}</h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-gray-400">Breed:</span>{" "}
+                      <span className="text-gray-400">{t("analyze.condition.breed")}:</span>{" "}
                       <span className="font-medium">{result.condition.breed_guess}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400">Age:</span>{" "}
+                      <span className="text-gray-400">{t("analyze.condition.age")}:</span>{" "}
                       <span className="font-medium">{result.condition.estimated_age}</span>
                     </div>
                   </div>
@@ -334,7 +352,7 @@ export default function AnalyzePage() {
                   {result.condition.visible_injuries.length > 0 && (
                     <div>
                       <div className="text-sm font-semibold text-red-600 mb-1">
-                        Visible Injuries:
+                        {t("analyze.condition.injuries")}:
                       </div>
                       <ul className="text-sm text-red-600 list-disc list-inside">
                         {result.condition.visible_injuries.map((inj, i) => (
@@ -347,7 +365,7 @@ export default function AnalyzePage() {
                   {result.condition.health_concerns.length > 0 && (
                     <div>
                       <div className="text-sm font-semibold text-yellow-700 mb-1">
-                        Health Concerns:
+                        {t("analyze.condition.concerns")}:
                       </div>
                       <ul className="text-sm text-yellow-700 list-disc list-inside">
                         {result.condition.health_concerns.map((c, i) => (
@@ -363,7 +381,7 @@ export default function AnalyzePage() {
               {result.first_aid.length > 0 && (
                 <div className="bg-white rounded-xl p-4 shadow-sm">
                   <h3 className="font-bold text-[var(--color-sage-700)] mb-3">
-                    🩹 First Aid Steps
+                    🩹 {t("analyze.firstaid.title")}
                   </h3>
                   <ol className="space-y-2">
                     {result.first_aid.map((step) => (
@@ -390,7 +408,7 @@ export default function AnalyzePage() {
                   onClick={goToChat}
                   className="bg-[var(--color-warm-500)] text-white rounded-xl p-3 text-center text-sm font-semibold"
                 >
-                  💬 Ask Follow-up
+                  💬 {t("analyze.followup")}
                 </button>
               </div>
 

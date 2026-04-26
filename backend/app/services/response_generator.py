@@ -22,8 +22,20 @@ logger = logging.getLogger(__name__)
 
 LANGUAGE_INSTRUCTIONS = {
     "en": "Respond in English.",
-    "hi": "Respond in Hindi (Devanagari script). Use simple, everyday Hindi that anyone can understand.",
-    "mr": "Respond in Marathi (Devanagari script). Use simple, everyday Marathi that anyone can understand.",
+    "hi": (
+        "CRITICAL LANGUAGE RULE: You MUST respond ENTIRELY in Hindi using Devanagari script (हिन्दी). "
+        "Do NOT use Roman/English transliteration (no 'Aapke paas', no 'kutta', no 'namaste' in Roman). "
+        "Write every word in Devanagari — आपके पास, कुत्ता, नमस्ते. "
+        "You MAY keep medicine brand names in English (Betadine, Neosporin, Topicure, etc.). "
+        "Use simple, everyday Hindi with correct grammar."
+    ),
+    "mr": (
+        "CRITICAL LANGUAGE RULE: You MUST respond ENTIRELY in Marathi using Devanagari script (मराठी). "
+        "Do NOT use Roman/English transliteration. Write every word in Devanagari. "
+        "Do NOT substitute Hindi words for Marathi — use authentic Marathi vocabulary. "
+        "You MAY keep medicine brand names in English (Betadine, Neosporin, Topicure, etc.). "
+        "Use simple, everyday Marathi with correct grammar."
+    ),
 }
 
 SYSTEM_PROMPT = """You are IndieAid, a compassionate AI assistant that helps people care for stray dogs in India. You speak with warmth and empathy — the person talking to you is likely worried about a dog they've found. Your tone is calm, encouraging, and never clinical or cold.
