@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { analyzeImage, type AnalysisResult } from "@/lib/api";
+import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const SAFETY_COLORS: Record<string, string> = {
@@ -26,14 +26,12 @@ const EMOTION_ICONS: Record<string, string> = {
   fearful: "😨",
 };
 
-type AllResults = Partial<Record<string, AnalysisResult>>;
-
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [allResults, setAllResults] = useState<AllResults>({});
+  const [mlResult, setMlResult] = useState<MultilingualAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,8 +39,25 @@ export default function AnalyzePage() {
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
-  // The result to display is always the one for the current language
-  const result = allResults[language] ?? null;
+  // Derive display result reactively — language switching is instant with no extra network call
+  const result: AnalysisResult | null = mlResult
+    ? mlResult.dog_detected
+      ? (() => {
+          const langData = mlResult.languages[language];
+          if (!langData) return null;
+          return {
+            dog_detected: true,
+            emotion: mlResult.emotion,
+            condition: mlResult.condition,
+            safety: langData.safety,
+            first_aid: langData.first_aid,
+            empathetic_summary: langData.empathetic_summary,
+            disclaimer: langData.disclaimer,
+            language,
+          } as AnalysisResult;
+        })()
+      : { dog_detected: false, first_aid: [], empathetic_summary: "", disclaimer: "", language } as AnalysisResult
+    : null;
 
   useEffect(() => {
     return () => {
@@ -58,7 +73,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setAllResults({});
+    setMlResult(null);
     setError("");
   };
 
@@ -108,24 +123,19 @@ export default function AnalyzePage() {
     setLoading(true);
     setError("");
     try {
-      // Fetch all 3 languages concurrently so switching is instant
-      const [enData, hiData, mrData] = await Promise.all([
-        analyzeImage(image, "en"),
-        analyzeImage(image, "hi"),
-        analyzeImage(image, "mr"),
-      ]);
+      // Single endpoint: vision model runs once, text LLM runs 3x in parallel server-side
+      const data = await analyzeImageMultilingual(image);
+      setMlResult(data);
 
-      const gathered: AllResults = { en: enData, hi: hiData, mr: mrData };
-      setAllResults(gathered);
-
-      // Save English context for chat (condition data is always English from the vision model)
-      const ctx = enData.dog_detected ? [
-        enData.emotion ? `Emotion: ${enData.emotion.label}` : "",
-        enData.condition?.breed_guess ? `Breed: ${enData.condition.breed_guess}` : "",
-        enData.condition?.physical_condition || "",
-        enData.condition?.visible_injuries?.length ? `Injuries: ${enData.condition.visible_injuries.join(", ")}` : "",
-        enData.condition?.health_concerns?.length ? `Concerns: ${enData.condition.health_concerns.join(", ")}` : "",
-        enData.safety ? `Safety: ${enData.safety.level} - ${enData.safety.reason}` : "",
+      // Save English context for chat (condition data always comes from the shared vision pass)
+      const enLang = data.languages?.["en"];
+      const ctx = data.dog_detected ? [
+        data.emotion ? `Emotion: ${data.emotion.label}` : "",
+        data.condition?.breed_guess ? `Breed: ${data.condition.breed_guess}` : "",
+        data.condition?.physical_condition || "",
+        data.condition?.visible_injuries?.length ? `Injuries: ${data.condition.visible_injuries.join(", ")}` : "",
+        data.condition?.health_concerns?.length ? `Concerns: ${data.condition.health_concerns.join(", ")}` : "",
+        enLang?.safety ? `Safety: ${enLang.safety.level} - ${enLang.safety.reason}` : "",
       ].filter(Boolean).join("\n") : null;
 
       if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
@@ -142,7 +152,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setPreview("");
     setImage(null);
-    setAllResults({});
+    setMlResult(null);
     setError("");
   };
 

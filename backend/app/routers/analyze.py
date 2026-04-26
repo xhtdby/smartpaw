@@ -1,15 +1,20 @@
 """Image analysis pipeline endpoint.
 
 POST /api/analyze — upload a dog photo, receive a full empathetic assessment.
+POST /api/analyze-multilingual — single vision pass + parallel text generation for all languages.
 """
 
+import asyncio
 import io
 import logging
 from PIL import Image
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
 from app.config import get_settings
-from app.models.schemas import AnalysisResponse, EmotionResult, SafetyLevel, ConditionAssessment, FirstAidStep
+from app.models.schemas import (
+    AnalysisResponse, EmotionResult, SafetyLevel, ConditionAssessment, FirstAidStep,
+    MultilingualAnalysisResponse, LanguageResult,
+)
 from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
 from app.services.condition_analyzer import analyze_condition
@@ -140,4 +145,91 @@ async def analyze_dog_image(
         first_aid=first_aid_steps,
         empathetic_summary=response_data.get("empathetic_summary", ""),
         language=language,
+    )
+
+
+def _build_language_result(response_data: dict) -> LanguageResult:
+    first_aid_steps = [
+        FirstAidStep(step_number=s["step_number"], instruction=s["instruction"])
+        for s in response_data.get("first_aid_steps", [])
+    ]
+    return LanguageResult(
+        safety=SafetyLevel(
+            level=response_data.get("safety_level", "caution"),
+            reason=response_data.get("safety_reason", "Approach with care."),
+        ),
+        first_aid=first_aid_steps,
+        empathetic_summary=response_data.get("empathetic_summary", ""),
+    )
+
+
+@router.post("/analyze-multilingual", response_model=MultilingualAnalysisResponse)
+async def analyze_dog_image_multilingual(
+    image: UploadFile = File(..., description="Photo of the dog"),
+):
+    """Run vision analysis once, then generate text responses for all languages in parallel."""
+    settings = get_settings()
+
+    content_type = (image.content_type or "").lower()
+    if not content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Please upload an image file (JPEG, PNG, WebP, GIF, BMP, TIFF, HEIC, AVIF, etc.)")
+
+    image_bytes = await image.read()
+
+    if len(image_bytes) > settings.max_image_size:
+        raise HTTPException(status_code=400, detail="Image too large. Please upload an image under 10 MB.")
+
+    if len(image_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Empty file uploaded.")
+
+    logger.info(f"Multilingual: received {image.filename} ({content_type}, {len(image_bytes)} bytes)")
+    image_bytes = normalize_image(image_bytes)
+    logger.info(f"Multilingual: normalized to JPEG {len(image_bytes)} bytes")
+
+    # Step 1: Detect dog (vision — once)
+    logger.info("Multilingual Step 1: Detecting dog...")
+    detection = await detect_dog(image_bytes, settings.yolo_confidence)
+
+    if not detection:
+        return MultilingualAnalysisResponse(dog_detected=False)
+
+    # Step 2: Classify emotion (vision — once)
+    logger.info("Multilingual Step 2: Classifying emotion...")
+    try:
+        emotion_result = await classify_emotion(image_bytes)
+    except Exception as e:
+        logger.error(f"Emotion classification failed: {e}")
+        emotion_result = {"label": "unknown", "confidence": 0.0, "description": "Could not determine emotion"}
+
+    # Step 3: Analyze condition (vision — once)
+    logger.info("Multilingual Step 3: Analyzing condition...")
+    condition_result = await analyze_condition(image_bytes)
+
+    # Step 4: Generate text responses for all three languages in parallel (text LLM only)
+    logger.info("Multilingual Step 4: Generating responses for en/hi/mr in parallel...")
+    en_data, hi_data, mr_data = await asyncio.gather(
+        generate_empathetic_response(emotion_result, condition_result, "en"),
+        generate_empathetic_response(emotion_result, condition_result, "hi"),
+        generate_empathetic_response(emotion_result, condition_result, "mr"),
+    )
+
+    return MultilingualAnalysisResponse(
+        dog_detected=True,
+        emotion=EmotionResult(
+            label=emotion_result["label"],
+            confidence=emotion_result["confidence"],
+        ),
+        condition=ConditionAssessment(
+            breed_guess=condition_result.get("breed_guess", "Unknown"),
+            estimated_age=condition_result.get("estimated_age", "Unknown"),
+            physical_condition=condition_result.get("physical_condition", ""),
+            visible_injuries=condition_result.get("visible_injuries", []),
+            health_concerns=condition_result.get("health_concerns", []),
+            body_language=condition_result.get("body_language", ""),
+        ),
+        languages={
+            "en": _build_language_result(en_data),
+            "hi": _build_language_result(hi_data),
+            "mr": _build_language_result(mr_data),
+        },
     )
