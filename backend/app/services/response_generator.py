@@ -2,6 +2,7 @@
 
 import json
 import logging
+import re
 
 import httpx
 
@@ -89,9 +90,22 @@ Return ONLY valid JSON with the exact same keys and array structure as the sourc
 
 Rules:
 - Translate every user-facing string into {language_name}
+- Every user-facing sentence must be fully written in {language_name}; leaving English text behind is invalid
 - Preserve facts, meaning, tone, safety_level, step numbers, medicine names, and phone numbers
 - Do not add new advice or remove any advice
 - If the breed has no common translation, transliterate it into Devanagari or use a natural local phrase
+- Do not wrap the JSON in markdown
+"""
+
+TRANSLATION_REPAIR_SYSTEM_PROMPT = """You repair an IndieAid translation JSON that still contains English text.
+
+Return ONLY valid JSON with the exact same keys and array structure as the source object.
+
+Rules:
+- Rewrite EVERY user-facing string into {language_name}
+- Do not leave English words or English sentences in fields like estimated_age, physical_condition, body_language, safety_reason, empathetic_summary, first_aid_steps, when_to_call_professional, or approach_tips
+- Preserve meaning, tone, safety_level, step numbers, medicine names, and phone numbers
+- Do not add new advice or remove any advice
 - Do not wrap the JSON in markdown
 """
 
@@ -178,6 +192,36 @@ def _extract_json_object(content: str) -> str:
     if start != -1 and end != -1 and end > start:
         return text[start : end + 1]
     return text
+
+
+def _has_devanagari(text: str) -> bool:
+    return any("\u0900" <= char <= "\u097F" for char in text)
+
+
+def _iter_strings(value: object):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, list):
+        for item in value:
+            yield from _iter_strings(item)
+    elif isinstance(value, dict):
+        for item in value.values():
+            yield from _iter_strings(item)
+
+
+def _translation_coverage_ok(raw: dict | None, language: str) -> bool:
+    if language == "en":
+        return True
+    if not isinstance(raw, dict):
+        return False
+
+    for text in _iter_strings(raw):
+        cleaned = text.strip()
+        if not cleaned:
+            continue
+        if re.search(r"[A-Za-z]", cleaned) and not _has_devanagari(cleaned):
+            return False
+    return True
 
 
 def _clean_text(value: object, fallback: str) -> str:
@@ -429,23 +473,38 @@ def _normalize_translated_payload(raw: dict | None, source_payload: dict, langua
 
     return {
         "condition": {
-            "breed_guess": _clean_text(raw_condition.get("breed_guess"), fallback_condition["breed_guess"]),
-            "estimated_age": _clean_text(raw_condition.get("estimated_age"), fallback_condition["estimated_age"]),
-            "physical_condition": _clean_text(
-                raw_condition.get("physical_condition"),
-                fallback_condition["physical_condition"],
+            "breed_guess": _localize_condition_text(
+                _clean_text(raw_condition.get("breed_guess"), fallback_condition["breed_guess"]),
+                language,
+            ),
+            "estimated_age": _localize_condition_text(
+                _clean_text(raw_condition.get("estimated_age"), fallback_condition["estimated_age"]),
+                language,
+            ),
+            "physical_condition": _localize_condition_text(
+                _clean_text(raw_condition.get("physical_condition"), fallback_condition["physical_condition"]),
+                language,
             ),
             "visible_injuries": [
-                _clean_text(item, fallback_condition["visible_injuries"][index] if index < len(fallback_condition["visible_injuries"]) else "")
+                _localize_condition_text(
+                    _clean_text(item, fallback_condition["visible_injuries"][index] if index < len(fallback_condition["visible_injuries"]) else ""),
+                    language,
+                )
                 for index, item in enumerate(raw_condition.get("visible_injuries", []))
                 if _clean_text(item, "").strip()
             ] or fallback_condition["visible_injuries"],
             "health_concerns": [
-                _clean_text(item, fallback_condition["health_concerns"][index] if index < len(fallback_condition["health_concerns"]) else "")
+                _localize_condition_text(
+                    _clean_text(item, fallback_condition["health_concerns"][index] if index < len(fallback_condition["health_concerns"]) else ""),
+                    language,
+                )
                 for index, item in enumerate(raw_condition.get("health_concerns", []))
                 if _clean_text(item, "").strip()
             ] or fallback_condition["health_concerns"],
-            "body_language": _clean_text(raw_condition.get("body_language"), fallback_condition["body_language"]),
+            "body_language": _localize_condition_text(
+                _clean_text(raw_condition.get("body_language"), fallback_condition["body_language"]),
+                language,
+            ),
         },
         "safety_level": source_payload["safety_level"],
         "safety_reason": _clean_text(
@@ -501,6 +560,19 @@ async def generate_empathetic_response(
     return _normalize_response_payload(raw, emotion_result, condition_result, language)
 
 
+async def _translate_payload_once(source_payload: dict, language: str, repair: bool = False) -> dict | None:
+    language_name = TRANSLATION_INSTRUCTIONS.get(language)
+    if not language_name:
+        return None
+
+    prompt = TRANSLATION_REPAIR_SYSTEM_PROMPT if repair else TRANSLATION_SYSTEM_PROMPT
+    return await _call_groq_json(
+        prompt.format(language_name=language_name),
+        json.dumps(source_payload, ensure_ascii=False),
+        max_tokens=1400,
+    )
+
+
 async def translate_analysis_payload(source_payload: dict, language: str) -> dict:
     """Translate a canonical English analysis payload into a UI-ready language payload."""
     if language == "en":
@@ -515,8 +587,7 @@ async def translate_analysis_payload(source_payload: dict, language: str) -> dic
             "disclaimer": DISCLAIMERS["en"],
         }
 
-    language_name = TRANSLATION_INSTRUCTIONS.get(language)
-    if not language_name:
+    if language not in TRANSLATION_INSTRUCTIONS:
         return {
             "condition": source_payload["condition"],
             "safety_level": source_payload["safety_level"],
@@ -536,9 +607,11 @@ async def translate_analysis_payload(source_payload: dict, language: str) -> dic
         "when_to_call_professional": source_payload["when_to_call_professional"],
         "approach_tips": source_payload["approach_tips"],
     }
-    raw = await _call_groq_json(
-        TRANSLATION_SYSTEM_PROMPT.format(language_name=language_name),
-        json.dumps(translation_source, ensure_ascii=False),
-        max_tokens=1200,
-    )
+    raw = await _translate_payload_once(translation_source, language, repair=False)
+    if not _translation_coverage_ok(raw, language):
+        logger.warning("Translation for %s left English text; retrying strict repair.", language)
+        repaired = await _translate_payload_once(translation_source, language, repair=True)
+        if _translation_coverage_ok(repaired, language):
+            raw = repaired
+
     return _normalize_translated_payload(raw, source_payload, language)
