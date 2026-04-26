@@ -38,6 +38,15 @@ LANGUAGE_INSTRUCTIONS = {
     ),
 }
 
+# In-script per-message reminders — appended to the user message to anchor the language
+# requirement next to the content, overriding learned English patterns from the input data.
+# Mirrors the same two-layer enforcement used in chat.py.
+LANGUAGE_REMINDERS = {
+    "en": "",
+    "hi": "\n\nकृपया हिंदी में उत्तर दें।",
+    "mr": "\n\nकृपया मराठीत उत्तर द्या।",
+}
+
 SYSTEM_PROMPT = """You are IndieAid, a compassionate AI assistant that helps people care for stray dogs in India. You speak with warmth and empathy — the person talking to you is likely worried about a dog they've found. Your tone is calm, encouraging, and never clinical or cold.
 
 You are NOT a veterinarian, but you provide India-specific first aid advice based on NGO guidelines and Indian veterinary standards.
@@ -112,6 +121,7 @@ async def generate_empathetic_response(
 - Visible Injuries: {', '.join(condition_result.get('visible_injuries', [])) or 'None observed'}
 - Health Concerns: {', '.join(condition_result.get('health_concerns', [])) or 'None observed'}
 - Body Language: {condition_result.get('body_language', 'unknown')}"""
+    analysis_summary += LANGUAGE_REMINDERS.get(language, "")
 
     if not settings.groq_api_key:
         logger.warning("Groq API key not set — returning template response.")

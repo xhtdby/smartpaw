@@ -424,7 +424,7 @@ export default function AnalyzePage() {
 
               {/* Disclaimer */}
               <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-400 text-center">
-                ⚕️ {result.disclaimer}
+                ⚕️ {t("disclaimer")}
               </div>
             </>
           )}
