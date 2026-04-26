@@ -226,7 +226,16 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface ActionCard {
+  type: "emergency" | "learn" | "find_help";
+  label: string;
+  href: string;
+  guide_id?: string;
+}
+
 export interface ChatResponse {
   response: string;
   sources: string[];
+  action_cards?: ActionCard[];
+  is_emergency?: boolean;
 }

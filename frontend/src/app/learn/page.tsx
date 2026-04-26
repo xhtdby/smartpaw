@@ -437,7 +437,8 @@ export default function LearnPage() {
         {GUIDES.map((guide) => (
           <div
             key={guide.id}
-            className="bg-white rounded-xl border border-gray-100 shadow-sm p-4"
+            id={guide.id}
+            className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 scroll-mt-20"
           >
             <div className="flex items-start gap-3">
               <span className="text-2xl">{guide.icon}</span>
