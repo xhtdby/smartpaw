@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     max_image_size: int = 10 * 1024 * 1024
 
     # SQLite database path
-    db_path: str = str(Path(__file__).parent.parent / "data" / "smartpaw.db")
+    db_path: str = str(Path(__file__).parent.parent / "data" / "indieaid.db")
 
     # Upload directory for report images
     uploads_dir: str = str(Path(__file__).parent.parent / "uploads")
@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     # Allowed CORS origins
     cors_origins: list[str] = [
         "http://localhost:3000",
+        "https://indieaid.vercel.app",
         "https://smartpaw.vercel.app",
     ]
 

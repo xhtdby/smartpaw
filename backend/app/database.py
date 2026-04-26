@@ -1,4 +1,4 @@
-"""SQLite database layer for SmartPaw.
+"""SQLite database layer for IndieAid.
 
 Handles report persistence and image metadata.
 Uses aiosqlite for async compatibility with FastAPI.
@@ -15,10 +15,24 @@ logger = logging.getLogger(__name__)
 _db_path: str | None = None
 
 
+def _migrate_legacy_db_path(target_path: str) -> None:
+    target = Path(target_path)
+    legacy = target.with_name("smartpaw.db")
+    if target.exists() or not legacy.exists():
+        return
+
+    try:
+        legacy.rename(target)
+        logger.info(f"Migrated legacy database from {legacy} to {target}")
+    except Exception as exc:
+        logger.warning(f"Could not migrate legacy database from {legacy} to {target}: {exc}")
+
+
 def _get_db_path() -> str:
     global _db_path
     if _db_path is None:
         _db_path = get_settings().db_path
+        _migrate_legacy_db_path(_db_path)
     return _db_path
 
 

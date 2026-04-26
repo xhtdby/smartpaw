@@ -1,4 +1,4 @@
-const CACHE_NAME = "smartpaw-v1";
+const CACHE_NAME = "indieaid-v1";
 const OFFLINE_URLS = [
   "/",
   "/learn",

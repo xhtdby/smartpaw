@@ -15,7 +15,7 @@ const translations: Record<Language, Record<string, string>> = {
     "app.name": "IndieAid",
     "app.tagline": "Helping India's stray dogs, one photo at a time",
     "app.subtitle": "AI-powered first aid guidance, emotion assessment, and rescue coordination",
-    "app.footer": "SmartPaw — AI for compassion",
+    "app.footer": "IndieAid — AI for compassion",
     "home.help": "Help a Dog",
     "home.help.desc": "Take a photo to assess condition & get first aid guidance",
     "home.nearby": "Find Help",
@@ -86,9 +86,9 @@ const translations: Record<Language, Record<string, string>> = {
     "report.error.submit": "Failed to submit report. Please try again.",
     "report.error.update": "Failed to update status.",
     "report.prompt.resolve_note": "Add a resolution note (optional):",
-    "chat.title": "SmartPaw Chat",
+    "chat.title": "IndieAid Chat",
     "chat.subtitle": "Ask about dog first aid & care",
-    "chat.welcome": "Hi, I'm SmartPaw!",
+    "chat.welcome": "Hi, I'm IndieAid!",
     "chat.welcome.desc": "I can help you with first aid for stray dogs, understanding dog behavior, and finding resources in Mumbai.",
     "chat.placeholder": "Ask about dog care or first aid...",
     "chat.disclaimer": "Not a vet. Always consult a professional for serious cases.",
@@ -128,17 +128,17 @@ const translations: Record<Language, Record<string, string>> = {
     "learn.emergency_helpline": "AWBI Helpline",
   },
   hi: {
-    "app.name": "SmartPaw",
+    "app.name": "IndieAid",
     "app.tagline": "मुंबई के आवारा कुत्तों की मदद, एक फोटो से",
     "app.subtitle": "AI-संचालित प्राथमिक चिकित्सा मार्गदर्शन और बचाव समन्वय",
-    "app.footer": "SmartPaw — करुणा के लिए AI",
+    "app.footer": "IndieAid — करुणा के लिए AI",
     "home.help": "कुत्ते की मदद करें",
     "home.help.desc": "स्थिति जांचने के लिए फोटो लें",
     "home.nearby": "मदद खोजें",
     "home.nearby.desc": "आस-पास के पशु चिकित्सक",
     "home.report": "रिपोर्ट करें",
     "home.report.desc": "मदद चाहने वाले कुत्ते की सूचना दें",
-    "home.chat": "SmartPaw से पूछें",
+    "home.chat": "IndieAid से पूछें",
     "home.chat.desc": "प्राथमिक चिकित्सा चैट",
     "home.learn": "सीखें",
     "home.learn.desc": "कुत्ते की देखभाल गाइड",
@@ -202,9 +202,9 @@ const translations: Record<Language, Record<string, string>> = {
     "report.error.submit": "रिपोर्ट जमा नहीं हो सकी। कृपया फिर से कोशिश करें।",
     "report.error.update": "स्थिति अपडेट नहीं हो सकी।",
     "report.prompt.resolve_note": "समाधान नोट जोड़ें (वैकल्पिक):",
-    "chat.title": "SmartPaw चैट",
+    "chat.title": "IndieAid चैट",
     "chat.subtitle": "कुत्ते की देखभाल के बारे में पूछें",
-    "chat.welcome": "नमस्ते, मैं SmartPaw हूं!",
+    "chat.welcome": "नमस्ते, मैं IndieAid हूं!",
     "chat.welcome.desc": "मैं आवारा कुत्तों की प्राथमिक चिकित्सा, व्यवहार समझने और मुंबई में संसाधन खोजने में मदद कर सकता हूं।",
     "chat.placeholder": "कुत्ते की देखभाल के बारे में पूछें...",
     "chat.disclaimer": "पशु चिकित्सक नहीं। गंभीर मामलों में हमेशा पेशेवर से सलाह लें।",
@@ -244,17 +244,17 @@ const translations: Record<Language, Record<string, string>> = {
     "learn.emergency_helpline": "AWBI हेल्पलाइन",
   },
   mr: {
-    "app.name": "SmartPaw",
+    "app.name": "IndieAid",
     "app.tagline": "मुंबईच्या भटक्या कुत्र्यांना मदत, एका फोटोतून",
     "app.subtitle": "AI-चालित प्रथमोपचार मार्गदर्शन आणि बचाव समन्वय",
-    "app.footer": "SmartPaw — करुणेसाठी AI",
+    "app.footer": "IndieAid — करुणेसाठी AI",
     "home.help": "कुत्र्याला मदत करा",
     "home.help.desc": "स्थिती तपासण्यासाठी फोटो काढा",
     "home.nearby": "मदत शोधा",
     "home.nearby.desc": "जवळचे पशुवैद्य",
     "home.report": "कळवा",
     "home.report.desc": "मदत हव्या असलेल्या कुत्र्याची माहिती द्या",
-    "home.chat": "SmartPaw ला विचारा",
+    "home.chat": "IndieAid ला विचारा",
     "home.chat.desc": "प्रथमोपचार चॅट",
     "home.learn": "शिका",
     "home.learn.desc": "कुत्र्यांची काळजी मार्गदर्शक",
@@ -318,9 +318,9 @@ const translations: Record<Language, Record<string, string>> = {
     "report.error.submit": "अहवाल सादर करता आला नाही. कृपया पुन्हा प्रयत्न करा.",
     "report.error.update": "स्थिती अद्यतनित करता आली नाही.",
     "report.prompt.resolve_note": "निराकरण नोट जोडा (पर्यायी):",
-    "chat.title": "SmartPaw चॅट",
+    "chat.title": "IndieAid चॅट",
     "chat.subtitle": "कुत्र्यांच्या काळजीबद्दल विचारा",
-    "chat.welcome": "नमस्कार, मी SmartPaw आहे!",
+    "chat.welcome": "नमस्कार, मी IndieAid आहे!",
     "chat.welcome.desc": "मी भटक्या कुत्र्यांसाठी प्रथमोपचार, वर्तन समजून घेणे आणि मुंबईत संसाधने शोधण्यात मदत करू शकतो.",
     "chat.placeholder": "कुत्र्यांच्या काळजीबद्दल विचारा...",
     "chat.disclaimer": "पशुवैद्य नाही. गंभीर प्रकरणांसाठी नेहमी व्यावसायिकांचा सल्ला घ्या.",
@@ -367,7 +367,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLang] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("smartpaw-lang") as Language | null;
+    const saved = (
+      localStorage.getItem("indieaid-lang") || localStorage.getItem("smartpaw-lang")
+    ) as Language | null;
     if (saved && (saved === "en" || saved === "hi" || saved === "mr")) {
       setLang(saved);
     }
@@ -382,7 +384,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLang(lang);
-    localStorage.setItem("smartpaw-lang", lang);
+    localStorage.setItem("indieaid-lang", lang);
+    localStorage.removeItem("smartpaw-lang");
   };
 
   const t = (key: string): string => {

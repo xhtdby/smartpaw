@@ -7,8 +7,10 @@ import { useSearchParams } from "next/navigation";
 import { sendChatMessage, type ChatMessage, type ChatResponse } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
-const STORAGE_KEY = "smartpaw-chat-history";
-const ANALYSIS_KEY = "smartpaw-analysis-context";
+const STORAGE_KEY = "indieaid-chat-history";
+const LEGACY_STORAGE_KEY = "smartpaw-chat-history";
+const ANALYSIS_KEY = "indieaid-analysis-context";
+const LEGACY_ANALYSIS_KEY = "smartpaw-analysis-context";
 
 function ChatInner() {
   const { language, t } = useLanguage();
@@ -26,10 +28,10 @@ function ChatInner() {
     if (initialized.current) return;
     initialized.current = true;
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) setMessages(JSON.parse(saved));
     } catch { /* ignore */ }
-    const ctx = localStorage.getItem(ANALYSIS_KEY);
+    const ctx = localStorage.getItem(ANALYSIS_KEY) || localStorage.getItem(LEGACY_ANALYSIS_KEY);
     if (ctx) setAnalysisContext(ctx);
     // Auto-send context message if coming from analysis
     if (searchParams.get("from") === "analysis" && ctx) {
@@ -42,6 +44,7 @@ function ChatInner() {
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
   }, [messages]);
 
@@ -67,6 +70,7 @@ function ChatInner() {
       if (analysisContext) {
         setAnalysisContext(undefined);
         localStorage.removeItem(ANALYSIS_KEY);
+        localStorage.removeItem(LEGACY_ANALYSIS_KEY);
       }
     } catch {
       setMessages((prev) => [
@@ -85,6 +89,7 @@ function ChatInner() {
     setMessages([]);
     setSources([]);
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   };
 
   return (

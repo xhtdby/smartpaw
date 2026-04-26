@@ -138,7 +138,10 @@ export default function AnalyzePage() {
         enLang?.safety ? `Safety: ${enLang.safety.level} - ${enLang.safety.reason}` : "",
       ].filter(Boolean).join("\n") : null;
 
-      if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
+      if (ctx) {
+        localStorage.setItem("indieaid-analysis-context", ctx);
+        localStorage.removeItem("smartpaw-analysis-context");
+      }
     } catch (err) {
       const code = err instanceof Error ? err.message : "";
       const key =
