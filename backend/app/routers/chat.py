@@ -168,6 +168,13 @@ LANGUAGE_INSTRUCTIONS = {
     ),
 }
 
+# Short in-script reminders appended to the user message so the language
+# instruction appears right next to the content the model must respond to.
+_LANG_REMINDER = {
+    "hi": " (कृपया हिन्दी में उत्तर दें।)",
+    "mr": " (कृपया मराठीत उत्तर द्या।)",
+}
+
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
@@ -184,11 +191,16 @@ async def chat(request: ChatRequest):
     lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
     system = SYSTEM_PROMPT.format(language_instruction=lang_instruction, context=context)
 
+    # Append a brief in-script language reminder directly to the user message.
+    # This anchors the language requirement right beside the content the model
+    # must respond to, overriding any language pattern in the history.
+    user_text = request.message + _LANG_REMINDER.get(request.language, "")
+
     # Build message history
     messages = [{"role": "system", "content": system}]
     for msg in request.history[-10:]:  # Keep last 10 messages for context
         messages.append({"role": msg.role, "content": msg.content})
-    messages.append({"role": "user", "content": request.message})
+    messages.append({"role": "user", "content": user_text})
 
     if not settings.groq_api_key:
         return {

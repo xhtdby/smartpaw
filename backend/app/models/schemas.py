@@ -40,6 +40,25 @@ class AnalysisResponse(BaseModel):
     language: str = "en"
 
 
+class LanguageContent(BaseModel):
+    """Language-specific generated content for one language variant."""
+    safety: Optional[SafetyLevel] = None
+    empathetic_summary: str = ""
+    first_aid: list[FirstAidStep] = []
+
+
+class MultilingualAnalysisResponse(BaseModel):
+    """Full analysis with generated content pre-built for all three languages."""
+    dog_detected: bool
+    emotion: Optional[EmotionResult] = None
+    condition: Optional[ConditionAssessment] = None
+    languages: dict[str, LanguageContent] = {}
+    disclaimer: str = (
+        "This is AI-based guidance, not a veterinary diagnosis. "
+        "When in doubt, please contact a veterinary professional immediately."
+    )
+
+
 class ReportCreate(BaseModel):
     latitude: float
     longitude: float

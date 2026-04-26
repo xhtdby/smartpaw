@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { analyzeImage, type AnalysisResult } from "@/lib/api";
+import { analyzeImageMultilingual, type MultilingualAnalysisResult } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const SAFETY_COLORS: Record<string, string> = {
@@ -26,14 +26,12 @@ const EMOTION_ICONS: Record<string, string> = {
   fearful: "😨",
 };
 
-type AllResults = Partial<Record<string, AnalysisResult>>;
-
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
-  const [allResults, setAllResults] = useState<AllResults>({});
+  const [mlResult, setMlResult] = useState<MultilingualAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -41,8 +39,8 @@ export default function AnalyzePage() {
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
 
-  // The result to display is always the one for the current language
-  const result = allResults[language] ?? null;
+  // Derive the per-language view from the shared result
+  const langContent = mlResult?.languages[language] ?? null;
 
   useEffect(() => {
     return () => {
@@ -58,7 +56,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setImage(file);
     setPreview(URL.createObjectURL(file));
-    setAllResults({});
+    setMlResult(null);
     setError("");
   };
 
@@ -108,27 +106,28 @@ export default function AnalyzePage() {
     setLoading(true);
     setError("");
     try {
-      // Fetch all 3 languages concurrently so switching is instant
-      const [enData, hiData, mrData] = await Promise.all([
-        analyzeImage(image, "en"),
-        analyzeImage(image, "hi"),
-        analyzeImage(image, "mr"),
-      ]);
+      const data = await analyzeImageMultilingual(image);
+      setMlResult(data);
 
-      const gathered: AllResults = { en: enData, hi: hiData, mr: mrData };
-      setAllResults(gathered);
-
-      // Save English context for chat (condition data is always English from the vision model)
-      const ctx = enData.dog_detected ? [
-        enData.emotion ? `Emotion: ${enData.emotion.label}` : "",
-        enData.condition?.breed_guess ? `Breed: ${enData.condition.breed_guess}` : "",
-        enData.condition?.physical_condition || "",
-        enData.condition?.visible_injuries?.length ? `Injuries: ${enData.condition.visible_injuries.join(", ")}` : "",
-        enData.condition?.health_concerns?.length ? `Concerns: ${enData.condition.health_concerns.join(", ")}` : "",
-        enData.safety ? `Safety: ${enData.safety.level} - ${enData.safety.reason}` : "",
-      ].filter(Boolean).join("\n") : null;
-
-      if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
+      // Save English context for chat (factual data is always in English)
+      if (data.dog_detected) {
+        const enContent = data.languages["en"];
+        const ctx = [
+          data.emotion ? `Emotion: ${data.emotion.label}` : "",
+          data.condition?.breed_guess ? `Breed: ${data.condition.breed_guess}` : "",
+          data.condition?.physical_condition || "",
+          data.condition?.visible_injuries?.length
+            ? `Injuries: ${data.condition.visible_injuries.join(", ")}`
+            : "",
+          data.condition?.health_concerns?.length
+            ? `Concerns: ${data.condition.health_concerns.join(", ")}`
+            : "",
+          enContent?.safety
+            ? `Safety: ${enContent.safety.level} - ${enContent.safety.reason}`
+            : "",
+        ].filter(Boolean).join("\n");
+        if (ctx) localStorage.setItem("smartpaw-analysis-context", ctx);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
@@ -142,7 +141,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setPreview("");
     setImage(null);
-    setAllResults({});
+    setMlResult(null);
     setError("");
   };
 
@@ -152,13 +151,13 @@ export default function AnalyzePage() {
     return t("analyze.safety.caution");
   };
 
+  const dogDetected = mlResult?.dog_detected ?? false;
+
   return (
     <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="text-2xl">
-          ←
-        </Link>
+        <Link href="/" className="text-2xl">←</Link>
         <div className="flex-1">
           <h1 className="text-xl font-bold text-[var(--color-warm-700)]">
             {t("analyze.title")}
@@ -204,13 +203,7 @@ export default function AnalyzePage() {
       {/* Camera Preview */}
       {cameraActive && (
         <div className="space-y-4">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full rounded-xl"
-          />
+          <video ref={videoRef} autoPlay playsInline muted className="w-full rounded-xl" />
           <div className="flex gap-3">
             <button
               onClick={capturePhoto}
@@ -218,10 +211,7 @@ export default function AnalyzePage() {
             >
               📸 Capture
             </button>
-            <button
-              onClick={stopCamera}
-              className="px-4 bg-gray-100 rounded-xl text-gray-600"
-            >
+            <button onClick={stopCamera} className="px-4 bg-gray-100 rounded-xl text-gray-600">
               ✕
             </button>
           </div>
@@ -237,7 +227,7 @@ export default function AnalyzePage() {
             className="w-full rounded-xl shadow-md max-h-80 object-cover"
           />
 
-          {!result && (
+          {!mlResult && (
             <div className="flex gap-3">
               <button
                 onClick={analyze}
@@ -258,12 +248,8 @@ export default function AnalyzePage() {
       {loading && (
         <div className="mt-6 text-center p-8 bg-white rounded-xl shadow-sm">
           <div className="text-4xl animate-bounce mb-4">🐾</div>
-          <p className="text-[var(--color-warm-600)] font-medium">
-            {t("analyze.analyzing")}
-          </p>
-          <p className="text-sm text-gray-400 mt-2">
-            {t("analyze.loading.desc")}
-          </p>
+          <p className="text-[var(--color-warm-600)] font-medium">{t("analyze.analyzing")}</p>
+          <p className="text-sm text-gray-400 mt-2">{t("analyze.loading.desc")}</p>
         </div>
       )}
 
@@ -275,47 +261,45 @@ export default function AnalyzePage() {
       )}
 
       {/* Results */}
-      {result && (
+      {mlResult && (
         <div className="mt-6 space-y-4">
           {/* No dog detected */}
-          {!result.dog_detected && (
+          {!dogDetected && (
             <div className="bg-white rounded-xl p-6 shadow-sm text-center">
               <div className="text-4xl mb-3">🔍</div>
-              <p className="text-gray-600">{result.empathetic_summary}</p>
+              <p className="text-gray-600">{langContent?.empathetic_summary}</p>
             </div>
           )}
 
           {/* Dog detected — full results */}
-          {result.dog_detected && (
+          {dogDetected && langContent && (
             <>
               {/* Safety Badge */}
-              {result.safety && (
+              {langContent.safety && (
                 <div
                   className={`rounded-xl p-4 border-2 ${
-                    SAFETY_COLORS[result.safety.level] || SAFETY_COLORS.caution
+                    SAFETY_COLORS[langContent.safety.level] || SAFETY_COLORS.caution
                   }`}
                 >
                   <div className="flex items-center gap-2 font-bold text-lg mb-1">
-                    <span>{SAFETY_ICONS[result.safety.level] || "⚠️"}</span>
-                    <span>{safetyLabel(result.safety.level)}</span>
+                    <span>{SAFETY_ICONS[langContent.safety.level] || "⚠️"}</span>
+                    <span>{safetyLabel(langContent.safety.level)}</span>
                   </div>
-                  <p className="text-sm">{result.safety.reason}</p>
+                  <p className="text-sm">{langContent.safety.reason}</p>
                 </div>
               )}
 
-              {/* Emotion */}
-              {result.emotion && (
+              {/* Emotion — label is always the English enum, shown with icon */}
+              {mlResult.emotion && (
                 <div className="bg-white rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-2xl">
-                      {EMOTION_ICONS[result.emotion.label] || "🐕"}
+                      {EMOTION_ICONS[mlResult.emotion.label] || "🐕"}
                     </span>
                     <div>
-                      <div className="font-semibold capitalize">
-                        {result.emotion.label}
-                      </div>
+                      <div className="font-semibold capitalize">{mlResult.emotion.label}</div>
                       <div className="text-xs text-gray-400">
-                        {t("analyze.emotion.confidence")}: {Math.round(result.emotion.confidence * 100)}%
+                        {t("analyze.emotion.confidence")}: {Math.round(mlResult.emotion.confidence * 100)}%
                       </div>
                     </div>
                   </div>
@@ -323,52 +307,50 @@ export default function AnalyzePage() {
               )}
 
               {/* Empathetic Summary */}
-              {result.empathetic_summary && (
+              {langContent.empathetic_summary && (
                 <div className="bg-[var(--color-warm-100)] rounded-xl p-4">
                   <p className="text-[var(--color-warm-800)] leading-relaxed">
-                    {result.empathetic_summary}
+                    {langContent.empathetic_summary}
                   </p>
                 </div>
               )}
 
-              {/* Condition Details */}
-              {result.condition && (
+              {/* Condition Details — factual data from vision model, always English */}
+              {mlResult.condition && (
                 <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
                   <h3 className="font-bold text-gray-700">{t("analyze.condition.title")}</h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <span className="text-gray-400">{t("analyze.condition.breed")}:</span>{" "}
-                      <span className="font-medium">{result.condition.breed_guess}</span>
+                      <span className="font-medium">{mlResult.condition.breed_guess}</span>
                     </div>
                     <div>
                       <span className="text-gray-400">{t("analyze.condition.age")}:</span>{" "}
-                      <span className="font-medium">{result.condition.estimated_age}</span>
+                      <span className="font-medium">{mlResult.condition.estimated_age}</span>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    {result.condition.physical_condition}
-                  </p>
+                  <p className="text-sm text-gray-600">{mlResult.condition.physical_condition}</p>
 
-                  {result.condition.visible_injuries.length > 0 && (
+                  {mlResult.condition.visible_injuries.length > 0 && (
                     <div>
                       <div className="text-sm font-semibold text-red-600 mb-1">
                         {t("analyze.condition.injuries")}:
                       </div>
                       <ul className="text-sm text-red-600 list-disc list-inside">
-                        {result.condition.visible_injuries.map((inj, i) => (
+                        {mlResult.condition.visible_injuries.map((inj, i) => (
                           <li key={i}>{inj}</li>
                         ))}
                       </ul>
                     </div>
                   )}
 
-                  {result.condition.health_concerns.length > 0 && (
+                  {mlResult.condition.health_concerns.length > 0 && (
                     <div>
                       <div className="text-sm font-semibold text-yellow-700 mb-1">
                         {t("analyze.condition.concerns")}:
                       </div>
                       <ul className="text-sm text-yellow-700 list-disc list-inside">
-                        {result.condition.health_concerns.map((c, i) => (
+                        {mlResult.condition.health_concerns.map((c, i) => (
                           <li key={i}>{c}</li>
                         ))}
                       </ul>
@@ -378,13 +360,13 @@ export default function AnalyzePage() {
               )}
 
               {/* First Aid Steps */}
-              {result.first_aid.length > 0 && (
+              {langContent.first_aid.length > 0 && (
                 <div className="bg-white rounded-xl p-4 shadow-sm">
                   <h3 className="font-bold text-[var(--color-sage-700)] mb-3">
                     🩹 {t("analyze.firstaid.title")}
                   </h3>
                   <ol className="space-y-2">
-                    {result.first_aid.map((step) => (
+                    {langContent.first_aid.map((step) => (
                       <li key={step.step_number} className="flex gap-3 text-sm">
                         <span className="bg-[var(--color-sage-100)] text-[var(--color-sage-700)] rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shrink-0">
                           {step.step_number}
@@ -414,7 +396,7 @@ export default function AnalyzePage() {
 
               {/* Disclaimer */}
               <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-400 text-center">
-                ⚕️ {result.disclaimer}
+                ⚕️ {t("disclaimer")}
               </div>
             </>
           )}
