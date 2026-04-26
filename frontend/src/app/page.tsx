@@ -4,8 +4,27 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
+const HOME_EMERGENCY_COPY = {
+  en: {
+    human: "If a person is in danger or may have rabies exposure, use local emergency care immediately. In India, call 112.",
+    animal: "For animal-specific next steps and verified contacts, open Find Help.",
+    cta: "Open Find Help",
+  },
+  hi: {
+    human: "अगर कोई व्यक्ति खतरे में है या रेबीज़ एक्सपोज़र की आशंका है, तो तुरंत स्थानीय आपातकालीन सहायता लें। भारत में 112 पर कॉल करें।",
+    animal: "जानवर से जुड़ी अगली कार्रवाई और सत्यापित संपर्कों के लिए Find Help खोलें।",
+    cta: "Find Help खोलें",
+  },
+  mr: {
+    human: "एखादी व्यक्ती धोक्यात असेल किंवा रेबीज एक्स्पोजरची शक्यता असेल, तर त्वरित स्थानिक आपत्कालीन मदत घ्या. भारतात 112 वर कॉल करा.",
+    animal: "प्राण्यांसाठी पुढची पावले आणि पडताळलेले संपर्क पाहण्यासाठी Find Help उघडा.",
+    cta: "Find Help उघडा",
+  },
+} as const;
+
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const emergencyCopy = HOME_EMERGENCY_COPY[language as keyof typeof HOME_EMERGENCY_COPY] || HOME_EMERGENCY_COPY.en;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-8">
@@ -90,18 +109,18 @@ export default function Home() {
             <div className="font-semibold text-red-700 text-sm">
               {t("home.emergency")}
             </div>
-            <div className="text-xs text-red-600 mt-1">
-              {t("home.helpline.awbi")}:{" "}
-              <a href="tel:1962" className="underline font-bold">
-                1962
-              </a>
+            <div className="text-xs text-red-700 mt-1 leading-relaxed">
+              {emergencyCopy.human}
             </div>
-            <div className="text-xs text-red-600">
-              {t("home.helpline.resq")}:{" "}
-              <a href="tel:+919820233633" className="underline">
-                +91 98202 33633
-              </a>
+            <div className="text-xs text-red-700 mt-2 leading-relaxed">
+              {emergencyCopy.animal}
             </div>
+            <Link
+              href="/nearby"
+              className="inline-block mt-3 text-xs font-semibold text-red-700 underline"
+            >
+              {emergencyCopy.cta}
+            </Link>
           </div>
         </div>
       </div>

@@ -61,17 +61,8 @@ export async function analyzeImageMultilingual(
   return res.json();
 }
 
-export async function fetchNearby(
-  lat: number,
-  lng: number,
-  radiusKm: number = 10,
-  type?: string
-): Promise<ShelterVet[]> {
-  const params = new URLSearchParams({
-    latitude: lat.toString(),
-    longitude: lng.toString(),
-    radius_km: radiusKm.toString(),
-  });
+export async function fetchNearby(type?: string): Promise<ShelterVet[]> {
+  const params = new URLSearchParams();
   if (type) params.set("type", type);
 
   const res = await fetchWithRetry(`${API_BASE}/api/nearby?${params}`);
@@ -160,6 +151,8 @@ export interface AnalysisResult {
   };
   first_aid: { step_number: number; instruction: string }[];
   empathetic_summary: string;
+  when_to_call_professional?: string;
+  approach_tips?: string;
   disclaimer: string;
   language: string;
 }
@@ -200,12 +193,18 @@ export interface ShelterVet {
   name: string;
   type: string;
   address: string;
-  phone: string;
-  latitude: number;
-  longitude: number;
+  phone?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   hours: string;
   distance_km?: number;
   emergency_24hr: boolean;
+  website?: string | null;
+  email?: string | null;
+  scope: string;
+  service_area: string;
+  summary: string;
+  notes: string;
 }
 
 export interface Report {

@@ -200,6 +200,8 @@ async def analyze_dog_image(
         condition=_build_condition_assessment(localized_payload["condition"]),
         first_aid=_build_first_aid_steps(localized_payload.get("first_aid_steps", [])),
         empathetic_summary=localized_payload.get("empathetic_summary", ""),
+        when_to_call_professional=localized_payload.get("when_to_call_professional", ""),
+        approach_tips=localized_payload.get("approach_tips", ""),
         disclaimer=localized_payload.get("disclaimer", ""),
         language=language,
     )

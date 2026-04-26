@@ -33,6 +33,8 @@ class AnalysisResponse(BaseModel):
     condition: Optional[ConditionAssessment] = None
     first_aid: list[FirstAidStep] = []
     empathetic_summary: str = ""
+    when_to_call_professional: str = ""
+    approach_tips: str = ""
     disclaimer: str = (
         "This is AI-based guidance, not a veterinary diagnosis. "
         "When in doubt, please contact a veterinary professional immediately."
@@ -68,10 +70,10 @@ class ReportStatusUpdate(BaseModel):
 
 
 class NearbyQuery(BaseModel):
-    latitude: float
-    longitude: float
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     radius_km: float = 5.0
-    type: Optional[str] = None  # "vet", "shelter", "ngo"
+    type: Optional[str] = None  # "rescue", "official", "advice"
 
 
 class ShelterVet(BaseModel):
@@ -79,12 +81,18 @@ class ShelterVet(BaseModel):
     name: str
     type: str
     address: str
-    phone: str
-    latitude: float
-    longitude: float
+    phone: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     hours: str = ""
     distance_km: Optional[float] = None
     emergency_24hr: bool = False
+    website: Optional[str] = None
+    email: Optional[str] = None
+    scope: str = "regional"
+    service_area: str = ""
+    summary: str = ""
+    notes: str = ""
 
 
 class ChatMessage(BaseModel):

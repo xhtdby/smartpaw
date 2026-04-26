@@ -1,10 +1,10 @@
-"""Community reporting and nearby shelter/vet endpoints.
+"""Community reporting and help-resource endpoints.
 
-POST /api/report           — submit a stray dog sighting (with optional image)
-GET  /api/reports          — fetch nearby reports
-PATCH /api/reports/{id}    — update report status
-GET  /api/reports/{id}/image — serve report image
-GET  /api/nearby           — find nearby vets, shelters, NGOs
+POST /api/report             - submit a dog sighting (with optional image)
+GET  /api/reports            - fetch nearby reports
+PATCH /api/reports/{id}      - update report status
+GET  /api/reports/{id}/image - serve report image
+GET  /api/nearby             - list verified rescue, official, and advice resources
 """
 
 import json
@@ -15,39 +15,38 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
 
 from app.config import get_settings
+from app.database import get_report_by_id, get_reports_nearby, insert_report, update_report_status
 from app.models.schemas import ReportResponse, ReportStatusUpdate, ShelterVet
-from app.database import insert_report, get_reports_nearby, update_report_status, get_report_by_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["community"])
 
-# Load shelter/vet data
-_shelters: list[dict] = []
-_SHELTERS_FILE = Path(__file__).parent.parent.parent / "data" / "shelters_mumbai.json"
+_resources: list[dict] = []
+_RESOURCES_FILE = Path(__file__).parent.parent.parent / "data" / "help_resources.json"
 
 
-def _load_shelters():
-    global _shelters
-    if not _shelters and _SHELTERS_FILE.exists():
-        with open(_SHELTERS_FILE, encoding="utf-8") as f:
-            _shelters = json.load(f)
-        logger.info(f"Loaded {len(_shelters)} shelters/vets from seed data.")
+def _load_resources():
+    global _resources
+    if not _resources and _RESOURCES_FILE.exists():
+        with open(_RESOURCES_FILE, encoding="utf-8") as f:
+            _resources = json.load(f)
+        logger.info("Loaded %s verified help resources.", len(_resources))
 
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Calculate distance in km between two lat/lng points."""
-    R = 6371.0
+    radius = 6371.0
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
     a = (
         math.sin(dlat / 2) ** 2
         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
     )
-    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return radius * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
 def _get_uploads_dir() -> Path:
@@ -64,14 +63,13 @@ async def create_report(
     urgency: str = Form(default="medium"),
     image: Optional[UploadFile] = File(default=None),
 ):
-    """Submit a stray dog sighting with location, urgency, and optional image."""
+    """Submit a dog sighting with location, urgency, and optional image."""
     if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
         raise HTTPException(status_code=400, detail="invalid_coordinates")
 
     if urgency not in ("low", "medium", "high", "critical"):
         raise HTTPException(status_code=400, detail="invalid_urgency")
 
-    # Handle optional image upload
     image_filename = None
     if image and image.content_type and image.content_type.startswith("image/"):
         ext = image.filename.rsplit(".", 1)[-1] if image.filename and "." in image.filename else "jpg"
@@ -96,7 +94,7 @@ async def create_report(
         "status": "open",
     }
     await insert_report(entry)
-    logger.info(f"New report created: {report_id} — urgency: {urgency}")
+    logger.info("New report created: %s - urgency: %s", report_id, urgency)
 
     return ReportResponse(**entry)
 
@@ -143,21 +141,42 @@ async def get_report_image(report_id: str):
 
 @router.get("/nearby", response_model=list[ShelterVet])
 async def find_nearby(
-    latitude: float = Query(..., ge=-90, le=90),
-    longitude: float = Query(..., ge=-180, le=180),
+    latitude: Optional[float] = Query(default=None, ge=-90, le=90),
+    longitude: Optional[float] = Query(default=None, ge=-180, le=180),
     radius_km: float = Query(default=10.0, ge=0.1, le=50.0),
-    type: Optional[str] = Query(default=None, description="Filter: vet, shelter, ngo"),
+    type: Optional[str] = Query(default=None, description="Filter: rescue, official, advice"),
 ):
-    """Find nearby vets, shelters, and NGOs."""
-    _load_shelters()
+    """Return verified help resources.
+
+    Location is optional because the data model is now a curated set of
+    trustworthy rescue, official, and poison/advice resources rather than a
+    misleading claim of full geocoded coverage for every city.
+    """
+    _load_resources()
 
     results = []
-    for s in _shelters:
-        if type and s.get("type") != type:
+    for resource in _resources:
+        if type and resource.get("type") != type:
             continue
-        dist = _haversine_km(latitude, longitude, s["latitude"], s["longitude"])
-        if dist <= radius_km:
-            results.append({**s, "distance_km": round(dist, 2)})
 
-    results.sort(key=lambda x: x["distance_km"])
-    return [ShelterVet(**r) for r in results]
+        lat = resource.get("latitude")
+        lon = resource.get("longitude")
+        distance_km = None
+        if latitude is not None and longitude is not None and lat is not None and lon is not None:
+            dist = _haversine_km(latitude, longitude, lat, lon)
+            if dist > radius_km:
+                continue
+            distance_km = round(dist, 2)
+
+        results.append({**resource, "distance_km": distance_km})
+
+    type_order = {"rescue": 0, "official": 1, "advice": 2}
+    scope_order = {"regional": 0, "national": 1, "global": 2}
+    results.sort(
+        key=lambda item: (
+            type_order.get(str(item.get("type")), 99),
+            scope_order.get(str(item.get("scope")), 99),
+            str(item.get("name", "")).lower(),
+        )
+    )
+    return [ShelterVet(**item) for item in results]

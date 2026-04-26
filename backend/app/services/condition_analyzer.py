@@ -19,7 +19,7 @@ from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
-CONDITION_PROMPT = """You are a veterinary AI assistant specializing in Indian street dog health. Analyze this image of a dog and provide a structured assessment. Be thorough but compassionate.
+CONDITION_PROMPT = """You are a veterinary AI assistant analyzing the condition of a dog for a rescue-support app. Analyze this image and provide a structured assessment. Be thorough, compassionate, and grounded in what is actually visible.
 
 Pay special attention to these conditions common in Indian stray dogs:
 - Mange (sarcoptic/demodectic): patchy hair loss, red/irritated skin, crusting, excessive scratching
@@ -44,7 +44,9 @@ Respond ONLY with valid JSON in this exact format:
   "body_language": "description of the dog's posture, tail, ears, and overall body language"
 }
 
-If you cannot identify specific details, make your best assessment and note uncertainty. Always err on the side of caution for safety."""
+If you cannot identify specific details, make your best assessment and note uncertainty.
+Distinguish between clearly visible findings and likely possibilities.
+Always err on the side of caution for safety without inventing details."""
 
 
 async def analyze_condition_groq(image_bytes: bytes) -> dict | None:

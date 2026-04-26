@@ -13,7 +13,7 @@ from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
-VISION_PROMPT = """You are a veterinary AI assistant specializing in Indian street dogs.
+VISION_PROMPT = """You are a veterinary AI assistant analyzing dogs for a rescue-support app.
 
 Analyze this image in ONE pass and respond ONLY with valid JSON in this exact shape:
 {
@@ -50,7 +50,8 @@ Rules:
       "body_language": "No dog visible"
     }
 - Emotion label must be exactly one of: happy, sad, angry, relaxed, fearful, unknown
-- Be cautious and India-specific when identifying stray-dog health issues
+- Distinguish clearly between what is directly visible and what is only a likely possibility
+- Be cautious when identifying health issues and avoid overclaiming from limited visual evidence
 - Do not wrap the JSON in markdown
 """
 

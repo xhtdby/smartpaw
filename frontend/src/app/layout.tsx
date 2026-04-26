@@ -4,9 +4,9 @@ import SWRegister from "./sw-register";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "IndieAid — Help India's Stray Dogs",
+  title: "IndieAid - Grounded AI Help for Pets and Community Animals",
   description:
-    "AI-powered assistant to assess stray dog conditions, provide first aid guidance, and connect you with shelters and vets in India.",
+    "AI-powered guidance for pets and community animals: assess condition from a photo, get grounded first-aid steps, and find verified help resources.",
   manifest: "/manifest.json",
   icons: { icon: "/logo-192.png", apple: "/logo-192.png" },
 };

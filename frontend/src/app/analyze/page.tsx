@@ -26,6 +26,21 @@ const EMOTION_ICONS: Record<string, string> = {
   fearful: "😨",
 };
 
+const EXTRA_COPY = {
+  en: {
+    whenToCall: "Get Professional Help Now If",
+    approachTips: "Approach Tips",
+  },
+  hi: {
+    whenToCall: "इन स्थितियों में तुरंत पेशेवर मदद लें",
+    approachTips: "सुरक्षित तरीके से पास जाने के सुझाव",
+  },
+  mr: {
+    whenToCall: "या परिस्थितीत त्वरित व्यावसायिक मदत घ्या",
+    approachTips: "सुरक्षितपणे जवळ जाण्याच्या सूचना",
+  },
+} as const;
+
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
@@ -52,6 +67,8 @@ export default function AnalyzePage() {
             safety: langData.safety,
             first_aid: langData.first_aid,
             empathetic_summary: langData.empathetic_summary,
+            when_to_call_professional: langData.when_to_call_professional,
+            approach_tips: langData.approach_tips,
             disclaimer: langData.disclaimer,
             language,
           } as AnalysisResult;
@@ -170,6 +187,8 @@ export default function AnalyzePage() {
     if (level === "danger") return t("analyze.safety.danger");
     return t("analyze.safety.caution");
   };
+
+  const extraCopy = EXTRA_COPY[language as keyof typeof EXTRA_COPY] || EXTRA_COPY.en;
 
   return (
     <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
@@ -415,6 +434,28 @@ export default function AnalyzePage() {
                 </div>
               )}
 
+              {result.when_to_call_professional && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <h3 className="font-bold text-red-700 mb-2">
+                    {extraCopy.whenToCall}
+                  </h3>
+                  <p className="text-sm text-red-700 leading-relaxed">
+                    {result.when_to_call_professional}
+                  </p>
+                </div>
+              )}
+
+              {result.approach_tips && (
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <h3 className="font-bold text-gray-700 mb-2">
+                    {extraCopy.approachTips}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {result.approach_tips}
+                  </p>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <Link
@@ -432,8 +473,8 @@ export default function AnalyzePage() {
               </div>
 
               {/* Disclaimer */}
-              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-400 text-center">
-                ⚕️ {t("disclaimer")}
+              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 text-center leading-relaxed">
+                ⚕️ {result.disclaimer || t("disclaimer")}
               </div>
             </>
           )}

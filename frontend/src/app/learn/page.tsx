@@ -3,686 +3,494 @@
 import Link from "next/link";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
-interface Guide {
-  emoji: string;
-  title: Record<string, string>;
-  summary: Record<string, string>;
-  tips: Record<string, string[]>;
-}
+type PageLanguage = "en" | "hi" | "mr";
+
+type Guide = {
+  id: string;
+  icon: string;
+  title: Record<PageLanguage, string>;
+  summary: Record<PageLanguage, string>;
+  bullets: Record<PageLanguage, string[]>;
+};
+
+type ResourceLink = {
+  href: string;
+  label: string;
+  note: Record<PageLanguage, string>;
+};
+
+const COPY = {
+  en: {
+    title: "Learn",
+    subtitle: "High-confidence first aid basics for pets and community dogs",
+    truthTitle: "How to use this page",
+    truthBody:
+      "IndieAid is AI guidance, not a veterinary diagnosis. This page sticks to safer, high-confidence first-aid basics. It avoids made-up dosing and tells you when to escalate.",
+    quickTitle: "Quick Actions",
+    quickFindHelp: "Open Find Help",
+    quickVet: "Emergency Vet Search",
+    quickRabies: "WHO Rabies Guidance",
+    redFlagsTitle: "Get urgent professional help if you see",
+    redFlags: [
+      "trouble breathing, collapse, repeated seizures, or the dog cannot stand",
+      "heavy bleeding, obvious fracture, severe road trauma, or deep bite wounds",
+      "suspected poisoning, heatstroke, bloated belly with retching, or severe eye injury",
+      "maggot wounds, rapidly worsening skin disease, or a weak puppy with bloody diarrhoea",
+    ],
+    uncertaintyTitle: "When the problem is not clear",
+    uncertaintyBody:
+      "Do not guess a single diagnosis too early. Compare the main possibilities, check the dog's breathing, ability to stand, bleeding, body temperature, vomiting, swelling, and pain level, then choose the safest action that fits all likely causes.",
+    resourcesTitle: "Verified Resources",
+    emergencyTitle: "Human safety first",
+    emergencyBody:
+      "If a person is in danger or may have rabies exposure, use local emergency care immediately. In India, call 112.",
+  },
+  hi: {
+    title: "सीखें",
+    subtitle: "पालतू और सामुदायिक कुत्तों के लिए उच्च-विश्वास प्राथमिक उपचार के मूल कदम",
+    truthTitle: "इस पेज का उपयोग कैसे करें",
+    truthBody:
+      "IndieAid AI-आधारित मार्गदर्शन है, पशु-चिकित्सीय निदान नहीं। यह पेज सुरक्षित और अधिक भरोसेमंद प्राथमिक-उपचार कदमों पर केंद्रित है। यह मनगढ़ंत दवा-डोज़ से बचता है और स्पष्ट बताता है कि कब पेशेवर मदद लेनी चाहिए।",
+    quickTitle: "त्वरित कार्रवाइयाँ",
+    quickFindHelp: "Find Help खोलें",
+    quickVet: "इमरजेंसी वेट खोजें",
+    quickRabies: "WHO रेबीज़ मार्गदर्शन",
+    redFlagsTitle: "इन स्थितियों में तुरंत पेशेवर मदद लें",
+    redFlags: [
+      "साँस लेने में दिक्कत, गिर जाना, बार-बार दौरे, या कुत्ता खड़ा न हो पा रहा हो",
+      "बहुत खून बहना, हड्डी टूटना दिखना, गंभीर सड़क दुर्घटना, या गहरे काटने के घाव",
+      "ज़हर की आशंका, हीटस्ट्रोक, पेट फूलना और उल्टी जैसा प्रयास, या गंभीर आँख की चोट",
+      "कीड़ों वाले घाव, तेजी से बिगड़ती त्वचा की बीमारी, या खून वाले दस्त के साथ कमजोर पिल्ला",
+    ],
+    uncertaintyTitle: "जब समस्या स्पष्ट न हो",
+    uncertaintyBody:
+      "बहुत जल्दी एक ही निदान मानकर न चलें। मुख्य संभावनाओं की तुलना करें, कुत्ते की साँस, खड़े होने की क्षमता, खून, शरीर का तापमान, उल्टी, सूजन और दर्द का स्तर देखें, फिर वह कदम चुनें जो सभी संभावित कारणों में सुरक्षित हो।",
+    resourcesTitle: "सत्यापित संसाधन",
+    emergencyTitle: "पहले मानव सुरक्षा",
+    emergencyBody:
+      "अगर कोई व्यक्ति खतरे में है या रेबीज़ एक्सपोज़र की आशंका है, तो तुरंत स्थानीय आपातकालीन सहायता लें। भारत में 112 पर कॉल करें।",
+  },
+  mr: {
+    title: "शिका",
+    subtitle: "पालीव आणि समुदायातील कुत्र्यांसाठी उच्च-विश्वास प्रथमोपचाराची मूलभूत माहिती",
+    truthTitle: "हे पान कसे वापरावे",
+    truthBody:
+      "IndieAid हे AI-आधारित मार्गदर्शन आहे, पशुवैद्यकीय निदान नाही. हे पान अधिक सुरक्षित आणि विश्वासार्ह प्रथमोपचाराच्या मूलभूत गोष्टींवरच लक्ष केंद्रित करते. हे बनावट डोस देत नाही आणि कधी व्यावसायिक मदत घ्यावी हे स्पष्ट सांगते.",
+    quickTitle: "झटपट कृती",
+    quickFindHelp: "Find Help उघडा",
+    quickVet: "आपत्कालीन वेट शोधा",
+    quickRabies: "WHO रेबीज मार्गदर्शन",
+    redFlagsTitle: "या परिस्थितीत त्वरित व्यावसायिक मदत घ्या",
+    redFlags: [
+      "श्वास घेण्यास त्रास, कोसळणे, वारंवार झटके, किंवा कुत्रा उभा राहू शकत नसणे",
+      "जोरदार रक्तस्त्राव, स्पष्ट फ्रॅक्चर, गंभीर रस्ते अपघात, किंवा खोल चाव्याच्या जखमा",
+      "विषबाधेची शक्यता, उष्माघात, फुगलेले पोट आणि ओकारीचे प्रयत्न, किंवा गंभीर डोळ्याची दुखापत",
+      "अळ्यांचे घाव, झपाट्याने बिघडणारा त्वचारोग, किंवा रक्ताळ जुलाब असलेले अशक्त पिल्लू",
+    ],
+    uncertaintyTitle: "समस्या स्पष्ट नसल्यास",
+    uncertaintyBody:
+      "खूप लवकर एकच निदान ठरवू नका. मुख्य शक्यता तुलना करा, कुत्र्याचा श्वास, उभे राहण्याची क्षमता, रक्तस्त्राव, शरीराचे तापमान, उलटी, सूज आणि वेदना तपासा, आणि मग सर्व शक्य कारणांमध्ये सुरक्षित ठरणारी कृती निवडा.",
+    resourcesTitle: "पडताळलेली संसाधने",
+    emergencyTitle: "आधी मानवी सुरक्षितता",
+    emergencyBody:
+      "एखादी व्यक्ती धोक्यात असेल किंवा रेबीज एक्स्पोजरची शक्यता असेल, तर त्वरित स्थानिक आपत्कालीन मदत घ्या. भारतात 112 वर कॉल करा.",
+  },
+} as const;
 
 const GUIDES: Guide[] = [
   {
-    emoji: "🤝",
+    id: "approach",
+    icon: "🤝",
     title: {
-      en: "How to Safely Approach a Stray Dog",
-      hi: "आवारा कुत्ते को सुरक्षित रूप से कैसे पहुंचें",
-      mr: "भटक्या कुत्र्याजवळ सुरक्षितपणे कसे जावे",
+      en: "Approach Safely",
+      hi: "सुरक्षित तरीके से पास जाएँ",
+      mr: "सुरक्षितपणे जवळ जा",
     },
     summary: {
-      en: "Stay calm, move slowly, turn sideways, and let the dog come to you. Never chase or corner a stray.",
-      hi: "शांत रहें, धीरे चलें, बग़ल में मुड़ें, और कुत्ते को आपके पास आने दें। कभी पीछा न करें।",
-      mr: "शांत राहा, हळू चाला, बाजूला वळा, आणि कुत्र्याला तुमच्याकडे येऊ द्या. कधीही पाठलाग करू नका.",
+      en: "Human safety comes first. A scared or painful dog can bite even if it needs help.",
+      hi: "मानव सुरक्षा पहले है। डरा हुआ या दर्द में कुत्ता मदद की ज़रूरत होने पर भी काट सकता है।",
+      mr: "मानवी सुरक्षितता आधी आहे. घाबरलेला किंवा वेदनेत असलेला कुत्रा मदतीची गरज असूनही चावू शकतो.",
     },
-    tips: {
+    bullets: {
       en: [
-        "Avoid direct eye contact — it can feel threatening",
-        "Extend the back of your hand slowly for sniffing",
-        "Watch the tail: tucked = fear, stiff = alert",
-        "If the dog growls, stop and give space",
+        "Approach sideways, move slowly, and avoid direct eye contact.",
+        "Do not corner the dog or reach straight for the head.",
+        "If the dog growls, lunges, or snaps, back away and call for help.",
+        "Use food, water, or a calm voice only if that does not put you at risk.",
       ],
       hi: [
-        "सीधी नज़र से बचें — यह धमकी जैसा लगता है",
-        "सूंघने के लिए धीरे-धीरे हाथ का पिछला हिस्सा बढ़ाएं",
-        "पूंछ देखें: दबी = डर, तनी = सतर्क",
-        "अगर कुत्ता गुर्राए तो रुकें और जगह दें",
+        "बगल से जाएँ, धीरे चलें, और सीधे आँखों में न देखें।",
+        "कुत्ते को घेरें नहीं और सिर की ओर सीधे हाथ न बढ़ाएँ।",
+        "अगर कुत्ता गुर्राए, झपटे, या काटने की कोशिश करे, पीछे हटें और मदद बुलाएँ।",
+        "खाना, पानी, या शांत आवाज़ तभी उपयोग करें जब उससे आपकी सुरक्षा प्रभावित न हो।",
       ],
       mr: [
-        "सरळ डोळ्यांत पाहणे टाळा — ती धमकी वाटू शकते",
-        "हुंगण्यासाठी हळूवारपणे हाताचा मागचा भाग पुढे करा",
-        "शेपूट पहा: दाबलेली = भीती, ताठ = सतर्क",
-        "कुत्रा गुरगुरल्यास थांबा आणि जागा द्या",
+        "बाजूने जा, हळू हालचाल करा, आणि थेट डोळ्यात पाहू नका.",
+        "कुत्र्याला कोपऱ्यात अडकवू नका आणि थेट डोक्याकडे हात नेऊ नका.",
+        "कुत्रा गुरगुरत असेल, झेपावत असेल, किंवा चावण्याचा प्रयत्न करत असेल तर मागे या आणि मदत मागा.",
+        "अन्न, पाणी किंवा शांत आवाज यांचा वापर फक्त तुमची सुरक्षितता धोक्यात येत नसेल तरच करा.",
       ],
     },
   },
   {
-    emoji: "🩹",
+    id: "trauma",
+    icon: "🩹",
     title: {
-      en: "Basic First Aid for Bleeding Wounds",
-      hi: "रक्तस्राव वाले घावों के लिए प्राथमिक चिकित्सा",
-      mr: "रक्तस्रावी जखमांसाठी प्रथमोपचार",
+      en: "Bleeding, Road Trauma, and Fractures",
+      hi: "खून बहना, सड़क दुर्घटना और फ्रैक्चर",
+      mr: "रक्तस्त्राव, रस्ते अपघात आणि फ्रॅक्चर",
     },
     summary: {
-      en: "Apply gentle pressure with a clean cloth, don't remove embedded objects, and get to a vet.",
-      hi: "साफ कपड़े से हल्का दबाव लगाएं, घुसी वस्तुएं न निकालें, और पशु चिकित्सक के पास जाएं।",
-      mr: "स्वच्छ कपड्याने हळूवार दाब द्या, रुतलेल्या वस्तू काढू नका, आणि पशुवैद्यकाकडे जा.",
+      en: "Control what you safely can, but minimize movement and escalate quickly.",
+      hi: "जो सुरक्षित रूप से कर सकते हैं वह करें, लेकिन हिलाना-डुलाना कम रखें और जल्दी मदद लें।",
+      mr: "जे सुरक्षितपणे शक्य आहे ते करा, पण हालचाल कमी ठेवा आणि लवकर मदत घ्या.",
     },
-    tips: {
+    bullets: {
       en: [
-        "Wear gloves if available",
-        "Do NOT use Dettol or hydrogen peroxide on dogs",
-        "Wrap wounds loosely with clean cloth",
-        "Rush to vet for heavy, non-stop bleeding",
+        "Use direct pressure with a clean cloth for active bleeding.",
+        "Do not remove embedded objects and do not force a bent limb straight.",
+        "If spinal injury is possible, move the dog as little as possible on a flat support.",
+        "Any heavy bleeding, obvious fracture, or vehicle trauma needs urgent veterinary care.",
       ],
       hi: [
-        "उपलब्ध हो तो दस्ताने पहनें",
-        "कुत्तों पर डेटॉल या हाइड्रोजन पेरोक्साइड का उपयोग न करें",
-        "घाव को साफ कपड़े से ढीला लपेटें",
-        "भारी, लगातार रक्तस्राव के लिए तुरंत पशु चिकित्सक के पास जाएं",
+        "सक्रिय खून बहने पर साफ कपड़े से सीधा दबाव दें।",
+        "घुसी हुई वस्तु न निकालें और मुड़े हुए पैर को सीधा करने की कोशिश न करें।",
+        "अगर रीढ़ की चोट की आशंका हो, तो कुत्ते को समतल सहारे पर बहुत कम हिलाएँ।",
+        "बहुत खून, स्पष्ट फ्रैक्चर, या वाहन दुर्घटना की स्थिति में तुरंत पशु-चिकित्सक की जरूरत है।",
       ],
       mr: [
-        "उपलब्ध असल्यास हातमोजे घाला",
-        "कुत्र्यांवर डेटॉल किंवा हायड्रोजन पेरॉक्साइड वापरू नका",
-        "स्वच्छ कापडाने जखम सैल गुंडाळा",
-        "जोरदार, सतत रक्तस्रावासाठी ताबडतोब पशुवैद्यकाकडे जा",
+        "सक्रिय रक्तस्त्राव असेल तर स्वच्छ कापडाने थेट दाब द्या.",
+        "घुसलेली वस्तू काढू नका आणि वाकलेला पाय जबरदस्तीने सरळ करू नका.",
+        "मणक्याच्या दुखापतीची शक्यता असेल तर कुत्र्याला सपाट आधारावर कमीत कमी हलवा.",
+        "जोरदार रक्तस्त्राव, स्पष्ट फ्रॅक्चर, किंवा वाहन अपघातात तातडीची पशुवैद्यकीय मदत आवश्यक आहे.",
       ],
     },
   },
   {
-    emoji: "🌡️",
+    id: "heat",
+    icon: "🌡️",
     title: {
-      en: "Dehydration & Heatstroke",
-      hi: "निर्जलीकरण और हीटस्ट्रोक",
-      mr: "निर्जलीकरण आणि उष्माघात",
+      en: "Heatstroke and Dehydration",
+      hi: "हीटस्ट्रोक और डिहाइड्रेशन",
+      mr: "उष्माघात आणि निर्जलीकरण",
     },
     summary: {
-      en: "Offer cool (not ice cold) water, move to shade, wet paws and belly with cool water.",
-      hi: "ठंडा (बर्फ जैसा नहीं) पानी दें, छाया में ले जाएं, पंजों और पेट को ठंडे पानी से गीला करें।",
-      mr: "थंड (बर्फासारखे नाही) पाणी द्या, सावलीत न्या, पंजे आणि पोट थंड पाण्याने ओले करा.",
+      en: "Cool the dog steadily, not aggressively. Ice-water shock is not the goal.",
+      hi: "कुत्ते को धीरे-धीरे ठंडा करें, बहुत आक्रामक तरीके से नहीं। बर्फीले पानी का झटका देना सही नहीं है।",
+      mr: "कुत्र्याला हळूहळू थंड करा, आक्रमकपणे नाही. बर्फाच्या पाण्याचा धक्का देणे योग्य नाही.",
     },
-    tips: {
+    bullets: {
       en: [
-        "Signs: dry gums, sunken eyes, excessive panting",
-        "Wet the dog's paws, belly, and neck",
-        "Never douse with ice water — it causes shock",
-        "Keep water bowls outside your building for strays",
+        "Move the dog to shade and offer water if it can swallow normally.",
+        "Use cool water on the paws, belly, and body; avoid ice baths.",
+        "Heavy panting, collapse, vomiting, confusion, or very high body heat is an emergency.",
+        "If the dog does not improve quickly, get professional care immediately.",
       ],
       hi: [
-        "लक्षण: सूखे मसूड़े, धंसी आंखें, अत्यधिक हांफना",
-        "कुत्ते के पंजे, पेट और गर्दन को गीला करें",
-        "कभी बर्फ के पानी से न भिगोएं — शॉक हो सकता है",
-        "अपनी बिल्डिंग के बाहर आवारा कुत्तों के लिए पानी रखें",
+        "कुत्ते को छाया में ले जाएँ और अगर वह सामान्य रूप से निगल पा रहा है तो पानी दें।",
+        "पंजों, पेट और शरीर पर ठंडा पानी डालें; बर्फ वाले स्नान से बचें।",
+        "बहुत हाँफना, गिर जाना, उल्टी, भ्रम, या बहुत अधिक शरीर-गर्मी आपातकाल है।",
+        "अगर सुधार जल्दी न हो, तो तुरंत पेशेवर मदद लें।",
       ],
       mr: [
-        "लक्षणे: कोरडे हिरडे, खोल गेलेले डोळे, जास्त धापा",
-        "कुत्र्याचे पंजे, पोट आणि मान ओली करा",
-        "बर्फाच्या पाण्याने कधीही भिजवू नका — शॉक होतो",
-        "तुमच्या इमारतीबाहेर भटक्या कुत्र्यांसाठी पाणी ठेवा",
+        "कुत्र्याला सावलीत न्या आणि तो व्यवस्थित गिळू शकत असेल तर पाणी द्या.",
+        "पंजे, पोट आणि शरीरावर थंड पाणी वापरा; बर्फाच्या अंघोळीपासून दूर रहा.",
+        "खूप धाप लागणे, कोसळणे, उलटी, गोंधळ, किंवा शरीर खूप गरम असणे ही आपत्कालीन चिन्हे आहेत.",
+        "लवकर सुधारणा न झाल्यास त्वरित व्यावसायिक मदत घ्या.",
       ],
     },
   },
   {
-    emoji: "🦠",
+    id: "poison",
+    icon: "☠️",
     title: {
-      en: "Mange — What You Can Do",
-      hi: "खुजली (मैंज) — आप क्या कर सकते हैं",
-      mr: "खरूज (मेंज) — तुम्ही काय करू शकता",
+      en: "Poisoning or Unknown Ingestion",
+      hi: "ज़हर या अज्ञात चीज़ खाने की आशंका",
+      mr: "विषबाधा किंवा अज्ञात वस्तू खाल्ल्याची शक्यता",
     },
     summary: {
-      en: "Mange is treatable! Contact an NGO for proper treatment. Never apply home remedies like kerosene.",
-      hi: "मैंज का इलाज हो सकता है! सही उपचार के लिए किसी NGO से संपर्क करें। केरोसिन जैसे घरेलू उपाय कभी न लगाएं।",
-      mr: "खरूज उपचार करता येतो! योग्य उपचारासाठी NGO शी संपर्क साधा. रॉकेल सारखे घरगुती उपाय कधीही लावू नका.",
+      en: "Do not guess a home antidote. Time and accurate history matter most.",
+      hi: "घर का कोई अनुमानित इलाज न करें। समय और सही जानकारी सबसे ज़्यादा महत्वपूर्ण है।",
+      mr: "घरगुती उतारा अंदाजाने देऊ नका. वेळ आणि अचूक माहिती सर्वात महत्त्वाची आहे.",
     },
-    tips: {
+    bullets: {
       en: [
-        "Signs: hair loss patches, red skin, excessive scratching",
-        "Do NOT use kerosene, engine oil, or turmeric paste",
-        "Provide nutritious food to build immunity",
-        "Report to WSD or IDA for treatment",
+        "Keep the dog away from the suspected toxin and bring the packet or photo if possible.",
+        "Do not force vomiting unless a veterinary professional specifically tells you to do so.",
+        "Drooling, tremors, seizures, repeated vomiting, collapse, or breathing trouble need urgent help.",
+        "Use poison hotlines or an emergency veterinarian as quickly as possible.",
       ],
       hi: [
-        "लक्षण: बाल झड़ने के धब्बे, लाल त्वचा, बहुत खुजली",
-        "केरोसिन, इंजन ऑइल, या हल्दी का पेस्ट न लगाएं",
-        "रोग प्रतिरोधक क्षमता बढ़ाने के लिए पौष्टिक भोजन दें",
-        "इलाज के लिए WSD या IDA को सूचित करें",
+        "कुत्ते को संदिग्ध ज़हरीली चीज़ से दूर रखें और संभव हो तो पैकेट या फोटो साथ रखें।",
+        "जब तक कोई पशु-चिकित्सक विशेष रूप से न कहे, उल्टी कराने की कोशिश न करें।",
+        "लार टपकना, कंपकंपी, दौरे, बार-बार उल्टी, गिरना, या साँस की दिक्कत में तुरंत मदद लें।",
+        "ज़हर हेल्पलाइन या इमरजेंसी पशु-चिकित्सक से जितनी जल्दी हो सके संपर्क करें।",
       ],
       mr: [
-        "लक्षणे: केस गळण्याचे ठिपके, लाल त्वचा, खूप खाजवणे",
-        "रॉकेल, इंजिन ऑईल, किंवा हळदीचा लेप लावू नका",
-        "प्रतिकारशक्ती वाढवण्यासाठी पौष्टिक अन्न द्या",
-        "उपचारासाठी WSD किंवा IDA ला कळवा",
+        "कुत्र्याला संशयित विषारी वस्तूपासून दूर ठेवा आणि शक्य असल्यास पॅकेट किंवा फोटो सोबत ठेवा.",
+        "पशुवैद्यकाने स्पष्ट सांगितल्याशिवाय उलटी करवण्याचा प्रयत्न करू नका.",
+        "लाळ गळणे, थरथर, झटके, वारंवार उलटी, कोसळणे, किंवा श्वासाचा त्रास असल्यास तातडीची मदत घ्या.",
+        "विषबाधा हेल्पलाइन किंवा आपत्कालीन पशुवैद्य यांच्याशी शक्य तितक्या लवकर संपर्क साधा.",
       ],
     },
   },
   {
-    emoji: "💉",
+    id: "skin",
+    icon: "🪰",
     title: {
-      en: "Rabies Awareness",
-      hi: "रेबीज जागरूकता",
-      mr: "रेबीज जागरूकता",
+      en: "Maggot Wounds and Severe Skin Disease",
+      hi: "कीड़ों वाले घाव और गंभीर त्वचा रोग",
+      mr: "अळ्यांचे घाव आणि गंभीर त्वचारोग",
     },
     summary: {
-      en: "Rabies is 100% fatal but 100% preventable. Wash any bite wound with soap and water for 15 minutes.",
-      hi: "रेबीज 100% घातक है लेकिन 100% रोकथाम योग्य। किसी भी काटने पर 15 मिनट साबुन-पानी से धोएं।",
-      mr: "रेबीज 100% प्राणघातक पण 100% टाळता येतो. कोणत्याही चाव्याच्या जखमेवर 15 मिनिटे साबण-पाण्याने धुवा.",
+      en: "These are painful, quickly worsening problems and usually need repeated treatment.",
+      hi: "ये दर्दनाक और तेजी से बिगड़ने वाली समस्याएँ हैं, और अक्सर बार-बार इलाज की जरूरत होती है।",
+      mr: "ही वेदनादायक आणि झपाट्याने बिघडणारी समस्या असते, आणि बहुतेकदा पुन्हा पुन्हा उपचार लागतात.",
     },
-    tips: {
+    bullets: {
       en: [
-        "ANY bite or scratch breaking skin needs PEP vaccine",
-        "Wash wound with soap + running water for 15 min",
-        "Go to hospital immediately for anti-rabies shots",
-        "Do NOT apply chilli, turmeric, or folk remedies",
+        "Keep flies away as much as possible and transport for treatment quickly.",
+        "If you must rinse the surface, use clean saline only.",
+        "Never pour kerosene, turpentine, engine oil, acid, or other chemicals into the wound or onto diseased skin.",
+        "Whole-body hair loss, foul smell, open sores, or maggots are not minor problems.",
       ],
       hi: [
-        "त्वचा तोड़ने वाले किसी भी काटने पर PEP टीका जरूरी",
-        "15 मिनट साबुन + बहते पानी से घाव धोएं",
-        "एंटी-रेबीज टीके के लिए तुरंत अस्पताल जाएं",
-        "मिर्ची, हल्दी या देसी इलाज न लगाएं",
+        "जहाँ तक संभव हो मक्खियों को दूर रखें और जल्दी इलाज के लिए ले जाएँ।",
+        "अगर सतह धोनी ही पड़े, तो केवल साफ सेलाइन का उपयोग करें।",
+        "घाव या खराब त्वचा पर कभी भी केरोसिन, टर्पेन्टाइन, इंजन ऑयल, एसिड, या दूसरे रसायन न डालें।",
+        "पूरे शरीर में बाल झड़ना, बदबू, खुले घाव, या कीड़े होना छोटी समस्या नहीं है।",
       ],
       mr: [
-        "त्वचा फोडणाऱ्या कोणत्याही चाव्याला PEP लस आवश्यक",
-        "15 मिनिटे साबण + वाहत्या पाण्याने जखम धुवा",
-        "रेबीज विरोधी लसीसाठी ताबडतोब हॉस्पिटलला जा",
-        "मिरची, हळद किंवा लोक उपचार लावू नका",
+        "शक्य तितक्या माशा दूर ठेवा आणि लवकर उपचारासाठी घेऊन जा.",
+        "वरचा भाग धुवावाच लागला तर फक्त स्वच्छ सलाईन वापरा.",
+        "जखमेवर किंवा आजारी त्वचेवर कधीही रॉकेल, टर्पेन्टाइन, इंजिन ऑइल, आम्ल, किंवा इतर रसायने टाकू नका.",
+        "संपूर्ण शरीरावर केस गळणे, दुर्गंधी, उघडी जखम, किंवा अळ्या असणे ही किरकोळ समस्या नाही.",
       ],
     },
   },
   {
-    emoji: "🐶",
+    id: "puppies",
+    icon: "🐶",
     title: {
-      en: "Dog Body Language Guide",
-      hi: "कुत्ते की बॉडी लैंग्वेज गाइड",
-      mr: "कुत्र्याच्या शारीरिक भाषेचे मार्गदर्शक",
+      en: "Puppies, Vomiting, and Diarrhoea",
+      hi: "पिल्ले, उल्टी और दस्त",
+      mr: "पिल्ले, उलटी आणि जुलाब",
     },
     summary: {
-      en: "Understanding body language keeps both you and the dog safe.",
-      hi: "बॉडी लैंग्वेज समझना आपको और कुत्ते दोनों को सुरक्षित रखता है।",
-      mr: "शारीरिक भाषा समजल्यास तुम्ही आणि कुत्रा दोघेही सुरक्षित राहता.",
+      en: "Young puppies deteriorate fast. Weakness, chilling, and bloody diarrhoea can become life-threatening quickly.",
+      hi: "छोटे पिल्ले बहुत जल्दी बिगड़ सकते हैं। कमजोरी, ठंड लगना और खून वाले दस्त जल्दी जानलेवा हो सकते हैं।",
+      mr: "लहान पिल्ले झपाट्याने खालावू शकतात. अशक्तपणा, अंग गार पडणे, आणि रक्ताळ जुलाब पटकन जीवघेणे ठरू शकतात.",
     },
-    tips: {
+    bullets: {
       en: [
-        "Happy: relaxed body, wide tail wags, open mouth smile",
-        "Scared: tucked tail, ears flat, crouching, lip licking",
-        "Aggressive: stiff body, raised hackles, showing teeth",
-        "In pain: whimpering, limping, licking one area obsessively",
+        "Keep weak puppies warm, dry, and away from larger animals.",
+        "Do not give random human medicines for diarrhoea or pain.",
+        "Bloody diarrhoea, repeated vomiting, or refusal to drink are urgent signs.",
+        "If the mother is present and safe, keeping puppies with her is usually better than separating them too early.",
       ],
       hi: [
-        "खुश: शिथिल शरीर, चौड़ी पूंछ हिलाना, खुले मुंह की मुस्कान",
-        "डरा: दबी पूंछ, चपटे कान, सिकुड़ा हुआ, होंठ चाटना",
-        "आक्रामक: तना शरीर, उभे बाल, दात दिखाना",
-        "दर्द में: कराहना, लंगड़ाना, एक जगह बार-बार चाटना",
+        "कमज़ोर पिल्लों को गर्म, सूखा, और बड़े जानवरों से अलग रखें।",
+        "दस्त या दर्द के लिए मनमानी मानव दवाएँ न दें।",
+        "खून वाले दस्त, बार-बार उल्टी, या पानी न पीना गंभीर संकेत हैं।",
+        "अगर माँ मौजूद और सुरक्षित है, तो पिल्लों को बहुत जल्दी अलग करने के बजाय उसके साथ रखना अक्सर बेहतर होता है।",
       ],
       mr: [
-        "आनंदी: शिथिल शरीर, रुंद शेपटी हलवणे, उघड्या तोंडाचे हसू",
-        "घाबरलेला: दाबलेली शेपूट, सपाट कान, वाकलेला, ओठ चाटणे",
-        "आक्रमक: ताठ शरीर, उभे केस, दात दाखवणे",
-        "दुखापत: ओरडणे, लंगडणे, एकाच जागी सारखे चाटणे",
-      ],
-    },
-  },
-  {
-    emoji: "🍖",
-    title: {
-      en: "Feeding Strays Safely",
-      hi: "आवारा कुत्तों को सुरक्षित रूप से खिलाना",
-      mr: "भटक्या कुत्र्यांना सुरक्षितपणे खाऊ घालणे",
-    },
-    summary: {
-      en: "Feed at the same time and place daily. Avoid chocolate, onions, and cooked bones.",
-      hi: "रोज़ एक ही समय और जगह पर खिलाएं। चॉकलेट, प्याज़ और पके हुए हड्डियों से बचें।",
-      mr: "रोज एकाच वेळी आणि ठिकाणी खाऊ घाला. चॉकलेट, कांदा आणि शिजवलेली हाडे टाळा.",
-    },
-    tips: {
-      en: [
-        "Good: rice + boiled chicken/egg, roti with dal, kibble",
-        "Bad: chocolate, onion, garlic, grapes, spicy food",
-        "Always provide water alongside food",
-        "Clean up leftovers to avoid attracting rats",
-      ],
-      hi: [
-        "अच्छा: चावल + उबला चिकन/अंडा, दाल रोटी, किबल",
-        "बुरा: चॉकलेट, प्याज़, लहसुन, अंगूर, मसालेदार खाना",
-        "खाने के साथ हमेशा पानी दें",
-        "चूहों को आकर्षित करने से बचने के लिए बचा हुआ खाना साफ करें",
-      ],
-      mr: [
-        "चांगले: भात + उकडलेले चिकन/अंडे, डाळ भाकरी, किबल",
-        "वाईट: चॉकलेट, कांदा, लसूण, द्राक्षे, तिखट अन्न",
-        "अन्नासोबत नेहमी पाणी द्या",
-        "उंदरांना आकर्षित होऊ नये म्हणून उरलेले अन्न साफ करा",
-      ],
-    },
-  },
-  {
-    emoji: "⚖️",
-    title: {
-      en: "Legal Rights of Stray Dogs in India",
-      hi: "भारत में आवारा कुत्तों के कानूनी अधिकार",
-      mr: "भारतातील भटक्या कुत्र्यांचे कायदेशीर अधिकार",
-    },
-    summary: {
-      en: "Stray dogs are protected by law. Feeding them is legal. Harming them is a criminal offense.",
-      hi: "आवारा कुत्ते कानून द्वारा संरक्षित हैं। उन्हें खिलाना कानूनी है। उन्हें नुकसान पहुंचाना अपराध है।",
-      mr: "भटक्या कुत्र्यांना कायद्याने संरक्षण आहे. त्यांना खाऊ घालणे कायदेशीर आहे. त्यांना इजा करणे गुन्हा आहे.",
-    },
-    tips: {
-      en: [
-        "PCA Act 1960: illegal to harm, poison, or kill strays",
-        "ABC Rules 2023: only sterilize/vaccinate, no relocation",
-        "No society can legally ban feeding strays",
-        "Report cruelty: AWBI helpline 1962",
-      ],
-      hi: [
-        "PCA अधिनियम 1960: आवारा कुत्तों को नुकसान, ज़हर या मारना गैरकानूनी",
-        "ABC नियम 2023: केवल नसबंदी/टीकाकरण, स्थानांतरण नहीं",
-        "कोई सोसाइटी कानूनी रूप से कुत्तों को खिलाने पर रोक नहीं लगा सकती",
-        "क्रूरता की शिकायत: AWBI हेल्पलाइन 1962",
-      ],
-      mr: [
-        "PCA कायदा 1960: भटक्या कुत्र्यांना दुखापत, विष किंवा मारणे बेकायदेशीर",
-        "ABC नियम 2023: फक्त निर्बीजन/लसीकरण, स्थलांतर नाही",
-        "कोणतीही सोसायटी कायदेशीररित्या कुत्र्यांना खाऊ घालण्यावर बंदी घालू शकत नाही",
-        "क्रूरतेची तक्रार: AWBI हेल्पलाइन 1962",
-      ],
-    },
-  },
-  {
-    emoji: "🦵",
-    title: {
-      en: "Dog Limping or Unable to Walk",
-      hi: "कुत्ता लंगड़ा रहा है या चल नहीं पा रहा",
-      mr: "कुत्रा लंगडत आहे किंवा चालू शकत नाही",
-    },
-    summary: {
-      en: "Check paw pads for glass/thorns. No weight on leg = possible fracture. Don't try to set bones yourself.",
-      hi: "पंजों में कांच/कांटे चेक करें। पैर पर वज़न नहीं = संभावित फ्रैक्चर। हड्डी खुद न जोड़ें।",
-      mr: "पंजात काच/काटे तपासा. पायावर वजन नाही = संभाव्य फ्रॅक्चर. स्वतः हाडे जोडू नका.",
-    },
-    tips: {
-      en: [
-        "Mumbai streets have sharp debris — check paw pads carefully",
-        "Suspected fracture: keep the dog still, use a board as stretcher",
-        "Swollen paw between toes may be an abscess",
-        "Contact a rescue NGO for transport if needed",
-      ],
-      hi: [
-        "मुंबई की सड़कों पर तेज़ कचरा होता है — पंजे ध्यान से जांचें",
-        "फ्रैक्चर का शक: कुत्ते को शांत रखें, बोर्ड को स्ट्रेचर की तरह इस्तेमाल करें",
-        "उंगलियों के बीच सूजा पंजा फोड़ा हो सकता है",
-        "ज़रूरत हो तो परिवहन के लिए बचाव NGO से संपर्क करें",
-      ],
-      mr: [
-        "मुंबईच्या रस्त्यांवर धारदार कचरा असतो — पंजे काळजीपूर्वक तपासा",
-        "फ्रॅक्चरचा संशय: कुत्र्याला शांत ठेवा, बोर्ड स्ट्रेचर म्हणून वापरा",
-        "बोटांमध्ये सुजलेला पंजा गळू असू शकतो",
-        "आवश्यक असल्यास वाहतुकीसाठी बचाव NGO शी संपर्क साधा",
-      ],
-    },
-  },
-  {
-    emoji: "👁️",
-    title: {
-      en: "Eye Injuries and Infections",
-      hi: "आंख की चोट और संक्रमण",
-      mr: "डोळ्यांच्या जखमा आणि संक्रमण",
-    },
-    summary: {
-      en: "Don't touch the eye or remove stuck objects. Clean around the eye gently with warm water.",
-      hi: "आंख को न छुएं और फंसी वस्तुएं न निकालें। गुनगुने पानी से आंख के आसपास धीरे साफ करें।",
-      mr: "डोळ्याला स्पर्श करू नका आणि अडकलेल्या वस्तू काढू नका. कोमट पाण्याने डोळ्याभोवती हळूवार स्वच्छ करा.",
-    },
-    tips: {
-      en: [
-        "Green/yellow discharge = bacterial infection, needs vet",
-        "Bulging eye after trauma = emergency, keep moist with saline",
-        "Cherry eye (red bulge in corner) is common in puppies",
-        "Many one-eyed strays live perfectly normal lives",
-      ],
-      hi: [
-        "हरा/पीला स्राव = बैक्टीरियल संक्रमण, पशु चिकित्सक ज़रूरी",
-        "चोट के बाद उभरी आंख = आपातकाल, सेलाइन से नम रखें",
-        "चेरी आई (कोने में लाल उभार) पिल्लों में आम है",
-        "कई एक-आंख वाले आवारा कुत्ते बिल्कुल सामान्य जीवन जीते हैं",
-      ],
-      mr: [
-        "हिरवा/पिवळा स्राव = बॅक्टेरियल संक्रमण, पशुवैद्य आवश्यक",
-        "आघातानंतर फुगलेला डोळा = आणीबाणी, सलाईनने ओला ठेवा",
-        "चेरी आय (कोपऱ्यात लाल फुगवटा) पिल्लांमध्ये सामान्य आहे",
-        "अनेक एक-डोळ्या भटक्या कुत्र्यांचे आयुष्य अगदी सामान्य असते",
-      ],
-    },
-  },
-  {
-    emoji: "🪢",
-    title: {
-      en: "Dog Caught in Wire, Rope, or Manja",
-      hi: "तार, रस्सी या मांझा में फंसा कुत्ता",
-      mr: "तार, दोरी किंवा मांझा में फंसलेला कुत्रा",
-    },
-    summary: {
-      en: "Don't pull embedded wire out. Cut loose entanglements carefully. Deep wire wounds need a vet.",
-      hi: "धंसी तार को बाहर न खींचें। उलझाव को सावधानी से काटें। गहरे तार के घाव के लिए डॉक्टर ज़रूरी।",
-      mr: "रुतलेली तार बाहेर ओढू नका. अडकलेले सावधपणे कापा. खोल तारेच्या जखमांसाठी पशुवैद्य आवश्यक.",
-    },
-    tips: {
-      en: [
-        "Manja (kite string) cuts are a major problem in Mumbai",
-        "Use thick gloves — trapped dogs may bite out of fear",
-        "Cover wounds to prevent flies from laying eggs",
-        "Rubber bands on muzzle/legs cut off circulation — remove urgently",
-      ],
-      hi: [
-        "मांझा (पतंग की डोर) के कट मुंबई में बड़ी समस्या है",
-        "मोटे दस्ताने इस्तेमाल करें — फंसे कुत्ते डर से काट सकते हैं",
-        "मक्खियों को अंडे देने से रोकने के लिए घाव ढकें",
-        "मुंह/पैरों पर रबर बैंड रक्त प्रवाह रोकते हैं — तुरंत हटाएं",
-      ],
-      mr: [
-        "मांझा (पतंगाची दोरी) चे कट मुंबईत मोठी समस्या आहे",
-        "जाड हातमोजे वापरा — अडकलेले कुत्रे भीतीने चावू शकतात",
-        "माश्यांना अंडी घालण्यापासून रोखण्यासाठी जखम झाका",
-        "तोंड/पायांवरील रबर बॅंड रक्तप्रवाह थांबवतात — ताबडतोब काढा",
-      ],
-    },
-  },
-  {
-    emoji: "☠️",
-    title: {
-      en: "Poisoning — What to Do",
-      hi: "ज़हर — क्या करें",
-      mr: "विषबाधा — काय करावे",
-    },
-    summary: {
-      en: "Time is critical. Don't make the dog vomit. Try to identify what was eaten. Rush to vet.",
-      hi: "समय बहुत ज़रूरी है। कुत्ते को उल्टी न कराएं। क्या खाया पहचानने की कोशिश करें। तुरंत डॉक्टर के पास जाएं।",
-      mr: "वेळ अत्यंत महत्त्वाचा. कुत्र्याला उलटी करवू नका. काय खाल्ले ते ओळखण्याचा प्रयत्न करा. ताबडतोब पशुवैद्यकाकडे जा.",
-    },
-    tips: {
-      en: [
-        "Signs: sudden vomiting, foaming, seizures, blue gums",
-        "Rat poison causes delayed symptoms (2-3 days) — internal bleeding",
-        "Collect suspicious food/pellets as evidence (wear gloves)",
-        "Intentional poisoning is a criminal offense — file an FIR",
-      ],
-      hi: [
-        "लक्षण: अचानक उल्टी, मुंह से झाग, दौरे, नीले मसूड़े",
-        "चूहे का ज़हर देर से असर करता है (2-3 दिन) — अंदरूनी रक्तस्राव",
-        "संदिग्ध खाना/गोलियां सबूत के रूप में इकट्ठा करें (दस्ताने पहनें)",
-        "जानबूझकर ज़हर देना अपराध है — FIR दर्ज करें",
-      ],
-      mr: [
-        "लक्षणे: अचानक उलटी, तोंडातून फेस, झटके, निळे हिरडे",
-        "उंदराचे विष उशीरा परिणाम दाखवते (2-3 दिवस) — अंतर्गत रक्तस्राव",
-        "संशयास्पद अन्न/गोळ्या पुरावा म्हणून गोळा करा (हातमोजे घाला)",
-        "जाणूनबुजून विष देणे गुन्हा आहे — FIR दाखल करा",
-      ],
-    },
-  },
-  {
-    emoji: "🐛",
-    title: {
-      en: "Maggot Wounds (Myiasis)",
-      hi: "कीड़ों वाले घाव (मैगट)",
-      mr: "अळ्यांच्या जखमा (मॅगट)",
-    },
-    summary: {
-      en: "Very common in Mumbai summers. Pour saline water to drive out maggots. Don't use kerosene.",
-      hi: "मुंबई की गर्मियों में बहुत आम। कीड़े निकालने के लिए नमक का पानी डालें। केरोसिन का उपयोग न करें।",
-      mr: "मुंबईच्या उन्हाळ्यात अत्यंत सामान्य. अळ्या बाहेर काढण्यासाठी मिठाचे पाणी घाला. रॉकेल वापरू नका.",
-    },
-    tips: {
-      en: [
-        "Salt water (saline) drives out maggots from wounds",
-        "Do NOT use turpentine, kerosene, or chemicals",
-        "Cover wound after cleaning to prevent flies",
-        "Contact Bombay SPCA or WSD for free treatment",
-      ],
-      hi: [
-        "नमक का पानी (सेलाइन) घाव से कीड़ों को बाहर निकालता है",
-        "तारपीन, केरोसिन या रसायन का उपयोग न करें",
-        "सफाई के बाद मक्खियों से बचाने के लिए घाव ढकें",
-        "मोफत इलाज के लिए Bombay SPCA या WSD से संपर्क करें",
-      ],
-      mr: [
-        "मिठाचे पाणी (सलाईन) जखमेतून अळ्या बाहेर काढते",
-        "तारपीन, रॉकेल किंवा रसायने वापरू नका",
-        "स्वच्छतेनंतर माश्यांपासून बचावासाठी जखम झाका",
-        "मोफत उपचारासाठी Bombay SPCA किंवा WSD शी संपर्क साधा",
-      ],
-    },
-  },
-  {
-    emoji: "🤰",
-    title: {
-      en: "Pregnant or Nursing Dogs",
-      hi: "गर्भवती या दूध पिलाने वाली कुत्तियां",
-      mr: "गर्भवती किंवा स्तनपान करणाऱ्या कुत्र्या",
-    },
-    summary: {
-      en: "Extra nutrition needed. Provide a safe sheltered area. Don't disturb during delivery.",
-      hi: "अतिरिक्त पोषण ज़रूरी। सुरक्षित आश्रय वाली जगह दें। प्रसव के दौरान परेशान न करें।",
-      mr: "अतिरिक्त पोषण आवश्यक. सुरक्षित आश्रय असलेली जागा द्या. प्रसूतीदरम्यान त्रास देऊ नका.",
-    },
-    tips: {
-      en: [
-        "Feed protein-rich food 2-3 times daily (eggs, chicken, paneer)",
-        "Provide a quiet corner with cardboard box lined with cloth",
-        "Nursing mothers need 2-3x normal food intake",
-        "Never separate puppies from mother before 8 weeks",
-      ],
-      hi: [
-        "प्रोटीन-युक्त खाना दिन में 2-3 बार दें (अंडे, चिकन, पनीर)",
-        "कपड़े से ढका कार्डबोर्ड बॉक्स एक शांत कोने में रखें",
-        "दूध पिलाने वाली मां को सामान्य से 2-3 गुना ज़्यादा खाना चाहिए",
-        "8 हफ्ते से पहले कभी पिल्लों को मां से अलग न करें",
-      ],
-      mr: [
-        "प्रथिनेयुक्त अन्न दिवसातून 2-3 वेळा द्या (अंडी, चिकन, पनीर)",
-        "कपड्याने आच्छादित कार्डबोर्ड बॉक्स शांत कोपऱ्यात ठेवा",
-        "स्तनपान करणाऱ्या मातांना सामान्यच्या 2-3 पट अन्न आवश्यक",
-        "8 आठवड्यांपूर्वी कधीही पिल्लांना मातेपासून वेगळे करू नका",
-      ],
-    },
-  },
-  {
-    emoji: "💩",
-    title: {
-      en: "Diarrhoea and Stomach Problems",
-      hi: "दस्त और पेट की समस्याएं",
-      mr: "जुलाब आणि पोटाच्या समस्या",
-    },
-    summary: {
-      en: "Bloody diarrhoea = emergency. Mild cases: bland rice + chicken. Prevent dehydration with ORS.",
-      hi: "खूनी दस्त = आपातकाल। हल्के मामले: सादा चावल + चिकन। ORS से निर्जलीकरण रोकें।",
-      mr: "रक्तरंजित जुलाब = आणीबाणी. सौम्य: साधा भात + चिकन. ORS ने निर्जलीकरण टाळा.",
-    },
-    tips: {
-      en: [
-        "Bloody or black diarrhoea: URGENT — possible parvo or poisoning",
-        "Bloated belly + visible ribs usually means heavy worm load",
-        "ORS / Electral in water helps prevent dehydration",
-        "Do NOT give human anti-diarrhoeal medicines to dogs",
-      ],
-      hi: [
-        "खूनी या काला दस्त: तुरंत — पार्वो या ज़हर हो सकता है",
-        "फूला पेट + दिखती पसलियां आमतौर पर भारी कीड़े का मतलब है",
-        "ORS / इलेक्ट्रॉल पानी में मिलाकर निर्जलीकरण रोकता है",
-        "कुत्तों को इंसानी दस्त-रोधी दवाई न दें",
-      ],
-      mr: [
-        "रक्तरंजित किंवा काळा जुलाब: तातडी — पार्वो किंवा विष असू शकते",
-        "फुगलेले पोट + दिसणाऱ्या बरगड्या म्हणजे सामान्यतः भरपूर जंत",
-        "ORS / इलेक्ट्रॉल पाण्यात मिसळल्यास निर्जलीकरण टाळता येते",
-        "कुत्र्यांना मानवी जुलाब-विरोधी औषधे देऊ नका",
-      ],
-    },
-  },
-  {
-    emoji: "⚔️",
-    title: {
-      en: "Dog Fight Wounds",
-      hi: "कुत्तों की लड़ाई के घाव",
-      mr: "कुत्र्यांच्या भांडणाच्या जखमा",
-    },
-    summary: {
-      en: "Bite puncture wounds look small but go deep. They almost always get infected without treatment.",
-      hi: "काटने के पंक्चर घाव छोटे दिखते हैं लेकिन गहरे होते हैं। बिना इलाज लगभग हमेशा संक्रमित होते हैं।",
-      mr: "चावल्याच्या पंक्चर जखमा लहान दिसतात पण खोल असतात. उपचाराशिवाय जवळजवळ नेहमीच संक्रमित होतात.",
-    },
-    tips: {
-      en: [
-        "Clean with saline (1 tsp salt in 1L boiled cooled water)",
-        "Swelling after 2-3 days = abscess forming, needs vet drainage",
-        "Neck/chest/abdomen bites can cause internal damage",
-        "Never put hands between two fighting dogs — use noise or water",
-      ],
-      hi: [
-        "सेलाइन से साफ करें (1 चम्मच नमक 1 लीटर उबले ठंडे पानी में)",
-        "2-3 दिन बाद सूजन = फोड़ा बन रहा है, डॉक्टर से निकासी ज़रूरी",
-        "गर्दन/छाती/पेट के काटने से अंदरूनी नुकसान हो सकता है",
-        "दो लड़ते कुत्तों के बीच कभी हाथ न डालें — आवाज़ या पानी का उपयोग करें",
-      ],
-      mr: [
-        "सलाईनने स्वच्छ करा (1 चमचा मीठ 1 लीटर उकळलेल्या थंड पाण्यात)",
-        "2-3 दिवसांनंतर सूज = गळू तयार होत आहे, पशुवैद्यकाकडून काढणे आवश्यक",
-        "मान/छाती/पोटावरील चावे अंतर्गत नुकसान करू शकतात",
-        "दोन भांडणाऱ्या कुत्र्यांमध्ये कधीही हात घालू नका — आवाज किंवा पाणी वापरा",
-      ],
-    },
-  },
-  {
-    emoji: "😤",
-    title: {
-      en: "Dealing with Aggressive Strays",
-      hi: "आक्रामक आवारा कुत्तों से निपटना",
-      mr: "आक्रमक भटक्या कुत्र्यांशी सामना",
-    },
-    summary: {
-      en: "Most strays aren't aggressive. Stop, stand still sideways, avoid eye contact. Never run.",
-      hi: "ज़्यादातर आवारा कुत्ते आक्रामक नहीं होते। रुकें, बग़ल में खड़े हों, आंख न मिलाएं। कभी न भागें।",
-      mr: "बहुतेक भटके कुत्रे आक्रमक नसतात. थांबा, बाजूला उभे राहा, डोळ्यांत पाहू नका. कधीही पळू नका.",
-    },
-    tips: {
-      en: [
-        "Running triggers chase instinct — stop and stand your ground",
-        "Dogs are more territorial at night — carry a torch",
-        "Aggression usually comes from fear or pain, not malice",
-        "Report genuinely dangerous dogs to local ABC centre",
-      ],
-      hi: [
-        "भागने से पीछा करने की प्रवृत्ति जागती है — रुकें और डटे रहें",
-        "कुत्ते रात में ज़्यादा क्षेत्रीय होते हैं — टॉर्च रखें",
-        "आक्रामकता आमतौर पर डर या दर्द से होती है, दुष्टपणामुळे नाही",
-        "सच में खतरनाक कुत्तों की सूचना स्थानीय ABC केंद्र को दें",
-      ],
-      mr: [
-        "पळण्याने पाठलाग करण्याची वृत्ती जागते — थांबा आणि ठाम राहा",
-        "कुत्रे रात्री जास्त प्रादेशिक असतात — टॉर्च ठेवा",
-        "आक्रमकता सामान्यतः भीती किंवा वेदनेमुळे असते, दुष्टपणामुळे नाही",
-        "खरोखर धोकादायक कुत्र्यांची माहिती स्थानिक ABC केंद्राला द्या",
+        "अशक्त पिल्लांना उबदार, कोरडे, आणि मोठ्या प्राण्यांपासून दूर ठेवा.",
+        "जुलाब किंवा वेदनेसाठी मनमानी मानवी औषधे देऊ नका.",
+        "रक्ताळ जुलाब, वारंवार उलटी, किंवा पाणी न पिणे ही गंभीर चिन्हे आहेत.",
+        "आई उपस्थित आणि सुरक्षित असेल तर पिल्लांना फार लवकर वेगळे करण्यापेक्षा तिच्यासोबत ठेवणे साधारणपणे चांगले असते.",
       ],
     },
   },
 ];
 
-const EXTERNAL_LINKS = [
-  { url: "https://www.vosd.in/faqs/", label: "VOSD Rescue FAQs" },
-  { url: "https://jaagruti.org/first-aid-for-dogs/", label: "Jaagruti: First Aid for Dogs" },
-  { url: "https://thebetterindia.com/328239/animal-rescue-and-rehabilitation-centres-in-india/", label: "Animal Rescue & Rehab Centres (Better India)" },
-  { url: "https://in.virbac.com/all-diseases", label: "Dog Diseases Guide (Virbac)" },
-  { url: "https://cdsco.gov.in/opencms/export/sites/CDSCO_WEB/Pdf-documents/listofveDrugs.pdf", label: "List of Veterinary Drugs (CDSCO)" },
-  { url: "https://lbb.in/mumbai/animal-shelters-mumbai/", label: "Animal Shelters in Mumbai (LBB)" },
-  { url: "https://supertails.com/collections/dog-medicines", label: "Dog Medicines (Supertails)" },
-  { url: "https://peepalfarm.org/animal-rescue-training", label: "Animal Rescue Training (Peepal Farm)" },
-  { url: "https://www.animalscharities.co.uk/animal-charities-in-india.html", label: "Animal Charities in India" },
-  { url: "https://vetstudy.journeywithasr.com/p/veterinary-drug-index-pdf.html", label: "Veterinary Drug Index" },
-  { url: "https://helplocal.in/blog/best-foods-for-street-dogs/", label: "Best Foods for Street Dogs" },
-  { url: "https://legalbots.in/blog/how-to-report-animal-abuse-in-india", label: "How to Report Animal Abuse" },
-  { url: "https://www.caninebible.com/homemade-dog-treat-recipes/", label: "Homemade Dog Treat Recipes" },
-  { url: "https://www.woofdoctor.vet/calming-music/", label: "Calming Music for Dogs" }
+const RESOURCE_LINKS: ResourceLink[] = [
+  {
+    href: "https://awbi.gov.in/view/index/contact-us",
+    label: "AWBI Contact",
+    note: {
+      en: "Official Animal Welfare Board of India contact details.",
+      hi: "भारतीय पशु कल्याण बोर्ड के आधिकारिक संपर्क विवरण।",
+      mr: "भारतीय प्राणी कल्याण मंडळाचे अधिकृत संपर्क तपशील.",
+    },
+  },
+  {
+    href: "https://awbi.gov.in/view/index/list-of-awo",
+    label: "AWBI Recognized Organizations",
+    note: {
+      en: "Directory of recognized organizations for local India-wide help.",
+      hi: "भारत भर में स्थानीय मदद के लिए मान्यता प्राप्त संस्थाओं की निर्देशिका।",
+      mr: "भारतभरातील स्थानिक मदतीसाठी मान्यताप्राप्त संस्थांची यादी.",
+    },
+  },
+  {
+    href: "https://www.who.int/news-room/fact-sheets/detail/rabies%EF%BB%BF",
+    label: "WHO Rabies Fact Sheet",
+    note: {
+      en: "Primary guidance for human rabies exposure and wound washing.",
+      hi: "मानव रेबीज़ एक्सपोज़र और घाव धोने के लिए प्राथमिक मार्गदर्शन।",
+      mr: "मानवी रेबीज एक्स्पोजर आणि जखम धुण्याबाबतचे प्राथमिक मार्गदर्शन.",
+    },
+  },
+  {
+    href: "https://www.aspca.org/pet-care/aspca-poison-control",
+    label: "ASPCA Poison Control",
+    note: {
+      en: "Useful poison-support resource where available.",
+      hi: "जहाँ उपलब्ध हो, ज़हर संबंधी उपयोगी सहायता संसाधन।",
+      mr: "जिथे उपलब्ध असेल तिथे विषबाधेसाठी उपयोगी सहाय्य संसाधन.",
+    },
+  },
+  {
+    href: "https://www.petpoisonhelpline.com/contact/",
+    label: "Pet Poison Helpline",
+    note: {
+      en: "Another poison-support option for urgent ingestion cases.",
+      hi: "अचानक कुछ खा लेने वाले मामलों में ज़हर सहायता का एक और विकल्प।",
+      mr: "अकस्मात काही खाल्ल्याच्या तातडीच्या प्रकरणांसाठी विष सहाय्याचा आणखी एक पर्याय.",
+    },
+  },
+  {
+    href: "https://www.112.gov.in/about",
+    label: "India Emergency Response Support System",
+    note: {
+      en: "Official information for India emergency response.",
+      hi: "भारत की आपातकालीन प्रतिक्रिया प्रणाली की आधिकारिक जानकारी।",
+      mr: "भारताच्या आपत्कालीन प्रतिसाद व्यवस्थेची अधिकृत माहिती.",
+    },
+  },
 ];
 
 export default function LearnPage() {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+  const pageLanguage = (language as PageLanguage) || "en";
+  const copy = COPY[pageLanguage];
 
   return (
     <main className="min-h-screen px-4 py-6 max-w-lg mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/" className="text-2xl">←</Link>
+        <Link href="/" className="text-2xl">
+          ←
+        </Link>
         <div className="flex-1">
           <h1 className="text-xl font-bold text-[var(--color-warm-700)]">
-            {t("home.learn")}
+            {copy.title}
           </h1>
-          <p className="text-sm text-gray-500">{t("learn.subtitle")}</p>
+          <p className="text-sm text-gray-500">{copy.subtitle}</p>
         </div>
         <LanguageSelector compact />
       </div>
 
-      {/* Offline Notice */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-sm text-blue-700 mb-6">
-        📱 {t("learn.offline_notice")}
-      </div>
+      <section className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+        <h2 className="font-semibold text-amber-800 mb-2">{copy.truthTitle}</h2>
+        <p className="text-sm text-amber-800 leading-relaxed">{copy.truthBody}</p>
+      </section>
 
-      {/* Guides */}
-      <div className="space-y-4">
-        {GUIDES.map((guide, i) => (
-          <details
-            key={i}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-          >
-            <summary className="p-4 cursor-pointer hover:bg-gray-50">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{guide.emoji}</span>
-                <div>
-                  <h3 className="font-semibold text-gray-800">
-                    {guide.title[language] || guide.title.en}
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {guide.summary[language] || guide.summary.en}
-                  </p>
-                </div>
-              </div>
-            </summary>
-            <div className="px-4 pb-4 border-t border-gray-50 pt-3">
-              <ul className="space-y-2">
-                {(guide.tips[language] || guide.tips.en).map((tip, j) => (
-                  <li key={j} className="flex gap-2 text-sm text-gray-600">
-                    <span className="text-[var(--color-warm-400)]">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </details>
-        ))}
-      </div>
+      <section className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <h2 className="font-semibold text-red-700 mb-2">{copy.emergencyTitle}</h2>
+        <p className="text-sm text-red-700 leading-relaxed">{copy.emergencyBody}</p>
+      </section>
 
-      {/* External Resources */}
-      <div className="mt-8">
+      <section className="mb-6">
         <h2 className="text-lg font-bold text-[var(--color-warm-700)] mb-3">
-          {t("learn.resources_title")}
+          {copy.quickTitle}
         </h2>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <ul className="divide-y divide-gray-100">
-            {EXTERNAL_LINKS.map((link, i) => (
-              <li key={i}>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block p-3 hover:bg-gray-50 transition-colors flex items-center justify-between text-sm text-[var(--color-warm-600)]"
-                >
-                  <span>{link.label}</span>
-                  <span className="text-gray-400">↗</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+        <div className="grid grid-cols-1 gap-3">
+          <Link
+            href="/nearby"
+            className="bg-white border border-gray-200 rounded-xl p-4 text-sm font-medium text-gray-700"
+          >
+            🏥 {copy.quickFindHelp}
+          </Link>
+          <a
+            href="https://www.google.com/maps/search/emergency+veterinarian+near+me"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white border border-gray-200 rounded-xl p-4 text-sm font-medium text-gray-700"
+          >
+            📍 {copy.quickVet}
+          </a>
+          <a
+            href="https://www.who.int/news-room/fact-sheets/detail/rabies%EF%BB%BF"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-white border border-gray-200 rounded-xl p-4 text-sm font-medium text-gray-700"
+          >
+            📘 {copy.quickRabies}
+          </a>
         </div>
-      </div>
+      </section>
 
-      {/* Emergency Banner */}
-      <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-center">
-        <div className="font-semibold text-red-700 text-sm mb-1">
-          🚨 {t("learn.emergency_title")}
+      <section className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <h2 className="font-semibold text-red-700 mb-3">{copy.redFlagsTitle}</h2>
+        <ul className="space-y-2">
+          {copy.redFlags.map((item) => (
+            <li key={item} className="flex gap-2 text-sm text-red-700">
+              <span>•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="space-y-4 mb-6">
+        {GUIDES.map((guide) => (
+          <div
+            key={guide.id}
+            className="bg-white rounded-xl border border-gray-100 shadow-sm p-4"
+          >
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">{guide.icon}</span>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-gray-800">
+                  {guide.title[pageLanguage]}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                  {guide.summary[pageLanguage]}
+                </p>
+              </div>
+            </div>
+            <ul className="mt-4 space-y-2">
+              {guide.bullets[pageLanguage].map((bullet) => (
+                <li key={bullet} className="flex gap-2 text-sm text-gray-600">
+                  <span className="text-[var(--color-warm-500)]">•</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
+
+      <section className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
+        <h2 className="font-semibold text-slate-800 mb-2">{copy.uncertaintyTitle}</h2>
+        <p className="text-sm text-slate-700 leading-relaxed">{copy.uncertaintyBody}</p>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-bold text-[var(--color-warm-700)] mb-3">
+          {copy.resourcesTitle}
+        </h2>
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          {RESOURCE_LINKS.map((resource) => (
+            <a
+              key={resource.href}
+              href={resource.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <span className="font-medium text-gray-800">{resource.label}</span>
+                <span className="text-gray-400">↗</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                {resource.note[pageLanguage]}
+              </p>
+            </a>
+          ))}
         </div>
-        <a
-          href="tel:1962"
-          className="text-red-600 font-bold text-lg underline"
-        >
-          {t("learn.emergency_helpline")}: 1962
-        </a>
-      </div>
+      </section>
     </main>
   );
 }

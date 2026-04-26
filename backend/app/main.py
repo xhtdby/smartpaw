@@ -1,6 +1,6 @@
-"""IndieAid — Backend API
+"""IndieAid backend API.
 
-An empathetic AI assistant for helping stray dogs in India.
+Grounded AI guidance for pets and community animals.
 """
 
 import logging
@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle."""
+    del app
     logger.info("IndieAid API starting up...")
     await init_db()
     uploads = Path(get_settings().uploads_dir)
@@ -39,14 +40,13 @@ settings = get_settings()
 app = FastAPI(
     title="IndieAid API",
     description=(
-        "AI-powered assistant for assessing stray dog conditions, "
-        "providing first aid guidance, and connecting rescuers with shelters in India."
+        "AI-powered guidance for assessing dog conditions, providing grounded "
+        "first-aid steps, and connecting rescuers with verified help resources."
     ),
     version="2.0.0",
     lifespan=lifespan,
 )
 
-# CORS — allow all Vercel preview/branch URLs + production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -57,17 +57,15 @@ app.add_middleware(
 )
 
 
-# Request logging
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start = time.time()
     response = await call_next(request)
     ms = round((time.time() - start) * 1000, 1)
-    logger.info(f"{request.method} {request.url.path} → {response.status_code} ({ms}ms)")
+    logger.info("%s %s -> %s (%sms)", request.method, request.url.path, response.status_code, ms)
     return response
 
 
-# Serve uploaded report images
 uploads_path = Path(settings.uploads_dir)
 uploads_path.mkdir(parents=True, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
@@ -82,7 +80,7 @@ async def root():
     return {
         "name": "IndieAid API",
         "version": "2.0.0",
-        "message": "Helping India's stray dogs, one photo at a time. 🐾",
+        "message": "Grounded AI help for pets and community animals.",
     }
 
 
