@@ -19,7 +19,7 @@ from app.models.schemas import (
 from app.services.condition_analyzer import analyze_condition
 from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
-from app.services.response_generator import generate_empathetic_response, translate_analysis_payload
+from app.services.response_generator import generate_empathetic_response
 from app.services.vision_analyzer import analyze_vision
 
 logger = logging.getLogger(__name__)
@@ -105,6 +105,12 @@ def _build_language_result(payload: dict) -> LanguageResult:
     )
 
 
+def _ensure_payload_condition(payload: dict, condition_result: dict) -> dict:
+    if "condition" not in payload or not isinstance(payload.get("condition"), dict):
+        payload["condition"] = condition_result
+    return payload
+
+
 async def _run_vision_pipeline(image_bytes: bytes, confidence_threshold: float) -> tuple[dict | None, dict, dict]:
     """Use the combined vision call first, then fall back to the legacy multi-call path."""
     combined = await analyze_vision(image_bytes)
@@ -133,22 +139,6 @@ async def _run_vision_pipeline(image_bytes: bytes, confidence_threshold: float) 
 
     condition_result = await analyze_condition(image_bytes)
     return detection, emotion_result, condition_result
-
-
-def _build_canonical_payload(condition_result: dict, response_data: dict, emotion_result: dict) -> dict:
-    return {
-        "emotion": {
-            "label": emotion_result.get("label", "unknown"),
-            "confidence": emotion_result.get("confidence", 0.0),
-        },
-        "condition": condition_result,
-        "safety_level": response_data.get("safety_level", "caution"),
-        "safety_reason": response_data.get("safety_reason", "Approach with care."),
-        "empathetic_summary": response_data.get("empathetic_summary", ""),
-        "first_aid_steps": response_data.get("first_aid_steps", []),
-        "when_to_call_professional": response_data.get("when_to_call_professional", ""),
-        "approach_tips": response_data.get("approach_tips", ""),
-    }
 
 
 @router.post("/analyze", response_model=AnalysisResponse)
@@ -183,9 +173,11 @@ async def analyze_dog_image(
             language=language,
         )
 
-    en_response = await generate_empathetic_response(emotion_result, condition_result, "en")
-    canonical_payload = _build_canonical_payload(condition_result, en_response, emotion_result)
-    localized_payload = await translate_analysis_payload(canonical_payload, language)
+    localized_payload = _ensure_payload_condition(
+        await generate_empathetic_response(emotion_result, condition_result, language),
+        condition_result,
+    )
+    localized_condition = localized_payload.get("condition", condition_result)
 
     return AnalysisResponse(
         dog_detected=True,
@@ -197,7 +189,7 @@ async def analyze_dog_image(
             level=localized_payload.get("safety_level", "caution"),
             reason=localized_payload.get("safety_reason", "Approach with care."),
         ),
-        condition=_build_condition_assessment(localized_payload["condition"]),
+        condition=_build_condition_assessment(localized_condition),
         first_aid=_build_first_aid_steps(localized_payload.get("first_aid_steps", [])),
         empathetic_summary=localized_payload.get("empathetic_summary", ""),
         when_to_call_professional=localized_payload.get("when_to_call_professional", ""),
@@ -234,12 +226,18 @@ async def analyze_dog_image_multilingual(
     if not detection:
         return MultilingualAnalysisResponse(dog_detected=False)
 
-    en_response = await generate_empathetic_response(emotion_result, condition_result, "en")
-    canonical_payload = _build_canonical_payload(condition_result, en_response, emotion_result)
-
-    en_payload = await translate_analysis_payload(canonical_payload, "en")
-    hi_payload = await translate_analysis_payload(canonical_payload, "hi")
-    mr_payload = await translate_analysis_payload(canonical_payload, "mr")
+    en_payload = _ensure_payload_condition(
+        await generate_empathetic_response(emotion_result, condition_result, "en"),
+        condition_result,
+    )
+    hi_payload = _ensure_payload_condition(
+        await generate_empathetic_response(emotion_result, condition_result, "hi"),
+        condition_result,
+    )
+    mr_payload = _ensure_payload_condition(
+        await generate_empathetic_response(emotion_result, condition_result, "mr"),
+        condition_result,
+    )
 
     return MultilingualAnalysisResponse(
         dog_detected=True,

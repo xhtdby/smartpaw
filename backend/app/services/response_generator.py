@@ -64,6 +64,14 @@ Urgency rules:
 
 Respond with valid JSON only:
 {{
+  "condition": {{
+    "breed_guess": "translated or transliterated breed text",
+    "estimated_age": "translated age label",
+    "physical_condition": "translated physical-condition summary",
+    "visible_injuries": ["translated visible injuries"],
+    "health_concerns": ["translated health concerns"],
+    "body_language": "translated body-language summary"
+  }},
   "safety_level": "safe" | "caution" | "danger",
   "safety_reason": "brief explanation",
   "empathetic_summary": "2-3 warm sentences for the rescuer",
@@ -77,6 +85,7 @@ Respond with valid JSON only:
 
 Rules:
 - Safety level must match the dog's visible behavior and injuries
+- Translate the provided condition facts into the target language without changing the underlying meaning
 - Keep first aid steps simple for a non-expert
 - Use 3 to 5 first aid steps
 - Keep steps grounded in what is visible
@@ -451,7 +460,24 @@ def _normalize_response_payload(raw: dict | None, emotion_result: dict, conditio
     if safety_level not in {"safe", "caution", "danger"}:
         safety_level = fallback["safety_level"]
 
+    source_payload = {
+        "emotion": emotion_result,
+        "condition": condition_result,
+        "safety_level": fallback["safety_level"],
+        "safety_reason": fallback["safety_reason"],
+        "empathetic_summary": fallback["empathetic_summary"],
+        "first_aid_steps": fallback["first_aid_steps"],
+        "when_to_call_professional": fallback["when_to_call_professional"],
+        "approach_tips": fallback["approach_tips"],
+    }
+    normalized_condition = _normalize_translated_payload(
+        {"condition": raw.get("condition", {})} if isinstance(raw.get("condition"), dict) else None,
+        source_payload,
+        language,
+    )["condition"]
+
     return {
+        "condition": normalized_condition,
         "safety_level": safety_level,
         "safety_reason": _clean_text(raw.get("safety_reason"), fallback["safety_reason"]),
         "empathetic_summary": _clean_text(raw.get("empathetic_summary"), fallback["empathetic_summary"]),
