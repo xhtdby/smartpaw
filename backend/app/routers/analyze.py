@@ -213,6 +213,14 @@ async def analyze_dog_image_multilingual(
         generate_empathetic_response(emotion_result, condition_result, "mr"),
     )
 
+    # Canonicalize safety_level from the English call — it is a factual, vision-based
+    # assessment that must be identical regardless of UI language. Running three independent
+    # LLM calls can produce different levels due to prompt variation; the English call (no
+    # language reminder appended) is the most stable baseline.
+    canonical_level = en_data.get("safety_level", "caution")
+    hi_data["safety_level"] = canonical_level
+    mr_data["safety_level"] = canonical_level
+
     return MultilingualAnalysisResponse(
         dog_detected=True,
         emotion=EmotionResult(
