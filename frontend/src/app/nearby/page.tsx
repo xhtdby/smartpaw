@@ -39,7 +39,7 @@ export default function NearbyPage() {
         const data = await fetchNearby(userLocation.lat, userLocation.lng, radius, filterType || undefined);
         setShelters(data);
       } catch {
-        setError("Could not load nearby help. Please try again.");
+        setError(t("nearby.error.load"));
       } finally {
         setLoading(false);
       }
@@ -62,8 +62,8 @@ export default function NearbyPage() {
       {/* Radius Slider */}
       <div className="mb-4 bg-white rounded-xl p-3 border border-gray-100">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-500">Search radius</span>
-          <span className="font-semibold text-[var(--color-warm-600)]">{radius} km</span>
+          <span className="text-gray-500">{t("nearby.search_radius")}</span>
+          <span className="font-semibold text-[var(--color-warm-600)]">{radius} {t("nearby.km")}</span>
         </div>
         <input
           type="range"
@@ -78,10 +78,10 @@ export default function NearbyPage() {
       {/* Filters */}
       <div className="flex gap-2 mb-4 overflow-x-auto">
         {[
-          { value: "", label: "All" },
-          { value: "vet", label: "🏥 Vets" },
-          { value: "shelter", label: "🏠 Shelters" },
-          { value: "ngo", label: "🤝 NGOs" },
+          { value: "", label: t("nearby.filter.all") },
+          { value: "vet", label: `🏥 ${t("nearby.filter.vet")}` },
+          { value: "shelter", label: `🏠 ${t("nearby.filter.shelter")}` },
+          { value: "ngo", label: `🤝 ${t("nearby.filter.ngo")}` },
         ].map((f) => (
           <button
             key={f.value}
@@ -101,7 +101,7 @@ export default function NearbyPage() {
       {loading && (
         <div className="text-center py-12">
           <div className="text-4xl animate-bounce mb-3">🐾</div>
-          <p className="text-gray-500">Finding help near you...</p>
+          <p className="text-gray-500">{t("nearby.finding")}</p>
         </div>
       )}
 
@@ -116,7 +116,7 @@ export default function NearbyPage() {
       {!loading && shelters.length === 0 && (
         <div className="text-center py-12">
           <div className="text-4xl mb-3">📍</div>
-          <p className="text-gray-500">No results found nearby. Try expanding your search area.</p>
+          <p className="text-gray-500">{t("nearby.empty")}</p>
         </div>
       )}
 
@@ -139,12 +139,12 @@ export default function NearbyPage() {
                   </span>
                   {s.emergency_24hr && (
                     <span className="bg-red-100 text-red-700 rounded-full px-2 py-1 font-semibold">
-                      24x7 Emergency
+                      {t("nearby.emergency_24h")}
                     </span>
                   )}
                   {s.distance_km != null && (
                     <span className="bg-blue-50 text-blue-600 rounded-full px-2 py-1">
-                      {s.distance_km} km away
+                      {s.distance_km} {t("nearby.km_away")}
                     </span>
                   )}
                 </div>
@@ -157,7 +157,7 @@ export default function NearbyPage() {
                 href={`tel:${s.phone}`}
                 className="flex-1 bg-[var(--color-sage-500)] text-white rounded-lg p-2 text-center text-sm font-medium"
               >
-                📞 Call
+                📞 {t("common.call")}
               </a>
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${s.latitude},${s.longitude}`}
@@ -165,7 +165,7 @@ export default function NearbyPage() {
                 rel="noopener noreferrer"
                 className="flex-1 bg-blue-500 text-white rounded-lg p-2 text-center text-sm font-medium"
               >
-                🗺️ Directions
+                🗺️ {t("common.directions")}
               </a>
             </div>
           </div>

@@ -25,7 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function ReportPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -98,19 +98,19 @@ export default function ReportPage() {
       setShowForm(false);
       await loadReports();
     } catch {
-      alert("Failed to submit report. Please try again.");
+      alert(t("report.error.submit"));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleStatusUpdate = async (id: string, status: string) => {
-    const note = status === "resolved" ? prompt("Add a resolution note (optional):") || "" : "";
+    const note = status === "resolved" ? prompt(t("report.prompt.resolve_note")) || "" : "";
     try {
       await updateReportStatus(id, status, note);
       await loadReports();
     } catch {
-      alert("Failed to update status.");
+      alert(t("report.error.update"));
     }
   };
 
@@ -188,26 +188,26 @@ export default function ReportPage() {
           </div>
 
           <div className="mt-3">
-            <div className="text-sm text-gray-500 mb-2">Urgency:</div>
+            <div className="text-sm text-gray-500 mb-2">{t("report.form.urgency")}</div>
             <div className="flex gap-2">
               {["low", "medium", "high", "critical"].map((u) => (
                 <button
                   key={u}
                   onClick={() => setUrgency(u)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium ${
                     urgency === u
                       ? URGENCY_COLORS[u] + " ring-2 ring-offset-1 ring-gray-300"
                       : "bg-gray-50 text-gray-400"
                   }`}
                 >
-                  {u}
+                  {t(`report.urgency.${u}`)}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="mt-3 text-xs text-gray-400">
-            📍 Your current location will be attached automatically
+            📍 {t("report.form.location_note")}
           </div>
 
           <button
@@ -227,21 +227,21 @@ export default function ReportPage() {
           onChange={(e) => setFilterUrgency(e.target.value)}
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white"
         >
-          <option value="">All urgency</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="critical">Critical</option>
+          <option value="">{t("report.filter.all_urgency")}</option>
+          <option value="low">{t("report.urgency.low")}</option>
+          <option value="medium">{t("report.urgency.medium")}</option>
+          <option value="high">{t("report.urgency.high")}</option>
+          <option value="critical">{t("report.urgency.critical")}</option>
         </select>
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
           className="border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white"
         >
-          <option value="">All status</option>
-          <option value="open">Open</option>
-          <option value="in-progress">In Progress</option>
-          <option value="resolved">Resolved</option>
+          <option value="">{t("report.filter.all_status")}</option>
+          <option value="open">{t("report.status.open")}</option>
+          <option value="in-progress">{t("report.status.in_progress")}</option>
+          <option value="resolved">{t("report.status.resolved")}</option>
         </select>
       </div>
 
@@ -268,15 +268,15 @@ export default function ReportPage() {
           <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <div className="flex items-start justify-between mb-2">
               <div className="flex gap-2">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${URGENCY_COLORS[r.urgency] || URGENCY_COLORS.medium}`}>
-                  {r.urgency}
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${URGENCY_COLORS[r.urgency] || URGENCY_COLORS.medium}`}>
+                  {t(`report.urgency.${r.urgency}`)}
                 </span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[r.status] || STATUS_COLORS.open}`}>
-                  {r.status}
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[r.status] || STATUS_COLORS.open}`}>
+                  {t(`report.status.${r.status === "in-progress" ? "in_progress" : r.status}`)}
                 </span>
               </div>
               <span className="text-xs text-gray-400">
-                {new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                {new Date(r.created_at).toLocaleDateString(language === "hi" ? "hi-IN" : language === "mr" ? "mr-IN" : "en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
               </span>
             </div>
 
@@ -302,13 +302,13 @@ export default function ReportPage() {
                 rel="noopener noreferrer"
                 className="text-xs text-blue-500 underline"
               >
-                📍 View on map
+                📍 {t("report.action.view_map")}
               </a>
               {r.status === "open" && (
                 <>
                   <span className="text-xs text-gray-300">|</span>
                   <button onClick={() => handleStatusUpdate(r.id, "in-progress")} className="text-xs text-purple-500 underline">
-                    Mark In-Progress
+                    {t("report.action.mark_in_progress")}
                   </button>
                 </>
               )}
@@ -316,7 +316,7 @@ export default function ReportPage() {
                 <>
                   <span className="text-xs text-gray-300">|</span>
                   <button onClick={() => handleStatusUpdate(r.id, "resolved")} className="text-xs text-green-500 underline">
-                    Mark Resolved
+                    {t("report.action.mark_resolved")}
                   </button>
                 </>
               )}

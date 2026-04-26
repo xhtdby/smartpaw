@@ -66,10 +66,10 @@ async def create_report(
 ):
     """Submit a stray dog sighting with location, urgency, and optional image."""
     if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-        raise HTTPException(status_code=400, detail="Invalid coordinates.")
+        raise HTTPException(status_code=400, detail="invalid_coordinates")
 
     if urgency not in ("low", "medium", "high", "critical"):
-        raise HTTPException(status_code=400, detail="Urgency must be low, medium, high, or critical.")
+        raise HTTPException(status_code=400, detail="invalid_urgency")
 
     # Handle optional image upload
     image_filename = None
@@ -80,7 +80,7 @@ async def create_report(
         image_filename = f"{uuid.uuid4().hex}.{ext}"
         image_bytes = await image.read()
         if len(image_bytes) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="Image too large (max 10 MB).")
+            raise HTTPException(status_code=400, detail="image_too_large")
         filepath = _get_uploads_dir() / image_filename
         filepath.write_bytes(image_bytes)
 

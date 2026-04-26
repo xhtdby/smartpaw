@@ -603,25 +603,14 @@ export default function LearnPage() {
           <h1 className="text-xl font-bold text-[var(--color-warm-700)]">
             {t("home.learn")}
           </h1>
-          <p className="text-sm text-gray-500">
-            {language === "hi"
-              ? "आवारा कुत्तों की मदद के लिए ज़रूरी गाइड"
-              : language === "mr"
-              ? "भटक्या कुत्र्यांना मदत करण्यासाठी आवश्यक मार्गदर्शक"
-              : "Essential guides for helping strays"}
-          </p>
+          <p className="text-sm text-gray-500">{t("learn.subtitle")}</p>
         </div>
         <LanguageSelector compact />
       </div>
 
       {/* Offline Notice */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-sm text-blue-700 mb-6">
-        📱{" "}
-        {language === "hi"
-          ? "ये गाइड ऑफलाइन भी उपलब्ध हैं। आपातकाल के लिए इस पेज को बुकमार्क करें।"
-          : language === "mr"
-          ? "हे मार्गदर्शक ऑफलाइन उपलब्ध आहेत. आणीबाणीसाठी हे पेज बुकमार्क करा."
-          : "These guides are available offline. Bookmark this page for emergencies."}
+        📱 {t("learn.offline_notice")}
       </div>
 
       {/* Guides */}
@@ -661,11 +650,7 @@ export default function LearnPage() {
       {/* External Resources */}
       <div className="mt-8">
         <h2 className="text-lg font-bold text-[var(--color-warm-700)] mb-3">
-          {language === "hi"
-            ? "उपयोगी संसाधन और लिंक"
-            : language === "mr"
-            ? "उपयुक्त संसाधने आणि दुवे"
-            : "Useful Resources & Links"}
+          {t("learn.resources_title")}
         </h2>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <ul className="divide-y divide-gray-100">
@@ -689,24 +674,13 @@ export default function LearnPage() {
       {/* Emergency Banner */}
       <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4 text-center">
         <div className="font-semibold text-red-700 text-sm mb-1">
-          🚨{" "}
-          {language === "hi"
-            ? "आपातकाल में, अभी कॉल करें"
-            : language === "mr"
-            ? "आणीबाणीत, आत्ता कॉल करा"
-            : "In an emergency, call now"}
+          🚨 {t("learn.emergency_title")}
         </div>
         <a
           href="tel:1962"
           className="text-red-600 font-bold text-lg underline"
         >
-          AWBI{" "}
-          {language === "hi"
-            ? "हेल्पलाइन"
-            : language === "mr"
-            ? "हेल्पलाइन"
-            : "Helpline"}
-          : 1962
+          {t("learn.emergency_helpline")}: 1962
         </a>
       </div>
     </main>
