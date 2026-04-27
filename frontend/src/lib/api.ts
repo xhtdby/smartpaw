@@ -23,11 +23,13 @@ async function fetchWithRetry(
 
 export async function analyzeImage(
   imageFile: File,
-  language: string = "en"
+  language: string = "en",
+  userContext?: string
 ): Promise<AnalysisResult> {
   const formData = new FormData();
   formData.append("image", imageFile);
   formData.append("language", language);
+  if (userContext?.trim()) formData.append("user_context", userContext.trim());
 
   const res = await fetchWithRetry(`${API_BASE}/api/analyze`, {
     method: "POST",
@@ -43,10 +45,12 @@ export async function analyzeImage(
 }
 
 export async function analyzeImageMultilingual(
-  imageFile: File
+  imageFile: File,
+  userContext?: string
 ): Promise<MultilingualAnalysisResult> {
   const formData = new FormData();
   formData.append("image", imageFile);
+  if (userContext?.trim()) formData.append("user_context", userContext.trim());
 
   const res = await fetchWithRetry(`${API_BASE}/api/analyze-multilingual`, {
     method: "POST",
@@ -149,7 +153,12 @@ export interface AnalysisResult {
     health_concerns: string[];
     body_language: string;
   };
+  user_context?: string | null;
+  urgency_signals?: string[];
+  unknown_factors?: string[];
+  scenario_type?: string;
   first_aid: { step_number: number; instruction: string }[];
+  triage_questions?: string[];
   empathetic_summary: string;
   when_to_call_professional?: string;
   approach_tips?: string;
@@ -168,6 +177,10 @@ export interface MultilingualAnalysisResult {
     health_concerns: string[];
     body_language: string;
   };
+  user_context?: string | null;
+  urgency_signals?: string[];
+  unknown_factors?: string[];
+  scenario_type?: string;
   languages: {
     [lang: string]: {
       condition?: {
@@ -180,6 +193,7 @@ export interface MultilingualAnalysisResult {
       };
       safety?: { level: string; reason: string };
       first_aid: { step_number: number; instruction: string }[];
+      triage_questions?: string[];
       empathetic_summary: string;
       when_to_call_professional?: string;
       approach_tips?: string;
@@ -238,4 +252,12 @@ export interface ChatResponse {
   sources: string[];
   action_cards?: ActionCard[];
   is_emergency?: boolean;
+  triage?: {
+    urgency_tier: string;
+    info_sufficient: boolean;
+    missing_facts: string[];
+    scenario_type: string;
+    needs_helpline_first: boolean;
+    rationale: string;
+  };
 }

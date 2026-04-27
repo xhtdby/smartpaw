@@ -1,5 +1,6 @@
 """Image analysis endpoints for single-language and multilingual responses."""
 
+import asyncio
 import io
 import logging
 
@@ -20,6 +21,7 @@ from app.services.condition_analyzer import analyze_condition
 from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
 from app.services.response_generator import generate_empathetic_response
+from app.services.triage import heuristic_classify_situation
 from app.services.vision_analyzer import analyze_vision
 
 logger = logging.getLogger(__name__)
@@ -98,6 +100,7 @@ def _build_language_result(payload: dict) -> LanguageResult:
             reason=payload.get("safety_reason", "Approach with care."),
         ),
         first_aid=_build_first_aid_steps(payload.get("first_aid_steps", [])),
+        triage_questions=payload.get("triage_questions", []),
         empathetic_summary=payload.get("empathetic_summary", ""),
         when_to_call_professional=payload.get("when_to_call_professional", ""),
         approach_tips=payload.get("approach_tips", ""),
@@ -111,12 +114,43 @@ def _ensure_payload_condition(payload: dict, condition_result: dict) -> dict:
     return payload
 
 
-async def _run_vision_pipeline(image_bytes: bytes, confidence_threshold: float) -> tuple[dict | None, dict, dict]:
+def _merge_context_triage(metadata: dict, user_context: str | None) -> dict:
+    merged = {
+        "urgency_signals": list(metadata.get("urgency_signals", [])),
+        "unknown_factors": list(metadata.get("unknown_factors", [])),
+        "scenario_type": metadata.get("scenario_type", "unclear"),
+    }
+    if not user_context or not user_context.strip():
+        return merged
+
+    triage = heuristic_classify_situation(user_context)
+    if triage.scenario_type != "unclear":
+        merged["scenario_type"] = triage.scenario_type
+    if triage.urgency_tier in {"life_threatening", "urgent"}:
+        signal = f"context_{triage.urgency_tier}"
+        if signal not in merged["urgency_signals"]:
+            merged["urgency_signals"].insert(0, signal)
+    for fact in triage.missing_facts:
+        if fact not in merged["unknown_factors"]:
+            merged["unknown_factors"].append(fact)
+    return merged
+
+
+async def _run_vision_pipeline(
+    image_bytes: bytes,
+    confidence_threshold: float,
+    user_context: str | None = None,
+) -> tuple[dict | None, dict, dict, dict]:
     """Use the combined vision call first, then fall back to the legacy multi-call path."""
-    combined = await analyze_vision(image_bytes)
+    combined = await analyze_vision(image_bytes, user_context=user_context)
     if combined is not None:
+        metadata = {
+            "urgency_signals": combined.get("urgency_signals", []),
+            "unknown_factors": combined.get("unknown_factors", []),
+            "scenario_type": combined.get("scenario_type", "unclear"),
+        }
         if not combined.get("dog_detected"):
-            return None, combined.get("emotion", {}), combined.get("condition", {})
+            return None, combined.get("emotion", {}), combined.get("condition", {}), metadata
         return (
             {
                 "confidence": combined.get("dog_confidence", 0.0),
@@ -124,12 +158,17 @@ async def _run_vision_pipeline(image_bytes: bytes, confidence_threshold: float) 
             },
             combined.get("emotion", {}),
             combined.get("condition", {}),
+            metadata,
         )
 
     logger.warning("Combined vision pipeline unavailable; falling back to legacy detection/emotion/condition calls.")
     detection = await detect_dog(image_bytes, confidence_threshold)
     if not detection:
-        return None, {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}, {}
+        return None, {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}, {}, {
+            "urgency_signals": [],
+            "unknown_factors": ["dog_not_visible"],
+            "scenario_type": "no_dog_visible",
+        }
 
     try:
         emotion_result = await classify_emotion(image_bytes)
@@ -138,13 +177,18 @@ async def _run_vision_pipeline(image_bytes: bytes, confidence_threshold: float) 
         emotion_result = {"label": "unknown", "confidence": 0.0, "description": "Could not determine emotion"}
 
     condition_result = await analyze_condition(image_bytes)
-    return detection, emotion_result, condition_result
+    return detection, emotion_result, condition_result, {
+        "urgency_signals": [],
+        "unknown_factors": [],
+        "scenario_type": "unclear",
+    }
 
 
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_dog_image(
     image: UploadFile = File(..., description="Photo of the dog"),
     language: str = Form(default="en", description="Response language: en, hi, mr"),
+    user_context: str | None = Form(default=None, description="Optional scene details from the rescuer"),
 ):
     """Analyze a dog image for emotion, condition, safety, and first aid guidance."""
     settings = get_settings()
@@ -162,19 +206,25 @@ async def analyze_dog_image(
     image_bytes = normalize_image(image_bytes)
     logger.info(f"Normalized to JPEG: {len(image_bytes)} bytes")
 
-    detection, emotion_result, condition_result = await _run_vision_pipeline(
+    detection, emotion_result, condition_result, vision_metadata = await _run_vision_pipeline(
         image_bytes,
         settings.yolo_confidence,
+        user_context,
     )
+    vision_metadata = _merge_context_triage(vision_metadata, user_context)
     if not detection:
         return AnalysisResponse(
             dog_detected=False,
             empathetic_summary=NO_DOG_MESSAGES.get(language, NO_DOG_MESSAGES["en"]),
             language=language,
+            user_context=user_context,
+            urgency_signals=vision_metadata.get("urgency_signals", []),
+            unknown_factors=vision_metadata.get("unknown_factors", []),
+            scenario_type=vision_metadata.get("scenario_type", "no_dog_visible"),
         )
 
     localized_payload = _ensure_payload_condition(
-        await generate_empathetic_response(emotion_result, condition_result, language),
+        await generate_empathetic_response(emotion_result, condition_result, language, user_context=user_context),
         condition_result,
     )
     localized_condition = localized_payload.get("condition", condition_result)
@@ -190,7 +240,12 @@ async def analyze_dog_image(
             reason=localized_payload.get("safety_reason", "Approach with care."),
         ),
         condition=_build_condition_assessment(localized_condition),
+        user_context=user_context,
+        urgency_signals=vision_metadata.get("urgency_signals", []),
+        unknown_factors=vision_metadata.get("unknown_factors", []),
+        scenario_type=vision_metadata.get("scenario_type", "unclear"),
         first_aid=_build_first_aid_steps(localized_payload.get("first_aid_steps", [])),
+        triage_questions=localized_payload.get("triage_questions", []),
         empathetic_summary=localized_payload.get("empathetic_summary", ""),
         when_to_call_professional=localized_payload.get("when_to_call_professional", ""),
         approach_tips=localized_payload.get("approach_tips", ""),
@@ -202,6 +257,7 @@ async def analyze_dog_image(
 @router.post("/analyze-multilingual", response_model=MultilingualAnalysisResponse)
 async def analyze_dog_image_multilingual(
     image: UploadFile = File(..., description="Photo of the dog"),
+    user_context: str | None = Form(default=None, description="Optional scene details from the rescuer"),
 ):
     """Run vision once, then build stored UI payloads for English, Hindi, and Marathi."""
     settings = get_settings()
@@ -219,25 +275,29 @@ async def analyze_dog_image_multilingual(
     image_bytes = normalize_image(image_bytes)
     logger.info(f"Multilingual: normalized to JPEG {len(image_bytes)} bytes")
 
-    detection, emotion_result, condition_result = await _run_vision_pipeline(
+    detection, emotion_result, condition_result, vision_metadata = await _run_vision_pipeline(
         image_bytes,
         settings.yolo_confidence,
+        user_context,
     )
+    vision_metadata = _merge_context_triage(vision_metadata, user_context)
     if not detection:
-        return MultilingualAnalysisResponse(dog_detected=False)
+        return MultilingualAnalysisResponse(
+            dog_detected=False,
+            user_context=user_context,
+            urgency_signals=vision_metadata.get("urgency_signals", []),
+            unknown_factors=vision_metadata.get("unknown_factors", []),
+            scenario_type=vision_metadata.get("scenario_type", "no_dog_visible"),
+        )
 
-    en_payload = _ensure_payload_condition(
-        await generate_empathetic_response(emotion_result, condition_result, "en"),
-        condition_result,
+    en_raw, hi_raw, mr_raw = await asyncio.gather(
+        generate_empathetic_response(emotion_result, condition_result, "en", user_context=user_context),
+        generate_empathetic_response(emotion_result, condition_result, "hi", user_context=user_context),
+        generate_empathetic_response(emotion_result, condition_result, "mr", user_context=user_context),
     )
-    hi_payload = _ensure_payload_condition(
-        await generate_empathetic_response(emotion_result, condition_result, "hi"),
-        condition_result,
-    )
-    mr_payload = _ensure_payload_condition(
-        await generate_empathetic_response(emotion_result, condition_result, "mr"),
-        condition_result,
-    )
+    en_payload = _ensure_payload_condition(en_raw, condition_result)
+    hi_payload = _ensure_payload_condition(hi_raw, condition_result)
+    mr_payload = _ensure_payload_condition(mr_raw, condition_result)
 
     return MultilingualAnalysisResponse(
         dog_detected=True,
@@ -246,6 +306,10 @@ async def analyze_dog_image_multilingual(
             confidence=emotion_result.get("confidence", 0.0),
         ),
         condition=_build_condition_assessment(condition_result),
+        user_context=user_context,
+        urgency_signals=vision_metadata.get("urgency_signals", []),
+        unknown_factors=vision_metadata.get("unknown_factors", []),
+        scenario_type=vision_metadata.get("scenario_type", "unclear"),
         languages={
             "en": _build_language_result(en_payload),
             "hi": _build_language_result(hi_payload),

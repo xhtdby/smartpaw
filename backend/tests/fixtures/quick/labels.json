@@ -1,0 +1,284 @@
+[
+  {
+    "id": "bleeding-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut"
+  },
+  {
+    "id": "mange-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange"
+  },
+  {
+    "id": "maggots-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog"
+  },
+  {
+    "id": "heatstroke-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse"
+  },
+  {
+    "id": "fracture-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture"
+  },
+  {
+    "id": "road-accident-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly"
+  },
+  {
+    "id": "well-entrapment-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining"
+  },
+  {
+    "id": "choking-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked"
+  },
+  {
+    "id": "seizure-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking"
+  },
+  {
+    "id": "poison-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago"
+  },
+  {
+    "id": "healthy-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong"
+  },
+  {
+    "id": "fearful-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it"
+  },
+  {
+    "id": "puppy-diarrhea-01",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak"
+  },
+  {
+    "id": "eye-injury-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it"
+  },
+  {
+    "id": "no-dog-01",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it"
+  }
+]

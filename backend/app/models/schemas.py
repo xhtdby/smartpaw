@@ -31,7 +31,12 @@ class AnalysisResponse(BaseModel):
     emotion: Optional[EmotionResult] = None
     safety: Optional[SafetyLevel] = None
     condition: Optional[ConditionAssessment] = None
+    user_context: Optional[str] = None
+    urgency_signals: list[str] = []
+    unknown_factors: list[str] = []
+    scenario_type: str = "unclear"
     first_aid: list[FirstAidStep] = []
+    triage_questions: list[str] = []
     empathetic_summary: str = ""
     when_to_call_professional: str = ""
     approach_tips: str = ""
@@ -111,6 +116,7 @@ class LanguageResult(BaseModel):
     condition: Optional[ConditionAssessment] = None
     safety: Optional[SafetyLevel] = None
     first_aid: list[FirstAidStep] = []
+    triage_questions: list[str] = []
     empathetic_summary: str = ""
     when_to_call_professional: str = ""
     approach_tips: str = ""
@@ -124,4 +130,8 @@ class MultilingualAnalysisResponse(BaseModel):
     dog_detected: bool
     emotion: Optional[EmotionResult] = None
     condition: Optional[ConditionAssessment] = None
+    user_context: Optional[str] = None
+    urgency_signals: list[str] = []
+    unknown_factors: list[str] = []
+    scenario_type: str = "unclear"
     languages: dict[str, LanguageResult] = {}

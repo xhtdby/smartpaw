@@ -8,6 +8,7 @@ import httpx
 
 from app.config import get_settings
 from app.services.groq_retry import groq_post_with_retry
+from app.services.triage import heuristic_classify_situation
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +80,10 @@ Respond with valid JSON only:
     {{"step_number": 1, "instruction": "clear actionable step"}},
     {{"step_number": 2, "instruction": "clear actionable step"}}
   ],
+  "triage_questions": ["only when more info is needed before first aid"],
+  "urgency_tier": "life_threatening" | "urgent" | "moderate" | "low_risk" | "unclear",
+  "info_sufficient": true | false,
+  "needs_helpline_first": true | false,
   "when_to_call_professional": "one sentence about when professional help is needed",
   "approach_tips": "one or two sentences on how to approach the dog safely"
 }}
@@ -88,6 +93,8 @@ Rules:
 - Translate the provided condition facts into the target language without changing the underlying meaning
 - Keep first aid steps simple for a non-expert
 - Use 3 to 5 first aid steps
+- For life-threatening scene context, use only 1 to 3 immediate steps and skip nonessential monitoring advice
+- If the image/context is too vague to choose safe first aid, set info_sufficient=false and provide 1-2 triage_questions instead of filling first_aid_steps
 - Keep steps grounded in what is visible
 - Say clearly when veterinary or rescue help is needed
 - Do not wrap the JSON in markdown
@@ -241,23 +248,51 @@ def _clean_text(value: object, fallback: str) -> str:
     return fallback
 
 
-def _normalize_first_aid_steps(raw_steps: object, fallback_steps: list[dict]) -> list[dict]:
+def _clean_string_list(value: object, limit: int = 3) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    items: list[str] = []
+    for item in value:
+        if isinstance(item, str):
+            cleaned = item.strip()
+            if cleaned:
+                items.append(cleaned)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def _normalize_first_aid_steps(
+    raw_steps: object,
+    fallback_steps: list[dict],
+    min_steps: int = 3,
+    max_steps: int = 5,
+) -> list[dict]:
     if not isinstance(raw_steps, list) or not raw_steps:
-        return fallback_steps
+        return fallback_steps[:max_steps]
 
     normalized: list[dict] = []
-    for index, fallback_step in enumerate(fallback_steps):
-        raw_step = raw_steps[index] if index < len(raw_steps) else None
-        instruction = fallback_step["instruction"]
+    for index, raw_step in enumerate(raw_steps[:max_steps]):
+        fallback_step = fallback_steps[index] if index < len(fallback_steps) else {"instruction": ""}
+        instruction = fallback_step.get("instruction", "")
         if isinstance(raw_step, dict):
             instruction = _clean_text(raw_step.get("instruction"), instruction)
-        normalized.append(
-            {
-                "step_number": fallback_step["step_number"],
-                "instruction": instruction,
-            }
-        )
-    return normalized
+        elif isinstance(raw_step, str):
+            instruction = _clean_text(raw_step, instruction)
+        if instruction:
+            normalized.append({"step_number": len(normalized) + 1, "instruction": instruction})
+
+    if len(normalized) < min_steps:
+        for fallback_step in fallback_steps[len(normalized) : max_steps]:
+            normalized.append(
+                {
+                    "step_number": len(normalized) + 1,
+                    "instruction": fallback_step["instruction"],
+                }
+            )
+            if len(normalized) >= min_steps:
+                break
+    return normalized[:max_steps]
 
 
 def _localize_condition_text(text: str, language: str) -> str:
@@ -456,6 +491,13 @@ def _normalize_response_payload(raw: dict | None, emotion_result: dict, conditio
     if not isinstance(raw, dict):
         return fallback
 
+    urgency_tier = str(raw.get("urgency_tier", "")).strip().lower()
+    if urgency_tier not in {"life_threatening", "urgent", "moderate", "low_risk", "unclear"}:
+        urgency_tier = "urgent" if str(raw.get("safety_level", "")).strip().lower() == "danger" else "unclear"
+    info_sufficient = bool(raw.get("info_sufficient", True))
+    needs_helpline_first = bool(raw.get("needs_helpline_first", False))
+    triage_questions = _clean_string_list(raw.get("triage_questions"), limit=2)
+
     safety_level = str(raw.get("safety_level", fallback["safety_level"])).strip().lower()
     if safety_level not in {"safe", "caution", "danger"}:
         safety_level = fallback["safety_level"]
@@ -476,16 +518,46 @@ def _normalize_response_payload(raw: dict | None, emotion_result: dict, conditio
         language,
     )["condition"]
 
+    if not info_sufficient and triage_questions:
+        return {
+            "condition": normalized_condition,
+            "safety_level": "caution",
+            "safety_reason": _clean_text(raw.get("safety_reason"), "A few details are needed before choosing first aid."),
+            "empathetic_summary": _clean_text(raw.get("empathetic_summary"), fallback["empathetic_summary"]),
+            "first_aid_steps": [],
+            "triage_questions": triage_questions,
+            "urgency_tier": urgency_tier,
+            "info_sufficient": False,
+            "needs_helpline_first": needs_helpline_first,
+            "when_to_call_professional": "",
+            "approach_tips": _clean_text(raw.get("approach_tips"), fallback["approach_tips"]),
+        }
+
+    min_steps = 1 if urgency_tier == "life_threatening" else 3
+    max_steps = 3 if urgency_tier == "life_threatening" else 5
+    when_to_call = _clean_text(
+        raw.get("when_to_call_professional"),
+        fallback["when_to_call_professional"],
+    )
+    if urgency_tier == "life_threatening" and needs_helpline_first:
+        when_to_call = _clean_text(raw.get("when_to_call_professional"), "")
+
     return {
         "condition": normalized_condition,
         "safety_level": safety_level,
         "safety_reason": _clean_text(raw.get("safety_reason"), fallback["safety_reason"]),
         "empathetic_summary": _clean_text(raw.get("empathetic_summary"), fallback["empathetic_summary"]),
-        "first_aid_steps": _normalize_first_aid_steps(raw.get("first_aid_steps"), fallback["first_aid_steps"]),
-        "when_to_call_professional": _clean_text(
-            raw.get("when_to_call_professional"),
-            fallback["when_to_call_professional"],
+        "first_aid_steps": _normalize_first_aid_steps(
+            raw.get("first_aid_steps"),
+            fallback["first_aid_steps"],
+            min_steps=min_steps,
+            max_steps=max_steps,
         ),
+        "triage_questions": triage_questions,
+        "urgency_tier": urgency_tier,
+        "info_sufficient": info_sufficient,
+        "needs_helpline_first": needs_helpline_first,
+        "when_to_call_professional": when_to_call,
         "approach_tips": _clean_text(raw.get("approach_tips"), fallback["approach_tips"]),
     }
 
@@ -545,6 +617,10 @@ def _normalize_translated_payload(raw: dict | None, source_payload: dict, langua
             translated_steps,
             translated_fallback["first_aid_steps"],
         ),
+        "triage_questions": _clean_string_list(
+            raw.get("triage_questions") if isinstance(raw, dict) else None,
+            limit=2,
+        ),
         "when_to_call_professional": _clean_text(
             raw.get("when_to_call_professional") if isinstance(raw, dict) else None,
             translated_fallback["when_to_call_professional"],
@@ -561,6 +637,7 @@ async def generate_empathetic_response(
     emotion_result: dict,
     condition_result: dict,
     language: str = "en",
+    user_context: str | None = None,
 ) -> dict:
     """Generate a structured response for a single language."""
     settings = get_settings()
@@ -580,9 +657,21 @@ async def generate_empathetic_response(
 - Visible Injuries: {', '.join(condition_result.get('visible_injuries', [])) or 'None observed'}
 - Health Concerns: {', '.join(condition_result.get('health_concerns', [])) or 'None observed'}
 - Body Language: {condition_result.get('body_language', 'unknown')}"""
+    context_triage = None
+    if user_context and user_context.strip():
+        context_triage = heuristic_classify_situation(user_context)
+        analysis_summary += (
+            f"\n- User-Provided Scene Context: {user_context.strip()[:1000]}"
+            f"\n- Context Triage Hint: {context_triage.model_dump()}"
+        )
     analysis_summary += LANGUAGE_REMINDERS.get(language, "")
 
     raw = await _call_groq_json(system_prompt, analysis_summary)
+    if context_triage and isinstance(raw, dict):
+        if str(raw.get("urgency_tier", "unclear")).strip().lower() in {"", "unclear"}:
+            raw["urgency_tier"] = context_triage.urgency_tier
+        raw.setdefault("info_sufficient", context_triage.info_sufficient)
+        raw.setdefault("needs_helpline_first", context_triage.needs_helpline_first)
     return _normalize_response_payload(raw, emotion_result, condition_result, language)
 
 
@@ -608,6 +697,7 @@ async def translate_analysis_payload(source_payload: dict, language: str) -> dic
             "safety_reason": source_payload["safety_reason"],
             "empathetic_summary": source_payload["empathetic_summary"],
             "first_aid_steps": source_payload["first_aid_steps"],
+            "triage_questions": source_payload.get("triage_questions", []),
             "when_to_call_professional": source_payload["when_to_call_professional"],
             "approach_tips": source_payload["approach_tips"],
             "disclaimer": DISCLAIMERS["en"],
@@ -620,6 +710,7 @@ async def translate_analysis_payload(source_payload: dict, language: str) -> dic
             "safety_reason": source_payload["safety_reason"],
             "empathetic_summary": source_payload["empathetic_summary"],
             "first_aid_steps": source_payload["first_aid_steps"],
+            "triage_questions": source_payload.get("triage_questions", []),
             "when_to_call_professional": source_payload["when_to_call_professional"],
             "approach_tips": source_payload["approach_tips"],
             "disclaimer": DISCLAIMERS["en"],
@@ -630,6 +721,7 @@ async def translate_analysis_payload(source_payload: dict, language: str) -> dic
         "safety_reason": source_payload["safety_reason"],
         "empathetic_summary": source_payload["empathetic_summary"],
         "first_aid_steps": source_payload["first_aid_steps"],
+        "triage_questions": source_payload.get("triage_questions", []),
         "when_to_call_professional": source_payload["when_to_call_professional"],
         "approach_tips": source_payload["approach_tips"],
     }

@@ -2,97 +2,1106 @@
   {
     "id": "fa1",
     "title": "How to Safely Approach an Injured or Fearful Dog",
-    "tags": ["approach", "fearful", "aggressive", "body language", "bite prevention", "stray", "pet"],
+    "tags": [
+      "approach",
+      "fearful",
+      "aggressive",
+      "body language",
+      "bite prevention",
+      "stray",
+      "pet"
+    ],
     "content": "1. Keep people safe first. Do not approach if traffic, fire, electrocution risk, or violence makes the scene unsafe.\n2. Move slowly, turn your body slightly sideways, and avoid leaning over the dog.\n3. Watch body language: hard stare, stiff posture, tucked tail, repeated lip licking, growling, snapping, or trying to crawl away all mean you should slow down or stop.\n4. Do not corner the dog. Give it a clear exit route whenever possible.\n5. Use a towel, blanket, board, or crate for transport only if this can be done without forcing the dog.\n6. Even friendly dogs may bite when they are in pain. Keep your face away from the mouth.\n7. If the dog is too distressed to handle safely, call a local rescue organization or veterinarian instead of forcing contact."
   },
   {
     "id": "fa2",
     "title": "Bleeding Wounds and Punctures",
-    "tags": ["bleeding", "wound", "bite wound", "cut", "puncture", "first aid"],
+    "tags": [
+      "bleeding",
+      "wound",
+      "bite wound",
+      "cut",
+      "puncture",
+      "first aid"
+    ],
     "content": "1. Apply firm, direct pressure with a clean cloth or towel.\n2. Keep pressure in place for at least 3 minutes before checking.\n3. If blood soaks through, add more cloth on top. Do not peel the first layer away.\n4. Do not remove deeply embedded objects.\n5. If you need to clean around a dirty wound, use saline or diluted povidone-iodine. Do not scrub inside a deep wound.\n6. Deep punctures, heavy bleeding, wounds to the chest or abdomen, or wounds caused by another animal need veterinary care urgently because internal damage and infection are common."
   },
   {
     "id": "fa3",
     "title": "Road Accidents, Fractures, and Possible Spinal Injury",
-    "tags": ["road accident", "fracture", "spinal", "hit by car", "limping", "trauma"],
+    "tags": [
+      "road accident",
+      "fracture",
+      "spinal",
+      "hit by car",
+      "limping",
+      "trauma"
+    ],
     "content": "1. Make the area safe before you approach.\n2. Assume pain, fracture, or internal injury until proven otherwise.\n3. Do not pull on the legs or try to straighten bones.\n4. Slide the dog onto a flat board, thick blanket, or sturdy cardboard so the body stays supported during transport.\n5. Keep the dog warm and as still as possible.\n6. Dogs that cannot stand, cry when touched, drag limbs, have obvious deformity, or seem weak or collapsed need urgent veterinary assessment."
   },
   {
     "id": "fa4",
     "title": "Heatstroke and Dehydration",
-    "tags": ["heatstroke", "dehydration", "panting", "hot weather", "collapse"],
+    "tags": [
+      "heatstroke",
+      "dehydration",
+      "panting",
+      "hot weather",
+      "collapse"
+    ],
     "content": "Signs include heavy panting, drooling, weakness, vomiting, diarrhea, confusion, collapse, or gums that feel dry or sticky.\n\n1. Move the dog into shade or a cool indoor space.\n2. Start cooling right away with room-temperature water on the neck, armpits, belly, and groin.\n3. Re-wet towels frequently or use a fan if available.\n4. Do not use ice water or immerse the dog in very cold water.\n5. Offer small amounts of water only if the dog is alert and able to swallow.\n6. Heatstroke can turn fatal quickly, so veterinary care is urgent even if the dog seems better after initial cooling."
   },
   {
     "id": "fa5",
     "title": "Possible Poisoning or Toxin Exposure",
-    "tags": ["poisoning", "toxin", "rat poison", "pesticide", "xylitol", "chocolate"],
+    "tags": [
+      "poisoning",
+      "toxin",
+      "rat poison",
+      "pesticide",
+      "xylitol",
+      "chocolate"
+    ],
     "content": "Warning signs include sudden vomiting, drooling, tremors, seizures, bleeding, difficulty breathing, collapse, or sudden extreme weakness.\n\n1. Remove the dog from the source if you can do it safely.\n2. Keep the product, packet, plant sample, or vomit for identification.\n3. Do not induce vomiting unless a veterinarian or poison control specialist tells you to.\n4. Do not give milk, oil, salt, or home remedies.\n5. Go to a veterinarian urgently and call a poison service where available.\n6. Corrosive cleaners, rodenticides, pesticides, human medicines, chocolate, xylitol, grapes/raisins, and some plants are common dangerous exposures."
   },
   {
     "id": "fa6",
     "title": "Maggot Wounds",
-    "tags": ["maggots", "myiasis", "flies", "open wound", "infection"],
+    "tags": [
+      "maggots",
+      "myiasis",
+      "flies",
+      "open wound",
+      "infection"
+    ],
     "content": "1. Maggot wounds need veterinary treatment as soon as possible.\n2. Keep the dog safe, calm, and protected from more flies.\n3. If you need to rinse the surface while arranging help, use clean saline. Do not pour kerosene, turpentine, engine oil, acid, or other chemicals into the wound.\n4. Do not dig aggressively into the wound.\n5. Cover loosely with a clean cloth or gauze for transport.\n6. The dog may need thorough wound cleaning, pain control, antibiotics, and repeated follow-up care."
   },
   {
     "id": "fa7",
     "title": "Mange, Skin Disease, and Severe Itching",
-    "tags": ["mange", "skin", "itching", "hair loss", "rash", "ticks", "mites"],
+    "tags": [
+      "mange",
+      "skin",
+      "itching",
+      "hair loss",
+      "rash",
+      "ticks",
+      "mites"
+    ],
     "content": "Patchy hair loss, thickened skin, redness, crusts, and relentless itching can be caused by mange, skin infection, flea allergy, fungal disease, or tick-borne illness.\n\n1. Avoid home remedies like kerosene, engine oil, battery acid, chili, or turmeric paste.\n2. If the skin is broken, painful, foul-smelling, or full of flies, arrange veterinary or rescue help promptly.\n3. Wash your hands after handling because some causes of itching can temporarily irritate human skin.\n4. If the problem is mild and the dog is handleable, focus first on nutrition, clean water, and a veterinary plan rather than random medicines.\n5. Skin disease that involves the whole body, rapid weight loss, or weakness is not a minor problem."
   },
   {
     "id": "fa8",
     "title": "Ticks and Tick-Borne Illness",
-    "tags": ["ticks", "tick fever", "ehrlichia", "babesia", "anemia"],
+    "tags": [
+      "ticks",
+      "tick fever",
+      "ehrlichia",
+      "babesia",
+      "anemia"
+    ],
     "content": "1. Heavy tick burdens can make dogs weak and anemic, and ticks can spread serious disease.\n2. If you see pale gums, fever, bleeding, profound lethargy, or the dog stops eating, the dog needs veterinary care quickly.\n3. You may remove visible ticks carefully with tweezers, pulling straight out close to the skin.\n4. Do not crush ticks into wounds or apply harsh chemicals to raw skin.\n5. A dog with many ticks plus weakness should not be treated as a simple grooming issue."
   },
   {
     "id": "fa9",
     "title": "Eye Injuries and Eye Discharge",
-    "tags": ["eye", "discharge", "redness", "cloudy eye", "swelling"],
+    "tags": [
+      "eye",
+      "discharge",
+      "redness",
+      "cloudy eye",
+      "swelling"
+    ],
     "content": "1. If the eye is bulging, very cloudy, bleeding, or the dog cannot open it, seek veterinary care urgently.\n2. Do not put steroid drops or random human eye drops into the eye.\n3. If there is dirt around the eye, you can gently wipe the fur around it with saline or clean water.\n4. Do not try to remove objects stuck in the eye.\n5. Green or yellow discharge, swelling, or repeated squinting usually means the eye needs proper examination."
   },
   {
     "id": "fa10",
     "title": "Choking and Breathing Distress",
-    "tags": ["choking", "breathing", "airway", "blue gums", "collapse"],
+    "tags": [
+      "choking",
+      "breathing",
+      "airway",
+      "blue gums",
+      "collapse"
+    ],
     "content": "1. If the dog is struggling to breathe, this is an emergency.\n2. If the dog is still coughing and moving air, do not panic or put your hands deep into the mouth.\n3. If you can clearly see an object near the front of the mouth and can remove it without pushing it deeper or getting bitten, do so carefully.\n4. Blue or gray gums, silent distress, collapse, or inability to breathe means immediate veterinary help is needed.\n5. Do not waste time on repeated attempts if the dog is worsening."
   },
   {
     "id": "fa11",
     "title": "Seizures, Collapse, or Unresponsiveness",
-    "tags": ["seizure", "collapse", "unconscious", "neurologic", "emergency"],
+    "tags": [
+      "seizure",
+      "collapse",
+      "unconscious",
+      "neurologic",
+      "emergency"
+    ],
     "content": "1. Move objects away so the dog does not injure itself.\n2. Do not put your hands near the mouth.\n3. Time the event if you can.\n4. Keep the dog cool, quiet, and away from stairs or traffic after the seizure.\n5. Repeated seizures, seizures lasting more than a few minutes, collapse, or failure to wake up normally require urgent veterinary care."
   },
   {
     "id": "fa12",
     "title": "Puppies, Orphans, and Newborn Litters",
-    "tags": ["puppies", "newborn", "orphan", "mother dog", "litter"],
+    "tags": [
+      "puppies",
+      "newborn",
+      "orphan",
+      "mother dog",
+      "litter"
+    ],
     "content": "1. Do not move a litter immediately unless the puppies are in direct danger.\n2. Watch from a distance first because the mother may be nearby and returning.\n3. Warmth matters more than feeding in the first moments for cold, weak newborns.\n4. Very young puppies can aspirate easily if fed incorrectly, so bottle-feeding plans should come from an experienced rescuer or veterinarian.\n5. Crying constantly, cold bodies, injuries, fly strike, or a missing mother for many hours are reasons to escalate for help quickly."
   },
   {
     "id": "fa13",
     "title": "Vomiting, Diarrhea, and Refusing Food",
-    "tags": ["vomiting", "diarrhea", "bloody stool", "parvo", "appetite loss"],
+    "tags": [
+      "vomiting",
+      "diarrhea",
+      "bloody stool",
+      "parvo",
+      "appetite loss"
+    ],
     "content": "1. Repeated vomiting, bloody diarrhea, black stool, or a swollen painful belly are urgent red flags.\n2. Puppies dehydrate very quickly and can crash fast.\n3. If the dog is alert and not vomiting constantly, offer water in small amounts.\n4. Do not give human anti-diarrheal or pain medicines.\n5. If the dog cannot keep water down, seems weak, or stops responding normally, seek veterinary care."
   },
   {
     "id": "fa14",
     "title": "Dog Bites, Scratches, and Rabies Exposure for People",
-    "tags": ["rabies", "bite", "scratch", "human safety", "PEP"],
+    "tags": [
+      "rabies",
+      "bite",
+      "scratch",
+      "human safety",
+      "PEP"
+    ],
     "content": "For people, rabies risk must be taken seriously.\n\n1. Wash any bite, scratch, or saliva exposure on broken skin with soap and running water for at least 15 minutes.\n2. Seek medical care immediately for rabies post-exposure assessment.\n3. Do not wait for symptoms.\n4. Report the animal through local animal welfare or public health channels where appropriate.\n5. Human safety comes first; if a rescue scene is unsafe, call emergency services."
   },
   {
     "id": "fa15",
     "title": "Animal Cruelty, Complaints, and ABC Rules in India",
-    "tags": ["cruelty", "complaint", "AWBI", "ABC Rules 2023", "India", "legal"],
+    "tags": [
+      "cruelty",
+      "complaint",
+      "AWBI",
+      "ABC Rules 2023",
+      "India",
+      "legal"
+    ],
     "content": "1. If you witness cruelty, document what you safely can: time, location, photos, video, and witness details.\n2. The Government of India announced the Animal Birth Control Rules, 2023 under the Prevention of Cruelty to Animals Act, 1960.\n3. According to the April 18, 2023 PIB release, relocation of dogs cannot be permitted, and local bodies are responsible for sterilization and anti-rabies work under the rules.\n4. AWBI can be contacted for grievances and escalation, but it is not a field ambulance dispatch team.\n5. If a person is in immediate danger, use public emergency services first."
   },
   {
     "id": "fa16",
     "title": "Finding Help in India and Beyond",
-    "tags": ["help", "helpline", "AWBI", "Friendicoes", "RESQ", "Animal Aid", "BSPCA", "Blue Cross", "poison control"],
+    "tags": [
+      "help",
+      "helpline",
+      "AWBI",
+      "Friendicoes",
+      "RESQ",
+      "Animal Aid",
+      "BSPCA",
+      "Blue Cross",
+      "poison control"
+    ],
     "content": "India-wide verified starting points:\n- Animal Welfare Board of India (AWBI) contact: 0129-2555700.\n- AWBI grievance line: 09650609880 and the online grievance portal.\n- AWBI also publishes a directory of recognized animal welfare organizations that can help you find a local organization in cities not listed below.\n\nSelected regional resources with clear published scope:\n- Mumbai: BSPCA hospital enquiry +91 85916 59398; their hospital says it serves emergency cases 24x7.\n- Delhi NCR: Friendicoes SECA helpline and ambulance service, with a published helpline window of 9am-9pm; Friendicoes also says its night clinic and night ambulance are currently suspended.\n- Delhi / guidance: Jaagruti offers guidance and first-aid advice and states on its site that it is not a rescue service, hospital, or ambulance.\n- Pune: RESQ office phone +91 98909 99111. RESQ says its 24x7 helplines are for wildlife emergencies and large domestic animals, with technical rescues for all animals depending on the case.\n- Udaipur: Animal Aid Unlimited asks callers to use 9829843726 / 9602325253 / 9784005989 for injured street animals in Udaipur and to stay with the animal if possible.\n- Greater Chennai: Blue Cross of India uses an online rescue request form for distressed street animals within its service area and says street-animal ABC requests within corporation limits should go to Corporation Helpline 1913.\n\nGlobal fallback guidance:\n- Search for the nearest open emergency veterinarian in maps.\n- For poison exposure, call a local emergency veterinarian or a poison service where available.\n- If a person may have rabies exposure or the scene is unsafe, prioritize human emergency care immediately."
+  },
+  {
+    "id": "fa_extra_017",
+    "title": "Dog Fallen Into Well or Borewell",
+    "tags": [
+      "entrapment",
+      "well",
+      "borewell",
+      "fall",
+      "rescue",
+      "urgent"
+    ],
+    "content": "1. Call rescue or fire services immediately and keep one calm person watching the dog from above.\n2. Do not climb down, lower an untrained person, throw stones, or pour water/food into the shaft.\n3. If the dog is silent, struggling to breathe, submerged, injured, or deep below reach, treat as life-threatening."
+  },
+  {
+    "id": "fa_extra_018",
+    "title": "Dog Trapped in Drain or Storm Sewer",
+    "tags": [
+      "entrapment",
+      "drain",
+      "sewer",
+      "rescue",
+      "confined space"
+    ],
+    "content": "1. Mark the drain opening, keep traffic and crowds away, and call municipal rescue or an animal rescue team.\n2. Do not force arms deep into a blind pipe or flush the drain with water.\n3. Escalate immediately if water is rising, the dog is wedged, or breathing sounds weak."
+  },
+  {
+    "id": "fa_extra_019",
+    "title": "Dog Stuck in Pipe or Culvert",
+    "tags": [
+      "entrapment",
+      "pipe",
+      "culvert",
+      "rescue"
+    ],
+    "content": "1. Keep the dog calm with a quiet voice and locate both pipe ends before attempting any movement.\n2. Do not pull hard on legs, tail, collar, or rope because wedged dogs can be injured internally.\n3. Call technical rescue if the dog cannot back out with gentle guidance."
+  },
+  {
+    "id": "fa_extra_020",
+    "title": "Dog Wedged Between Walls or Gates",
+    "tags": [
+      "entrapment",
+      "crush",
+      "walls",
+      "gate"
+    ],
+    "content": "1. Support the body if reachable and reduce pressure by opening or dismantling the obstruction.\n2. Do not yank the dog through a narrow gap or twist the spine.\n3. Urgent help is needed if breathing is restricted, gums look pale, or the dog cannot move after release."
+  },
+  {
+    "id": "fa_extra_021",
+    "title": "Dog Trapped Under a Vehicle",
+    "tags": [
+      "entrapment",
+      "vehicle",
+      "road",
+      "rescue"
+    ],
+    "content": "1. Stop traffic, switch the vehicle off, and ask the driver not to move until the dog is located.\n2. Do not crawl under an unstable vehicle or drag the dog by the limbs.\n3. Call rescue if the dog is pinned, bleeding, or cannot stand after being freed."
+  },
+  {
+    "id": "fa_extra_022",
+    "title": "Dog on Roof or High Ledge",
+    "tags": [
+      "height",
+      "roof",
+      "fall",
+      "rescue"
+    ],
+    "content": "1. Keep people quiet below and create a safe exit path away from the edge.\n2. Do not chase, shout, or climb onto unsafe roofing.\n3. Call fire/rescue or an experienced rescuer if the dog is panicking or near a fall."
+  },
+  {
+    "id": "fa_extra_023",
+    "title": "Dog Caught in Netting or Wire",
+    "tags": [
+      "entrapment",
+      "net",
+      "wire",
+      "manja",
+      "cut"
+    ],
+    "content": "1. Stabilize the dog, cut the material away from the outside, and protect wounds with clean cloth.\n2. Do not pull tight wire or kite string through skin.\n3. Deep cuts, swelling around the neck, or trouble breathing need urgent veterinary care."
+  },
+  {
+    "id": "fa_extra_024",
+    "title": "Dog in Construction Pit",
+    "tags": [
+      "entrapment",
+      "pit",
+      "construction",
+      "fall"
+    ],
+    "content": "1. Keep people away from the pit edge and call site staff or rescue with ladders/ropes.\n2. Do not jump in or drop loose rubble while trying to help.\n3. Treat as emergency if the dog fell from height, is quiet, limping, or cannot climb out."
+  },
+  {
+    "id": "fa_extra_025",
+    "title": "Dog in Open Manhole",
+    "tags": [
+      "entrapment",
+      "manhole",
+      "drain",
+      "rescue"
+    ],
+    "content": "1. Cover or mark the hazard, stop passers-by from crowding, and call municipal/rescue support.\n2. Do not enter a manhole because toxic gases and collapse risk can kill rescuers.\n3. Life-threatening if the dog is in water, sewage, or a deep vertical shaft."
+  },
+  {
+    "id": "fa_extra_026",
+    "title": "Near-Drowning or Dog Pulled From Water",
+    "tags": [
+      "drowning",
+      "water",
+      "breathing",
+      "collapse"
+    ],
+    "content": "1. Move the dog to dry ground, keep the head and neck aligned, and check breathing immediately.\n2. Do not swing the dog or waste time trying to drain water by force.\n3. Trouble breathing, blue gums, collapse, or coughing foam means emergency transport now."
+  },
+  {
+    "id": "fa_extra_027",
+    "title": "Broken Front or Back Leg",
+    "tags": [
+      "fracture",
+      "limb",
+      "trauma",
+      "limping"
+    ],
+    "content": "1. Limit movement and transport on a blanket, board, or crate with the limb supported.\n2. Do not straighten, splint tightly, or test the leg repeatedly.\n3. Open fracture, severe pain, dangling limb, or inability to stand needs urgent vet care."
+  },
+  {
+    "id": "fa_extra_028",
+    "title": "Possible Spinal Injury",
+    "tags": [
+      "spinal",
+      "paralysis",
+      "dragging",
+      "trauma"
+    ],
+    "content": "1. Keep the dog flat and slide onto a board or firm surface with several helpers.\n2. Do not bend the neck/back or lift by front and back legs separately.\n3. Dragging limbs, loss of bladder control, or pain after a fall/accident is an emergency."
+  },
+  {
+    "id": "fa_extra_029",
+    "title": "Head Injury or Skull Trauma",
+    "tags": [
+      "head injury",
+      "skull",
+      "trauma",
+      "seizure"
+    ],
+    "content": "1. Keep the dog quiet, dim light, and transport with the head and neck supported.\n2. Do not give painkillers or let the dog walk around to test it.\n3. Seizure, unequal pupils, bleeding from nose/ears, or confusion needs urgent care."
+  },
+  {
+    "id": "fa_extra_030",
+    "title": "Jaw Injury or Mouth Trauma",
+    "tags": [
+      "jaw",
+      "mouth",
+      "trauma",
+      "bleeding"
+    ],
+    "content": "1. Keep the mouth area clean from outside and prevent chewing or rough handling.\n2. Do not force the mouth open or push bones/teeth back into place.\n3. Drooling blood, inability to close the mouth, or breathing trouble needs urgent help."
+  },
+  {
+    "id": "fa_extra_031",
+    "title": "Rib or Chest Injury",
+    "tags": [
+      "rib",
+      "chest",
+      "breathing",
+      "trauma"
+    ],
+    "content": "1. Keep the dog still in a comfortable chest-down position and minimize handling.\n2. Do not wrap the chest tightly because it can restrict breathing.\n3. Labored breathing, pale/blue gums, or chest puncture is life-threatening."
+  },
+  {
+    "id": "fa_extra_032",
+    "title": "Pelvis or Hip Trauma",
+    "tags": [
+      "pelvis",
+      "hip",
+      "fracture",
+      "road accident"
+    ],
+    "content": "1. Use a blanket or board to move the dog without twisting the hips.\n2. Do not make the dog stand or walk to check the injury.\n3. Inability to rise, severe pain, or urine problems after trauma needs urgent vet care."
+  },
+  {
+    "id": "fa_extra_033",
+    "title": "Tail Pull or Tail Crush Injury",
+    "tags": [
+      "tail",
+      "crush",
+      "trauma"
+    ],
+    "content": "1. Keep the dog quiet and prevent further pulling or chewing at the tail.\n2. Do not bandage tightly around the base of the tail.\n3. Loss of tail movement, bleeding, or trouble urinating/defecating needs veterinary assessment."
+  },
+  {
+    "id": "fa_extra_034",
+    "title": "Crushed Paw or Toe Injury",
+    "tags": [
+      "paw",
+      "crush",
+      "fracture",
+      "bleeding"
+    ],
+    "content": "1. Rinse dirt gently, cover with clean cloth, and limit walking.\n2. Do not remove nails or bone fragments at home.\n3. Severe swelling, exposed bone, or ongoing bleeding needs urgent care."
+  },
+  {
+    "id": "fa_extra_035",
+    "title": "Early Heat Stress",
+    "tags": [
+      "heat",
+      "panting",
+      "dehydration"
+    ],
+    "content": "1. Move to shade, offer small sips of water if alert, and wet paws/belly with room-temperature water.\n2. Do not force water or use ice baths.\n3. Escalate if panting stays extreme, weakness appears, or vomiting starts."
+  },
+  {
+    "id": "fa_extra_036",
+    "title": "Severe Heatstroke Collapse",
+    "tags": [
+      "heatstroke",
+      "collapse",
+      "emergency"
+    ],
+    "content": "1. Start cooling immediately with room-temperature water on belly, groin, armpits, and neck while arranging transport.\n2. Do not delay for temperature checks or use ice water.\n3. Collapse, confusion, seizures, or bloody diarrhea is life-threatening."
+  },
+  {
+    "id": "fa_extra_037",
+    "title": "Dehydrated Dog",
+    "tags": [
+      "dehydration",
+      "weakness",
+      "water"
+    ],
+    "content": "1. Move to a cool quiet place and offer small frequent sips only if the dog can swallow.\n2. Do not pour water into the mouth of a weak or semi-conscious dog.\n3. Sunken eyes, sticky gums, collapse, or repeated vomiting needs urgent fluids from a vet."
+  },
+  {
+    "id": "fa_extra_038",
+    "title": "Sunburn or Heat Skin Burn",
+    "tags": [
+      "sunburn",
+      "burn",
+      "skin",
+      "heat"
+    ],
+    "content": "1. Move indoors or to shade and cool the skin gently with clean room-temperature water.\n2. Do not apply oils, toothpaste, steroid creams, or harsh antiseptics.\n3. Blistering, severe pain, large burned areas, or weakness needs veterinary care."
+  },
+  {
+    "id": "fa_extra_039",
+    "title": "Dog Locked in Hot Vehicle",
+    "tags": [
+      "hot car",
+      "heatstroke",
+      "rescue"
+    ],
+    "content": "1. Call local authorities/rescue, find the owner fast, and document the location and condition.\n2. Do not wait if the dog is collapsing or unable to breathe normally.\n3. Heavy panting, drooling, weakness, or collapse is an emergency."
+  },
+  {
+    "id": "fa_extra_040",
+    "title": "Burned Paw Pads From Hot Ground",
+    "tags": [
+      "paw pad",
+      "burn",
+      "heat",
+      "limping"
+    ],
+    "content": "1. Move off hot ground, cool paws with room-temperature water, and prevent licking if possible.\n2. Do not pop blisters or apply butter/oil.\n3. Open pads, severe limping, or large raw areas need vet care."
+  },
+  {
+    "id": "fa_extra_041",
+    "title": "Chocolate Ingestion",
+    "tags": [
+      "poison",
+      "chocolate",
+      "toxin"
+    ],
+    "content": "1. Keep the wrapper and estimate amount/time while calling a vet or poison service.\n2. Do not induce vomiting unless a professional instructs you.\n3. Dark chocolate, small dogs, tremors, vomiting, or fast heartbeat are urgent."
+  },
+  {
+    "id": "fa_extra_042",
+    "title": "Xylitol or Sugar-Free Product Ingestion",
+    "tags": [
+      "poison",
+      "xylitol",
+      "toxin"
+    ],
+    "content": "1. Treat as urgent even if the dog looks normal; note product name, amount, and time.\n2. Do not wait for symptoms or give home remedies.\n3. Weakness, vomiting, tremors, or collapse can happen quickly and needs emergency care."
+  },
+  {
+    "id": "fa_extra_043",
+    "title": "Rat Poison Suspected",
+    "tags": [
+      "poison",
+      "rat poison",
+      "rodenticide"
+    ],
+    "content": "1. Save the packet if possible and call a veterinarian immediately.\n2. Do not give milk, oil, or random vitamin tablets at home.\n3. Bleeding, pale gums, coughing blood, weakness, or known ingestion is urgent."
+  },
+  {
+    "id": "fa_extra_044",
+    "title": "Organophosphate or Pesticide Exposure",
+    "tags": [
+      "poison",
+      "pesticide",
+      "organophosphate",
+      "chemical"
+    ],
+    "content": "1. Move the dog away from the chemical and prevent licking contaminated fur.\n2. Do not bathe without gloves if the chemical can harm people too.\n3. Drooling, tremors, twitching, diarrhea, or breathing trouble is life-threatening."
+  },
+  {
+    "id": "fa_extra_045",
+    "title": "Snake Bite Suspected",
+    "tags": [
+      "snake bite",
+      "poison",
+      "swelling"
+    ],
+    "content": "1. Keep the dog still and carry to transport if possible; note bite location and time.\n2. Do not cut, suck, ice, or tourniquet the bite.\n3. Facial swelling, weakness, bleeding, collapse, or breathing trouble needs emergency care."
+  },
+  {
+    "id": "fa_extra_046",
+    "title": "Scorpion Sting",
+    "tags": [
+      "scorpion",
+      "sting",
+      "pain",
+      "poison"
+    ],
+    "content": "1. Keep the dog calm, restrict movement, and monitor breathing and swelling.\n2. Do not apply kerosene, chili, or tight bands.\n3. Severe pain, tremors, vomiting, facial swelling, or weakness needs veterinary care."
+  },
+  {
+    "id": "fa_extra_047",
+    "title": "Spider Bite or Unknown Insect Bite",
+    "tags": [
+      "spider",
+      "bite",
+      "swelling",
+      "poison"
+    ],
+    "content": "1. Clean the area gently and prevent chewing or scratching.\n2. Do not squeeze the bite or apply harsh chemicals.\n3. Rapid swelling, collapse, vomiting, or breathing trouble means urgent help."
+  },
+  {
+    "id": "fa_extra_048",
+    "title": "Toxic Plant Chewing",
+    "tags": [
+      "poison",
+      "plant",
+      "toxic"
+    ],
+    "content": "1. Remove plant access and keep a sample/photo for identification.\n2. Do not assume vomiting will solve it or give milk/oil.\n3. Drooling, vomiting, tremors, mouth burns, or collapse needs vet advice quickly."
+  },
+  {
+    "id": "fa_extra_049",
+    "title": "Mushroom Ingestion",
+    "tags": [
+      "poison",
+      "mushroom",
+      "toxin"
+    ],
+    "content": "1. Collect a sample/photo of the mushroom and call a vet urgently.\n2. Do not wait to see if symptoms improve.\n3. Vomiting, diarrhea, drooling, tremors, or weakness after mushroom exposure is urgent."
+  },
+  {
+    "id": "fa_extra_050",
+    "title": "Chemical Cleaner Exposure",
+    "tags": [
+      "chemical burn",
+      "poison",
+      "cleaner"
+    ],
+    "content": "1. Move the dog away and rinse skin/fur with plenty of clean water if safe for you.\n2. Do not mix chemicals or neutralize acid/alkali with another chemical.\n3. Eye exposure, mouth burns, breathing trouble, or collapse needs emergency care."
+  },
+  {
+    "id": "fa_extra_051",
+    "title": "Human Medicine Ingestion",
+    "tags": [
+      "poison",
+      "human medicine",
+      "tablet"
+    ],
+    "content": "1. Keep the strip/bottle and estimate tablets swallowed and time.\n2. Do not give another medicine to counteract it at home.\n3. Painkillers, antidepressants, diabetes tablets, heart medicines, or unknown pills need urgent vet guidance."
+  },
+  {
+    "id": "fa_extra_052",
+    "title": "Grapes or Raisins Ingestion",
+    "tags": [
+      "poison",
+      "grapes",
+      "raisins"
+    ],
+    "content": "1. Call a vet urgently with the amount and time, even if the dog seems fine.\n2. Do not wait for vomiting or give home remedies.\n3. Any known ingestion can be risky; weakness, vomiting, or reduced urination is urgent."
+  },
+  {
+    "id": "fa_extra_053",
+    "title": "Deep Cut or Laceration",
+    "tags": [
+      "cut",
+      "bleeding",
+      "wound",
+      "trauma"
+    ],
+    "content": "1. Apply steady direct pressure with clean cloth and keep the dog still.\n2. Do not scrub deep tissue or pour harsh antiseptic into the wound.\n3. Gaping cuts, exposed fat/muscle, or bleeding through cloth needs urgent care."
+  },
+  {
+    "id": "fa_extra_054",
+    "title": "Puncture Wound or Bite Wound",
+    "tags": [
+      "puncture",
+      "bite wound",
+      "infection"
+    ],
+    "content": "1. Cover lightly and prevent licking while arranging veterinary cleaning.\n2. Do not seal punctures with thick ointment or ignore small holes.\n3. Bites to chest/abdomen, swelling, fever, or deep pain needs urgent assessment."
+  },
+  {
+    "id": "fa_extra_055",
+    "title": "Eye Prolapse or Severe Eye Trauma",
+    "tags": [
+      "eye",
+      "prolapse",
+      "trauma",
+      "emergency"
+    ],
+    "content": "1. Keep the eye moist with sterile saline or clean damp gauze and prevent rubbing.\n2. Do not push the eye back or use random drops.\n3. This is an emergency; rapid vet care gives the best chance of saving vision."
+  },
+  {
+    "id": "fa_extra_056",
+    "title": "Torn Ear Flap",
+    "tags": [
+      "ear",
+      "bleeding",
+      "wound"
+    ],
+    "content": "1. Apply gentle pressure with clean gauze and keep the head as still as possible.\n2. Do not wrap tightly around the neck or let the dog shake repeatedly.\n3. Persistent bleeding, deep tears, or bite wounds need vet care."
+  },
+  {
+    "id": "fa_extra_057",
+    "title": "Paw Pad Cut",
+    "tags": [
+      "paw pad",
+      "cut",
+      "bleeding"
+    ],
+    "content": "1. Rinse visible dirt, apply pressure, and cover with clean cloth for transport.\n2. Do not use superglue or tight rubber bands.\n3. Deep pad cuts often reopen and need veterinary cleaning or closure."
+  },
+  {
+    "id": "fa_extra_058",
+    "title": "Electrocution or Chewed Wire",
+    "tags": [
+      "electrocution",
+      "burn",
+      "shock"
+    ],
+    "content": "1. Switch off power before touching the dog and check breathing once safe.\n2. Do not touch the dog while it may still contact live current.\n3. Mouth burns, collapse, coughing, or breathing trouble after shock is emergency."
+  },
+  {
+    "id": "fa_extra_059",
+    "title": "Thermal Burn From Fire or Hot Liquid",
+    "tags": [
+      "burn",
+      "fire",
+      "trauma"
+    ],
+    "content": "1. Cool the burn with running room-temperature water for several minutes and cover loosely.\n2. Do not apply butter, oil, toothpaste, or ice.\n3. Large burns, face burns, smoke exposure, or severe pain needs urgent care."
+  },
+  {
+    "id": "fa_extra_060",
+    "title": "Chemical Burn on Skin",
+    "tags": [
+      "chemical burn",
+      "skin",
+      "acid"
+    ],
+    "content": "1. Use gloves, remove contaminated collar/cloth, and rinse with lots of clean water.\n2. Do not apply another chemical to neutralize it.\n3. Burns to eyes, mouth, genitals, or large areas need emergency care."
+  },
+  {
+    "id": "fa_extra_061",
+    "title": "Object Stuck in Body",
+    "tags": [
+      "embedded object",
+      "puncture",
+      "trauma"
+    ],
+    "content": "1. Stabilize the object with bulky cloth around it and transport carefully.\n2. Do not pull out deeply embedded sticks, metal, glass, or hooks.\n3. Chest, belly, neck, or heavy bleeding cases are emergencies."
+  },
+  {
+    "id": "fa_extra_062",
+    "title": "Kite String or Wire Neck Injury",
+    "tags": [
+      "manja",
+      "wire",
+      "neck wound",
+      "bleeding"
+    ],
+    "content": "1. Cut free loose string carefully and apply pressure to bleeding areas.\n2. Do not pull tight string through skin or rotate the neck forcefully.\n3. Neck swelling, breathing noise, deep cuts, or weakness needs urgent care."
+  },
+  {
+    "id": "fa_extra_063",
+    "title": "Crush Injury",
+    "tags": [
+      "crush",
+      "trauma",
+      "shock"
+    ],
+    "content": "1. Keep the dog still, warm, and transport on a firm surface.\n2. Do not massage crushed limbs or force walking.\n3. Pale gums, weakness, severe swelling, or dark urine after crush is urgent."
+  },
+  {
+    "id": "fa_extra_064",
+    "title": "Difficult Birth or Puppy Stuck",
+    "tags": [
+      "dystocia",
+      "birth",
+      "reproductive"
+    ],
+    "content": "1. Keep the mother calm and call a vet/rescue with delivery experience immediately.\n2. Do not pull hard on a puppy or insert objects into the birth canal.\n3. Straining over 30 minutes with no puppy, green discharge before a puppy, or exhaustion is urgent."
+  },
+  {
+    "id": "fa_extra_065",
+    "title": "Mastitis in Nursing Dog",
+    "tags": [
+      "mastitis",
+      "mother dog",
+      "reproductive"
+    ],
+    "content": "1. Keep puppies warm and check if the mother is feverish, painful, or refusing nursing.\n2. Do not squeeze painful glands hard or give leftover antibiotics.\n3. Hot swollen mammary glands, pus, fever, or weak puppies need vet care."
+  },
+  {
+    "id": "fa_extra_066",
+    "title": "Eclampsia or Trembling Nursing Mother",
+    "tags": [
+      "eclampsia",
+      "reproductive",
+      "tremors"
+    ],
+    "content": "1. Move puppies away temporarily and keep the mother quiet while seeking emergency care.\n2. Do not give calcium tablets blindly or force food during tremors.\n3. Restlessness, stiff walking, tremors, fever, or seizures after birth is emergency."
+  },
+  {
+    "id": "fa_extra_067",
+    "title": "Neonatal Puppy Distress",
+    "tags": [
+      "puppy",
+      "newborn",
+      "neonatal"
+    ],
+    "content": "1. Warm the puppy first against a warm wrapped bottle and keep the airway clear.\n2. Do not feed a cold or weak puppy because aspiration risk is high.\n3. Cold body, constant crying, blue gums, or no suckle reflex needs experienced help."
+  },
+  {
+    "id": "fa_extra_068",
+    "title": "Retained Placenta or Foul Discharge",
+    "tags": [
+      "birth",
+      "reproductive",
+      "infection"
+    ],
+    "content": "1. Keep the mother clean and record timing of puppies and placentas if known.\n2. Do not pull tissue from the vulva.\n3. Foul smell, fever, weakness, heavy bleeding, or no appetite after birth needs urgent care."
+  },
+  {
+    "id": "fa_extra_069",
+    "title": "Heavy Bleeding After Birth",
+    "tags": [
+      "postpartum",
+      "bleeding",
+      "reproductive"
+    ],
+    "content": "1. Keep the mother warm and quiet and arrange urgent transport.\n2. Do not give human medicines or try internal checks.\n3. Soaking blood, pale gums, collapse, or weakness after birth is emergency."
+  },
+  {
+    "id": "fa_extra_070",
+    "title": "Early Maggot Wound",
+    "tags": [
+      "maggot",
+      "myiasis",
+      "wound"
+    ],
+    "content": "1. Move the dog away from flies and cover loosely with clean gauze while arranging help.\n2. Do not pour kerosene, turpentine, engine oil, or acid into the wound.\n3. Maggots in any wound need vet/rescue cleaning as soon as possible."
+  },
+  {
+    "id": "fa_extra_071",
+    "title": "Advanced Maggot Wound",
+    "tags": [
+      "maggot",
+      "myiasis",
+      "infection",
+      "urgent"
+    ],
+    "content": "1. Keep the dog calm, prevent more flies, and transport urgently.\n2. Do not dig deeply with sharp tools or flood the wound with chemicals.\n3. Foul smell, deep tissue loss, fever, or weakness is urgent and painful."
+  },
+  {
+    "id": "fa_extra_072",
+    "title": "Severe Mange With Open Skin",
+    "tags": [
+      "mange",
+      "skin",
+      "itching"
+    ],
+    "content": "1. Provide clean bedding, food, water, and arrange a veterinary skin plan.\n2. Do not use engine oil, kerosene, acid, or random dips.\n3. Whole-body hair loss, open sores, pus, or weakness means rescue/vet help is needed."
+  },
+  {
+    "id": "fa_extra_073",
+    "title": "Oil or Tar on Coat",
+    "tags": [
+      "oil",
+      "tar",
+      "skin",
+      "chemical"
+    ],
+    "content": "1. Prevent licking and use a collar/cone substitute while seeking safe cleaning advice.\n2. Do not use petrol, kerosene, paint thinner, or harsh solvents.\n3. Large contamination, skin burns, or ingestion signs needs veterinary help."
+  },
+  {
+    "id": "fa_extra_074",
+    "title": "Hot Spot or Moist Skin Wound",
+    "tags": [
+      "skin",
+      "hot spot",
+      "infection"
+    ],
+    "content": "1. Keep the area dry, stop licking if possible, and clean gently around the surface.\n2. Do not apply thick oily home remedies that trap moisture.\n3. Rapid spreading, bad smell, pus, fever, or severe pain needs vet care."
+  },
+  {
+    "id": "fa_extra_075",
+    "title": "Heavy Tick Burden",
+    "tags": [
+      "ticks",
+      "anemia",
+      "skin"
+    ],
+    "content": "1. Remove visible ticks carefully and keep the dog quiet with water available.\n2. Do not pour pesticides or engine oil on raw skin.\n3. Pale gums, fever, nosebleeds, weakness, or not eating needs urgent vet care."
+  },
+  {
+    "id": "fa_extra_076",
+    "title": "Abscess or Swollen Bite Area",
+    "tags": [
+      "abscess",
+      "bite wound",
+      "infection"
+    ],
+    "content": "1. Keep the dog from licking and avoid squeezing the swelling.\n2. Do not lance it at home or seal draining holes.\n3. Painful swelling, pus, fever, or a bite near joints/face needs veterinary treatment."
+  },
+  {
+    "id": "fa_extra_077",
+    "title": "Ringworm-Like Patchy Skin",
+    "tags": [
+      "skin",
+      "fungal",
+      "ringworm"
+    ],
+    "content": "1. Wash hands after handling and keep bedding clean while arranging diagnosis.\n2. Do not share brushes or apply steroid creams randomly.\n3. Spreading lesions, puppies, or immunocompromised people in contact need prompt guidance."
+  },
+  {
+    "id": "fa_extra_078",
+    "title": "Bloat or Swollen Belly With Retching",
+    "tags": [
+      "bloat",
+      "gi",
+      "emergency"
+    ],
+    "content": "1. Keep the dog calm and transport to an emergency vet immediately.\n2. Do not force food, water, exercise, or home gas remedies.\n3. Swollen tight abdomen with unproductive retching is life-threatening."
+  },
+  {
+    "id": "fa_extra_079",
+    "title": "Foreign Body Swallowed",
+    "tags": [
+      "foreign body",
+      "gi",
+      "swallow"
+    ],
+    "content": "1. Identify what was swallowed and call a vet with size, material, and time.\n2. Do not pull string from the mouth or anus and do not induce vomiting without advice.\n3. Sharp objects, batteries, string, magnets, or blockage signs are urgent."
+  },
+  {
+    "id": "fa_extra_080",
+    "title": "Parvo-Suspect Puppy",
+    "tags": [
+      "puppy",
+      "parvo",
+      "bloody diarrhea"
+    ],
+    "content": "1. Isolate from other dogs, keep warm, and offer tiny water amounts only if not vomiting.\n2. Do not give human anti-diarrhea medicines.\n3. Bloody diarrhea, repeated vomiting, weakness, or unvaccinated puppy needs urgent care."
+  },
+  {
+    "id": "fa_extra_081",
+    "title": "Severe Diarrhea in Adult Dog",
+    "tags": [
+      "diarrhea",
+      "gi",
+      "dehydration"
+    ],
+    "content": "1. Offer water in small amounts if alert and keep the dog in a clean quiet area.\n2. Do not give random antibiotics, painkillers, or anti-diarrheals.\n3. Blood, black stool, collapse, fever, or dehydration needs vet care."
+  },
+  {
+    "id": "fa_extra_082",
+    "title": "Repeated Vomiting",
+    "tags": [
+      "vomiting",
+      "gi",
+      "dehydration"
+    ],
+    "content": "1. Remove food temporarily and offer small sips of water only if vomiting slows.\n2. Do not force water or give human nausea medicines.\n3. Vomiting with weakness, bloated belly, blood, or inability to keep water down is urgent."
+  },
+  {
+    "id": "fa_extra_083",
+    "title": "Painful Straining to Urinate",
+    "tags": [
+      "urinary",
+      "straining",
+      "emergency"
+    ],
+    "content": "1. Watch whether urine is actually passing and keep the dog calm.\n2. Do not press the abdomen or give urinary medicines at home.\n3. Repeated straining with little/no urine, especially in males, can be emergency."
+  },
+  {
+    "id": "fa_extra_084",
+    "title": "Aggressive Dog in Pain",
+    "tags": [
+      "approach",
+      "aggressive",
+      "pain"
+    ],
+    "content": "1. Create distance, reduce crowding, and call experienced rescue rather than forcing contact.\n2. Do not corner, stare, grab, or punish the dog.\n3. If people are at risk or the dog blocks an area, prioritize controlled rescue support."
+  },
+  {
+    "id": "fa_extra_085",
+    "title": "Fearful Cornered Dog",
+    "tags": [
+      "approach",
+      "fearful",
+      "cornered"
+    ],
+    "content": "1. Give an exit route, turn sideways, crouch only if safe, and toss food away from you.\n2. Do not block escape paths or reach over the head.\n3. Escalate if the dog is injured but cannot be approached safely."
+  },
+  {
+    "id": "fa_extra_086",
+    "title": "Unconscious but Breathing Dog",
+    "tags": [
+      "unconscious",
+      "breathing",
+      "collapse"
+    ],
+    "content": "1. Keep airway clear, place on the side with head/neck aligned, and keep warm.\n2. Do not give food, water, or medicines by mouth.\n3. Unconsciousness is an emergency even if breathing continues."
+  },
+  {
+    "id": "fa_extra_087",
+    "title": "Conscious but Cannot Stand",
+    "tags": [
+      "non ambulatory",
+      "weakness",
+      "trauma"
+    ],
+    "content": "1. Keep the dog still and carry using a blanket or board if movement is necessary.\n2. Do not force walking to test strength.\n3. Sudden inability to stand, severe pain, or collapse needs urgent veterinary care."
+  },
+  {
+    "id": "fa_extra_088",
+    "title": "Improvised Muzzle for Painful Dog",
+    "tags": [
+      "muzzle",
+      "approach",
+      "bite prevention"
+    ],
+    "content": "1. Use a soft cloth loop only if the dog is breathing normally and not vomiting.\n2. Do not muzzle a dog with breathing distress, heatstroke, vomiting, or facial injury.\n3. If a muzzle is unsafe, use distance, barriers, and rescue help instead."
+  },
+  {
+    "id": "fa_extra_089",
+    "title": "Lifting an Injured Dog",
+    "tags": [
+      "transport",
+      "lift",
+      "trauma"
+    ],
+    "content": "1. Use two or more people and support chest and hips evenly, keeping the spine aligned.\n2. Do not lift by legs, scruff, collar, or tail.\n3. For suspected spinal injury, slide onto a board rather than lifting in arms."
+  },
+  {
+    "id": "fa_extra_090",
+    "title": "Transport on Board or Blanket",
+    "tags": [
+      "transport",
+      "board",
+      "spinal"
+    ],
+    "content": "1. Prepare the vehicle first and move the dog once, slowly, with the body supported.\n2. Do not repeatedly reposition or let the dog jump in/out.\n3. Use a firm board for spinal or major trauma cases."
+  },
+  {
+    "id": "fa_extra_091",
+    "title": "Restraining While Controlling Bleeding",
+    "tags": [
+      "bleeding",
+      "restraint",
+      "approach"
+    ],
+    "content": "1. Have one person steady the head/body while another applies direct pressure.\n2. Do not put hands near the mouth if the dog is panicking.\n3. If restraint increases struggling or bleeding, pause and call experienced help."
+  },
+  {
+    "id": "fa_extra_092",
+    "title": "Crowd Control Around Injured Street Dog",
+    "tags": [
+      "approach",
+      "crowd",
+      "street dog"
+    ],
+    "content": "1. Ask people to step back, reduce noise, and create a clear path for rescue or transport.\n2. Do not let multiple people touch, film closely, or feed at once.\n3. Crowding can trigger bites and delay first aid."
+  },
+  {
+    "id": "fa_extra_093",
+    "title": "Rabies-Risk Bite to Human",
+    "tags": [
+      "rabies",
+      "human safety",
+      "bite"
+    ],
+    "content": "1. Wash the wound with soap and running water for 15 minutes and seek medical care now.\n2. Do not wait to see if the dog becomes sick.\n3. Any bite/scratch/saliva on broken skin needs rabies post-exposure assessment."
+  },
+  {
+    "id": "fa_extra_094",
+    "title": "Hypothermia or Cold Weak Puppy",
+    "tags": [
+      "hypothermia",
+      "puppy",
+      "cold"
+    ],
+    "content": "1. Warm gradually with wrapped warm bottles and dry bedding before feeding.\n2. Do not use direct heat, hot water, or force milk into a cold puppy.\n3. Cold, limp, or non-suckling puppies need experienced rescue/vet help."
+  },
+  {
+    "id": "fa_extra_095",
+    "title": "Collar Embedded in Neck",
+    "tags": [
+      "collar",
+      "neck wound",
+      "skin"
+    ],
+    "content": "1. If loose enough, remove the collar gently and cover wounds with clean cloth.\n2. Do not cut deeply into swollen tissue without help.\n3. Embedded collars, bad smell, maggots, or bleeding need veterinary wound care."
+  },
+  {
+    "id": "fa_extra_096",
+    "title": "Fishhook in Mouth or Skin",
+    "tags": [
+      "fishhook",
+      "embedded object",
+      "mouth"
+    ],
+    "content": "1. Prevent the dog from pawing and cover the area if possible for transport.\n2. Do not pull a barbed hook backward through tissue.\n3. Hooks in mouth, eye, throat, or deep skin need professional removal."
+  },
+  {
+    "id": "fa_extra_097",
+    "title": "Porcupine Quills or Multiple Spines",
+    "tags": [
+      "quills",
+      "puncture",
+      "trauma"
+    ],
+    "content": "1. Keep the dog from rubbing and arrange veterinary removal.\n2. Do not cut quills short or pull many painful quills at home.\n3. Quills near eyes, mouth, chest, or heavy distress need urgent care."
+  },
+  {
+    "id": "fa_extra_098",
+    "title": "Ear Canal Pain or Head Tilt",
+    "tags": [
+      "ear",
+      "head tilt",
+      "infection"
+    ],
+    "content": "1. Prevent scratching and keep the dog calm until examined.\n2. Do not pour oil, peroxide, or leftover drops into the ear.\n3. Head tilt, severe pain, swelling, or discharge with fever needs veterinary care."
+  },
+  {
+    "id": "fa_extra_099",
+    "title": "Nose Bleed After Trauma",
+    "tags": [
+      "nose bleed",
+      "trauma",
+      "bleeding"
+    ],
+    "content": "1. Keep the dog calm with head level and apply a cool cloth over the bridge of the nose.\n2. Do not pack the nostrils or tilt the head far back.\n3. Persistent bleeding, pale gums, or trauma history needs urgent assessment."
+  },
+  {
+    "id": "fa_extra_100",
+    "title": "Shock Signs",
+    "tags": [
+      "shock",
+      "pale gums",
+      "collapse"
+    ],
+    "content": "1. Keep the dog warm, still, and transport urgently while minimizing handling.\n2. Do not give food, large water amounts, or medicines by mouth.\n3. Pale/white gums, weak pulse, cold limbs, or collapse is life-threatening."
+  },
+  {
+    "id": "fa_extra_101",
+    "title": "Severe Malnutrition or Starvation",
+    "tags": [
+      "malnutrition",
+      "weakness",
+      "stray"
+    ],
+    "content": "1. Offer small amounts of food and water in a quiet place and arrange rescue follow-up.\n2. Do not give a huge meal immediately because refeeding can harm weak dogs.\n3. Collapse, severe dehydration, wounds, or inability to eat needs veterinary help."
+  },
+  {
+    "id": "fa_extra_102",
+    "title": "Abandoned Litter Without Mother",
+    "tags": [
+      "puppies",
+      "orphan",
+      "litter"
+    ],
+    "content": "1. Watch from a distance first to see if the mother returns, unless puppies are in direct danger.\n2. Do not feed cold puppies or cow milk immediately.\n3. Cold, injured, fly-covered, or constantly crying puppies need rescue support."
+  },
+  {
+    "id": "fa_extra_103",
+    "title": "Dog With Bloody Urine",
+    "tags": [
+      "urinary",
+      "blood",
+      "infection"
+    ],
+    "content": "1. Keep the dog calm and note frequency, pain, and whether urine is passing.\n2. Do not give human antibiotics or painkillers.\n3. Straining, no urine, weakness, or trauma with blood in urine needs urgent vet care."
   }
 ]

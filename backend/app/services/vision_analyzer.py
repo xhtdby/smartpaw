@@ -32,7 +32,10 @@ Analyze this image in ONE pass and respond ONLY with valid JSON in this exact sh
     "visible_injuries": ["list of visible injuries, wounds, or physical problems"],
     "health_concerns": ["list of likely health concerns like mange, malnutrition, ticks, maggots, eye infection, etc."],
     "body_language": "description of posture, tail, ears, and overall body language"
-  }
+  },
+  "urgency_signals": ["visible or context-provided emergency clues"],
+  "unknown_factors": ["important facts that cannot be determined from image/context"],
+  "scenario_type": "short snake_case label such as fall_entrapment, road_trauma, heatstroke, skin_disease, healthy_or_low_risk, no_dog_visible, unclear"
 }
 
 Rules:
@@ -49,8 +52,12 @@ Rules:
       "health_concerns": [],
       "body_language": "No dog visible"
     }
+  - "urgency_signals": []
+  - "unknown_factors": ["dog_not_visible"]
+  - "scenario_type": "no_dog_visible"
 - Emotion label must be exactly one of: happy, sad, angry, relaxed, fearful, unknown
 - Distinguish clearly between what is directly visible and what is only a likely possibility
+- Treat user-provided context as important scene information, but do not invent visual findings from it
 - Be cautious when identifying health issues and avoid overclaiming from limited visual evidence
 - Do not wrap the JSON in markdown
 """
@@ -139,10 +146,15 @@ def _normalize_result(payload: dict) -> dict:
             "description": str(emotion_payload.get("description") or "Could not determine emotion").strip(),
         },
         "condition": condition,
+        "urgency_signals": _normalize_string_list(payload.get("urgency_signals")),
+        "unknown_factors": _normalize_string_list(payload.get("unknown_factors")),
+        "scenario_type": str(
+            payload.get("scenario_type") or ("unclear" if dog_detected else "no_dog_visible")
+        ).strip().lower().replace(" ", "_"),
     }
 
 
-async def analyze_vision(image_bytes: bytes) -> dict | None:
+async def analyze_vision(image_bytes: bytes, user_context: str | None = None) -> dict | None:
     """Analyze dog presence, emotion, and condition in one call."""
     settings = get_settings()
     if not settings.groq_api_key:
@@ -153,6 +165,10 @@ async def analyze_vision(image_bytes: bytes) -> dict | None:
     buf = io.BytesIO()
     image.save(buf, format="JPEG", quality=85)
     b64_image = base64.b64encode(buf.getvalue()).decode("utf-8")
+
+    prompt = VISION_PROMPT
+    if user_context and user_context.strip():
+        prompt = f"{VISION_PROMPT}\n\nUser-provided context: {user_context.strip()[:1000]}"
 
     try:
         async with httpx.AsyncClient(timeout=40.0) as client:
@@ -169,7 +185,7 @@ async def analyze_vision(image_bytes: bytes) -> dict | None:
                         {
                             "role": "user",
                             "content": [
-                                {"type": "text", "text": VISION_PROMPT},
+                                {"type": "text", "text": prompt},
                                 {
                                     "type": "image_url",
                                     "image_url": {

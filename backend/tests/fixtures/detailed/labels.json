@@ -1,0 +1,2822 @@
+[
+  {
+    "id": "bleeding-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Bengaluru near my house)"
+  },
+  {
+    "id": "bleeding-02",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Pune behind my building)"
+  },
+  {
+    "id": "bleeding-03",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Delhi street case)"
+  },
+  {
+    "id": "bleeding-04",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Hyderabad roadside)"
+  },
+  {
+    "id": "bleeding-05",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Mumbai colony)"
+  },
+  {
+    "id": "bleeding-06",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Chennai lane)"
+  },
+  {
+    "id": "bleeding-07",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Jaipur market)"
+  },
+  {
+    "id": "bleeding-08",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Kolkata park)"
+  },
+  {
+    "id": "bleeding-09",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (Udaipur road)"
+  },
+  {
+    "id": "bleeding-10",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "severe_bleeding",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "pressure"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "A street dog has heavy bleeding from the leg after a cut (unknown city)"
+  },
+  {
+    "id": "mange-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Bengaluru near my house)"
+  },
+  {
+    "id": "mange-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Pune behind my building)"
+  },
+  {
+    "id": "mange-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Delhi street case)"
+  },
+  {
+    "id": "mange-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Hyderabad roadside)"
+  },
+  {
+    "id": "mange-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Mumbai colony)"
+  },
+  {
+    "id": "mange-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Chennai lane)"
+  },
+  {
+    "id": "mange-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Jaipur market)"
+  },
+  {
+    "id": "mange-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Kolkata park)"
+  },
+  {
+    "id": "mange-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (Udaipur road)"
+  },
+  {
+    "id": "mange-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "skin_disease",
+    "expected_urgency_tier": "moderate",
+    "must_mention_keywords": [
+      "skin"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has patchy hair loss, crusty itchy skin, maybe mange (unknown city)"
+  },
+  {
+    "id": "maggots-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Bengaluru near my house)"
+  },
+  {
+    "id": "maggots-02",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Pune behind my building)"
+  },
+  {
+    "id": "maggots-03",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Delhi street case)"
+  },
+  {
+    "id": "maggots-04",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Hyderabad roadside)"
+  },
+  {
+    "id": "maggots-05",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Mumbai colony)"
+  },
+  {
+    "id": "maggots-06",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Chennai lane)"
+  },
+  {
+    "id": "maggots-07",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Jaipur market)"
+  },
+  {
+    "id": "maggots-08",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Kolkata park)"
+  },
+  {
+    "id": "maggots-09",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (Udaipur road)"
+  },
+  {
+    "id": "maggots-10",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "maggot_wound",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "maggot"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "There are maggots moving in an open wound on the dog (unknown city)"
+  },
+  {
+    "id": "heatstroke-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Bengaluru near my house)"
+  },
+  {
+    "id": "heatstroke-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Pune behind my building)"
+  },
+  {
+    "id": "heatstroke-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Delhi street case)"
+  },
+  {
+    "id": "heatstroke-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Hyderabad roadside)"
+  },
+  {
+    "id": "heatstroke-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Mumbai colony)"
+  },
+  {
+    "id": "heatstroke-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Chennai lane)"
+  },
+  {
+    "id": "heatstroke-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Jaipur market)"
+  },
+  {
+    "id": "heatstroke-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Kolkata park)"
+  },
+  {
+    "id": "heatstroke-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (Udaipur road)"
+  },
+  {
+    "id": "heatstroke-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "heatstroke",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "cool"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is overheated in the sun, panting hard and starting to collapse (unknown city)"
+  },
+  {
+    "id": "fracture-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Bengaluru near my house)"
+  },
+  {
+    "id": "fracture-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Pune behind my building)"
+  },
+  {
+    "id": "fracture-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Delhi street case)"
+  },
+  {
+    "id": "fracture-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Hyderabad roadside)"
+  },
+  {
+    "id": "fracture-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Mumbai colony)"
+  },
+  {
+    "id": "fracture-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Chennai lane)"
+  },
+  {
+    "id": "fracture-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Jaipur market)"
+  },
+  {
+    "id": "fracture-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Kolkata park)"
+  },
+  {
+    "id": "fracture-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (Udaipur road)"
+  },
+  {
+    "id": "fracture-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fracture",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "move"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is crying and holding one back leg oddly after a fall, possible fracture (unknown city)"
+  },
+  {
+    "id": "road-accident-01",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Bengaluru near my house)"
+  },
+  {
+    "id": "road-accident-02",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Pune behind my building)"
+  },
+  {
+    "id": "road-accident-03",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Delhi street case)"
+  },
+  {
+    "id": "road-accident-04",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Hyderabad roadside)"
+  },
+  {
+    "id": "road-accident-05",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Mumbai colony)"
+  },
+  {
+    "id": "road-accident-06",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Chennai lane)"
+  },
+  {
+    "id": "road-accident-07",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Jaipur market)"
+  },
+  {
+    "id": "road-accident-08",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Kolkata park)"
+  },
+  {
+    "id": "road-accident-09",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (Udaipur road)"
+  },
+  {
+    "id": "road-accident-10",
+    "url": "https://images.pexels.com/photos/4587998/pexels-photo-4587998.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "still"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog was hit by a bike on the road and cannot stand properly (unknown city)"
+  },
+  {
+    "id": "well-entrapment-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Bengaluru near my house)"
+  },
+  {
+    "id": "well-entrapment-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Pune behind my building)"
+  },
+  {
+    "id": "well-entrapment-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Delhi street case)"
+  },
+  {
+    "id": "well-entrapment-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Hyderabad roadside)"
+  },
+  {
+    "id": "well-entrapment-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Mumbai colony)"
+  },
+  {
+    "id": "well-entrapment-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Chennai lane)"
+  },
+  {
+    "id": "well-entrapment-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Jaipur market)"
+  },
+  {
+    "id": "well-entrapment-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Kolkata park)"
+  },
+  {
+    "id": "well-entrapment-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (Udaipur road)"
+  },
+  {
+    "id": "well-entrapment-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fall_entrapment",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "rescue",
+      "do not"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Stray fell into a well behind my house in Pune, can hear it whining (unknown city)"
+  },
+  {
+    "id": "choking-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Bengaluru near my house)"
+  },
+  {
+    "id": "choking-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Pune behind my building)"
+  },
+  {
+    "id": "choking-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Delhi street case)"
+  },
+  {
+    "id": "choking-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Hyderabad roadside)"
+  },
+  {
+    "id": "choking-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Mumbai colony)"
+  },
+  {
+    "id": "choking-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Chennai lane)"
+  },
+  {
+    "id": "choking-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Jaipur market)"
+  },
+  {
+    "id": "choking-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Kolkata park)"
+  },
+  {
+    "id": "choking-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (Udaipur road)"
+  },
+  {
+    "id": "choking-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "choking_airway",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog is choking, pawing at mouth, breathing sounds blocked (unknown city)"
+  },
+  {
+    "id": "seizure-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Bengaluru near my house)"
+  },
+  {
+    "id": "seizure-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Pune behind my building)"
+  },
+  {
+    "id": "seizure-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Delhi street case)"
+  },
+  {
+    "id": "seizure-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Hyderabad roadside)"
+  },
+  {
+    "id": "seizure-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Mumbai colony)"
+  },
+  {
+    "id": "seizure-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Chennai lane)"
+  },
+  {
+    "id": "seizure-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Jaipur market)"
+  },
+  {
+    "id": "seizure-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Kolkata park)"
+  },
+  {
+    "id": "seizure-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (Udaipur road)"
+  },
+  {
+    "id": "seizure-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "seizure_collapse",
+    "expected_urgency_tier": "life_threatening",
+    "must_mention_keywords": [
+      "mouth"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog collapsed and is having repeated seizure-like shaking (unknown city)"
+  },
+  {
+    "id": "poison-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Bengaluru near my house)"
+  },
+  {
+    "id": "poison-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Pune behind my building)"
+  },
+  {
+    "id": "poison-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Delhi street case)"
+  },
+  {
+    "id": "poison-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Hyderabad roadside)"
+  },
+  {
+    "id": "poison-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Mumbai colony)"
+  },
+  {
+    "id": "poison-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Chennai lane)"
+  },
+  {
+    "id": "poison-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Jaipur market)"
+  },
+  {
+    "id": "poison-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Kolkata park)"
+  },
+  {
+    "id": "poison-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (Udaipur road)"
+  },
+  {
+    "id": "poison-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "packet"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog may have eaten rat poison from a torn packet 20 minutes ago (unknown city)"
+  },
+  {
+    "id": "healthy-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Bengaluru near my house)"
+  },
+  {
+    "id": "healthy-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Pune behind my building)"
+  },
+  {
+    "id": "healthy-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Delhi street case)"
+  },
+  {
+    "id": "healthy-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Hyderabad roadside)"
+  },
+  {
+    "id": "healthy-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Mumbai colony)"
+  },
+  {
+    "id": "healthy-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Chennai lane)"
+  },
+  {
+    "id": "healthy-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Jaipur market)"
+  },
+  {
+    "id": "healthy-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Kolkata park)"
+  },
+  {
+    "id": "healthy-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (Udaipur road)"
+  },
+  {
+    "id": "healthy-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "healthy_or_low_risk",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "This dog looks healthy and playful, I only want to check if anything is wrong (unknown city)"
+  },
+  {
+    "id": "fearful-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Bengaluru near my house)"
+  },
+  {
+    "id": "fearful-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Pune behind my building)"
+  },
+  {
+    "id": "fearful-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Delhi street case)"
+  },
+  {
+    "id": "fearful-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Hyderabad roadside)"
+  },
+  {
+    "id": "fearful-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Mumbai colony)"
+  },
+  {
+    "id": "fearful-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Chennai lane)"
+  },
+  {
+    "id": "fearful-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Jaipur market)"
+  },
+  {
+    "id": "fearful-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Kolkata park)"
+  },
+  {
+    "id": "fearful-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (Udaipur road)"
+  },
+  {
+    "id": "fearful-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "fearful_aggressive",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "distance"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Injured dog is growling and cornered under stairs, people are crowding it (unknown city)"
+  },
+  {
+    "id": "puppy-diarrhea-01",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Bengaluru near my house)"
+  },
+  {
+    "id": "puppy-diarrhea-02",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Pune behind my building)"
+  },
+  {
+    "id": "puppy-diarrhea-03",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Delhi street case)"
+  },
+  {
+    "id": "puppy-diarrhea-04",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Hyderabad roadside)"
+  },
+  {
+    "id": "puppy-diarrhea-05",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Mumbai colony)"
+  },
+  {
+    "id": "puppy-diarrhea-06",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Chennai lane)"
+  },
+  {
+    "id": "puppy-diarrhea-07",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Jaipur market)"
+  },
+  {
+    "id": "puppy-diarrhea-08",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Kolkata park)"
+  },
+  {
+    "id": "puppy-diarrhea-09",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (Udaipur road)"
+  },
+  {
+    "id": "puppy-diarrhea-10",
+    "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "puppy_gi",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "water"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Small puppy has bloody diarrhea and is very weak (unknown city)"
+  },
+  {
+    "id": "eye-injury-01",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Bengaluru near my house)"
+  },
+  {
+    "id": "eye-injury-02",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Pune behind my building)"
+  },
+  {
+    "id": "eye-injury-03",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Delhi street case)"
+  },
+  {
+    "id": "eye-injury-04",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Hyderabad roadside)"
+  },
+  {
+    "id": "eye-injury-05",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Mumbai colony)"
+  },
+  {
+    "id": "eye-injury-06",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Chennai lane)"
+  },
+  {
+    "id": "eye-injury-07",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Jaipur market)"
+  },
+  {
+    "id": "eye-injury-08",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Kolkata park)"
+  },
+  {
+    "id": "eye-injury-09",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (Udaipur road)"
+  },
+  {
+    "id": "eye-injury-10",
+    "url": "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg",
+    "license": "Pexels-Free",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "eye_injury",
+    "expected_urgency_tier": "urgent",
+    "must_mention_keywords": [
+      "eye"
+    ],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "Dog has a swollen bleeding eye and keeps rubbing it (unknown city)"
+  },
+  {
+    "id": "no-dog-01",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Bengaluru near my house)"
+  },
+  {
+    "id": "no-dog-02",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Pune behind my building)"
+  },
+  {
+    "id": "no-dog-03",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Delhi street case)"
+  },
+  {
+    "id": "no-dog-04",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Hyderabad roadside)"
+  },
+  {
+    "id": "no-dog-05",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Mumbai colony)"
+  },
+  {
+    "id": "no-dog-06",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Chennai lane)"
+  },
+  {
+    "id": "no-dog-07",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Jaipur market)"
+  },
+  {
+    "id": "no-dog-08",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Kolkata park)"
+  },
+  {
+    "id": "no-dog-09",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (Udaipur road)"
+  },
+  {
+    "id": "no-dog-10",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
+    "license": "Wikimedia Commons",
+    "attribution": "Pexels/Wikimedia source URL listed in url field",
+    "scenario_type": "no_dog_visible",
+    "expected_urgency_tier": "low_risk",
+    "must_mention_keywords": [],
+    "must_not_say_phrases": [
+      "I cannot help",
+      "consult a vet first",
+      "as an AI",
+      "I am unable to",
+      "I cannot provide"
+    ],
+    "user_message": "No dog is visible in this image; tell me if you can analyze it (unknown city)"
+  }
+]

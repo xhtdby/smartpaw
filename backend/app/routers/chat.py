@@ -4,6 +4,7 @@ POST /api/chat — conversational first aid after image analysis or direct query
 Uses a curated first aid knowledge base for retrieval-augmented generation.
 """
 
+import asyncio
 import json
 import logging
 import math
@@ -17,6 +18,7 @@ from fastapi import APIRouter
 
 from app.config import get_settings
 from app.models.schemas import ChatRequest
+from app.services.triage import TriageResult, classify_situation
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["chat"])
@@ -60,7 +62,14 @@ def _load_kb() -> None:
         }
 
 
-def _retrieve_relevant(query: str, top_k: int = 3) -> tuple[str, list[str]]:
+def _clip_text(text: str, max_chars: int) -> str:
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) <= max_chars:
+        return text
+    return text[: max_chars - 1].rstrip() + "..."
+
+
+def _retrieve_relevant(query: str, top_k: int = 2, max_chars: int = 600) -> tuple[str, list[str]]:
     _load_kb()
     query_tokens = _tokenize(query)
     if not query_tokens:
@@ -98,62 +107,62 @@ def _retrieve_relevant(query: str, top_k: int = 3) -> tuple[str, list[str]]:
 
     context_parts: list[str] = []
     sources: list[str] = []
+    remaining = max_chars
     for _, article in top:
-        context_parts.append(f"**{article['title']}**\n{article['content']}")
+        title = str(article["title"])
+        body_budget = max(120, remaining - len(title) - 8)
+        part = f"**{title}**\n{_clip_text(str(article['content']), body_budget)}"
+        context_parts.append(part)
         sources.append(article["title"])
+        remaining -= len(part) + 8
+        if remaining <= 80:
+            break
     return "\n\n---\n\n".join(context_parts), sources
 
 
 # ---------------------------------------------------------------------------
-# Emergency contacts for major Indian cities — embedded in system prompt
+# Emergency contacts for major Indian cities. Only the matching city is injected.
 # ---------------------------------------------------------------------------
-_INDIA_EMERGENCY_CONTACTS = """
-VERIFIED INDIA ANIMAL RESCUE CONTACTS (use when user asks who to call):
-- Mumbai: BSPCA +91-85916-59398 (24x7 hospital)
-- Delhi NCR: Friendicoes SECA +91-88829-31057 (9am–9pm; night service suspended)
-- Delhi guidance: Jaagruti WhatsApp +91-98181-44244 (advice only, not ambulance)
-- Bengaluru: CUPA +91-98454-25678 (9am–5pm daily, trauma & rescue)
-- Hyderabad: PFA Hyderabad +91-73374-50643 (24 hours)
-- Pune: RESQ Charitable Trust +91-98909-99111 (11am–5pm; 24x7 for wildlife/large animals)
-- Jaipur: Help in Suffering +91-81072-99711
-- Kolkata: Love N Care For Animals +91-98300-37693
-- Udaipur: Animal Aid Unlimited +91-98298-43726 (stay with animal)
-- Chennai: Blue Cross rescue form online (bluecrossofindia.org); ABC helpline 1913
-- All India: AWBI 0129-2555700 (Mon–Fri 9am–5:30pm)
-- All India emergencies (human safety): 112
-"""
+_CITY_EMERGENCY_CONTACTS: dict[str, str] = {
+    "mumbai": "Mumbai: BSPCA +91-85916-59398 (24x7 hospital)",
+    "delhi": "Delhi NCR: Friendicoes SECA +91-88829-31057 (9am-9pm; night service suspended). Jaagruti WhatsApp +91-98181-44244 for advice.",
+    "ncr": "Delhi NCR: Friendicoes SECA +91-88829-31057 (9am-9pm; night service suspended). Jaagruti WhatsApp +91-98181-44244 for advice.",
+    "bengaluru": "Bengaluru: CUPA +91-98454-25678 (9am-5pm daily, trauma and rescue)",
+    "bangalore": "Bengaluru: CUPA +91-98454-25678 (9am-5pm daily, trauma and rescue)",
+    "hyderabad": "Hyderabad: PFA Hyderabad +91-73374-50643 (24 hours)",
+    "pune": "Pune: RESQ Charitable Trust +91-98909-99111 (11am-5pm; technical rescues depending on case)",
+    "jaipur": "Jaipur: Help in Suffering +91-81072-99711",
+    "kolkata": "Kolkata: Love N Care For Animals +91-98300-37693",
+    "udaipur": "Udaipur: Animal Aid Unlimited +91-98298-43726 (stay with the animal if safe)",
+    "chennai": "Chennai: Blue Cross rescue form at bluecrossofindia.org; ABC helpline 1913",
+}
 
-SYSTEM_PROMPT = """You are IndieAid, an AI first-aid assistant for dogs. Your role is to help a rescuer take the right action in the next few minutes.
+DEFAULT_CONTACT_LINE = (
+    "If no city contact is known, open Find Help in the app or call a nearby "
+    "emergency veterinarian/rescue service. For unsafe human situations in India, call 112."
+)
 
-PRIME DIRECTIVE — LEAD WITH IMMEDIATE ACTION:
-When someone reports an injured or sick dog, your FIRST output must be the immediate first aid steps they can take RIGHT NOW. Do not open with disclaimers, "do not approach", or preamble. Start with what to DO. Safety warnings go inside the steps where they belong, not before them.
+SYSTEM_PROMPT = """You are IndieAid, a dog first-aid assistant. Help the rescuer act in the next few minutes.
 
-Only exceptions: if the dog is described as actively biting, lunging, cornering people, or the scene itself is dangerous (live traffic, fire, electrocution), open with a one-sentence safety note, then immediately give steps.
+Core rules:
+- Lead with concrete action. Do not open with disclaimers or generic caution.
+- Put safety warnings inside action steps, unless the dog is attacking or the scene has traffic, fire, electrocution, height, or confined-space risk.
+- Never recommend prescription drugs, injections, antibiotics, steroids, painkillers, dewormers, random human medicines, kerosene, turpentine, engine oil, acid, or chili.
+- Safe first aid may include shade, water only if the dog can swallow, direct pressure, saline rinse, diluted povidone-iodine on superficial wounds, clean cloth/gauze, warmth, quiet isolation, and careful transport.
+- Be honest about uncertainty; do not diagnose.
+- Keep the reply under 700 tokens.
 
-Response structure (always follow this):
-1. **Immediate steps** — numbered, concrete, do-now actions (2–5 steps max, each ≤20 words)
-2. **When to escalate** — 1–2 lines: what signs mean the dog needs a vet urgently
-3. **Who to call** — if professional help is needed, give the specific city contact from the list below, not a generic "find a vet"
-4. **Watch for** — what to monitor after the immediate steps (optional, 1–2 lines)
+Adaptive response shape:
+- If TRIAGE.info_sufficient is false: ask only 1-2 targeted questions; do not use section headings.
+- If TRIAGE.urgency_tier is life_threatening and TRIAGE.needs_helpline_first is true: give the contact line first, then 1-3 numbered immediate actions. No "watch for" section.
+- If TRIAGE.urgency_tier is life_threatening: give 1-3 numbered immediate actions. No "watch for" section.
+- Otherwise use: **Immediate steps**, **When to escalate**, **Who to call**, **Watch for**.
 
-Approach safety rules (embed in steps, not as the opener):
-- Move slowly, turn sideways, avoid leaning over the dog.
-- Give the dog an exit route — do not corner it.
-- Even friendly dogs bite when in pain. Keep face away from the mouth.
-- If the dog is actively attacking or cannot be approached safely, call rescue and wait nearby.
+CONTACT LINE:
+{emergency_contact}
 
-Clinical safety rules:
-- Do not recommend prescription drugs, injections, antibiotics, steroids, painkillers, dewormers, or human medicines.
-- Safe first aid you may recommend: shade, water (if dog can swallow), direct pressure on bleeding, saline rinse, diluted povidone-iodine on surface wounds, clean cloth or gauze, warmth for puppies, quiet isolation.
-- Explicitly warn against: kerosene, turpentine, engine oil, acid, chili, random OTC human medicines.
-- You are NOT a veterinarian and must not present advice as a diagnosis.
-
-Escalate as EMERGENCY for:
-- Trouble breathing, collapse, repeated seizures, heavy or non-stop bleeding, possible spinal or internal injury, suspected poisoning, heatstroke that is not improving, bloated abdomen with retching, maggot wounds, deep bite or puncture wounds, a puppy with bloody diarrhoea, or any bite/scratch that may expose a person to rabies.
-
-{emergency_contacts}
-
-Resource rule: When the user needs real-world help, give the specific city contact above if they mention or imply a city. If city is unknown, direct them to Find Help in the app or to the AWBI directory.
+TRIAGE:
+{triage}
 
 {language_instruction}
 
@@ -197,7 +206,8 @@ _EMERGENCY_KEYWORDS = [
     "urgent", "emergency", "immediately", "rush", "cannot breathe", "not breathing",
     "collapsed", "collapse", "seizure", "heavy bleeding", "poison", "unconscious",
     "unresponsive", "critical", "life-threatening", "call vet", "vet urgently",
-    "veterinary care urgently", "escalate", "112", "ambulance",
+    "veterinary care urgently", "escalate", "112", "ambulance", "well",
+    "borewell", "trapped", "entrap", "rescue", "choking", "heatstroke",
 ]
 
 _FIND_HELP_KEYWORDS = [
@@ -268,32 +278,235 @@ def _build_action_cards(query: str, response: str, language: str) -> tuple[list[
     return cards, is_emergency
 
 
+def _matching_emergency_contact(text: str) -> str:
+    haystack = text.lower()
+    for city, contact in _CITY_EMERGENCY_CONTACTS.items():
+        if re.search(rf"\b{re.escape(city)}\b", haystack):
+            return contact
+    return DEFAULT_CONTACT_LINE
+
+
+def _last_assistant_message(history: list[Any]) -> str | None:
+    for msg in reversed(history):
+        if getattr(msg, "role", "") == "assistant":
+            return getattr(msg, "content", "")
+    return None
+
+
+def _history_for_model(history: list[Any]) -> list[dict[str, str]]:
+    """Keep recent turns verbatim and compress older turns into one short block."""
+    if len(history) <= 6:
+        return [{"role": msg.role, "content": msg.content} for msg in history]
+
+    older = history[:-4]
+    recent = history[-4:]
+    snippets: list[str] = []
+    for msg in older[-8:]:
+        content = _clip_text(getattr(msg, "content", ""), 180)
+        if content:
+            snippets.append(f"{getattr(msg, 'role', 'user')}: {content}")
+    summary = _clip_text("Situation so far: " + " | ".join(snippets), 900)
+    return [{"role": "assistant", "content": summary}] + [
+        {"role": msg.role, "content": msg.content} for msg in recent
+    ]
+
+
+def _build_clarifying_reply(triage: TriageResult, language: str) -> str:
+    questions_by_fact = {
+        "main_symptom": "What is the main thing you are seeing right now: breathing problem, bleeding, vomiting/diarrhea, collapse, pain, or behavior change?",
+        "breathing_and_responsiveness": "Is the dog breathing normally and responding to voice or touch?",
+        "recent_event_or_exposure": "Did anything happen recently: fall, accident, heat exposure, poison/chemical, bite, or unknown?",
+        "what_happened": "What happened just before you messaged?",
+        "current_symptoms": "What symptoms can you see right now?",
+        "visible_injury": "Do you see bleeding, swelling, a wound, or a limb held oddly?",
+        "can_stand": "Can the dog stand or walk at all?",
+        "breathing_status": "Is breathing normal, noisy, very fast, or absent?",
+    }
+    selected: list[str] = []
+    for fact in triage.missing_facts:
+        question = questions_by_fact.get(fact)
+        if question and question not in selected:
+            selected.append(question)
+        if len(selected) == 2:
+            break
+    if not selected:
+        selected = [
+            "Is the dog breathing normally and responding?",
+            "What exactly happened or changed just before this?",
+        ]
+
+    if language == "hi":
+        return "पहले ये दो बातें बताएं:\n1. क्या कुत्ता सामान्य सांस ले रहा है और आवाज/छूने पर प्रतिक्रिया दे रहा है?\n2. अभी मुख्य समस्या क्या दिख रही है?"
+    if language == "mr":
+        return "आधी या दोन गोष्टी सांगा:\n1. कुत्रा नीट श्वास घेतोय आणि आवाज/स्पर्शाला प्रतिसाद देतोय का?\n2. आत्ता मुख्य त्रास काय दिसतोय?"
+    return "Two things first:\n" + "\n".join(f"{idx}. {question}" for idx, question in enumerate(selected, 1))
+
+
+def _triage_dict(triage: TriageResult) -> dict[str, Any]:
+    return triage.model_dump()
+
+
+def _fallback_for_triage(message: str, context: str, triage: TriageResult) -> str | None:
+    contact = _matching_emergency_contact(message + " " + context)
+    scenario = triage.scenario_type
+
+    if scenario == "fall_entrapment":
+        return (
+            f"{contact}\n"
+            "1. Call rescue/fire services now; this needs ropes or confined-space equipment.\n"
+            "2. Do not climb into the well or let bystanders crowd the edge.\n"
+            "3. Keep talking softly and watch breathing/movement until trained help arrives."
+        )
+    if scenario == "choking_airway":
+        return (
+            "1. If air is moving and the dog can cough, keep it calm and let it cough.\n"
+            "2. If an object is visible at the front of the mouth, remove it carefully without pushing deeper.\n"
+            "3. Blue gums, silent choking, or collapse means emergency transport now."
+        )
+    if scenario == "seizure_collapse":
+        return (
+            "1. Move objects away and keep the dog away from stairs, traffic, or water.\n"
+            "2. Do not put hands, food, water, or medicine in the mouth.\n"
+            "3. Time the seizure/collapse and arrange urgent veterinary help."
+        )
+    if scenario == "severe_bleeding":
+        return (
+            "1. Apply firm direct pressure with a clean cloth for at least 3 minutes.\n"
+            "2. Add more cloth on top if it soaks through; do not peel the first layer away.\n"
+            "3. Heavy or spurting bleeding needs urgent transport/rescue help."
+        )
+    if scenario == "heatstroke":
+        return (
+            "1. Move the dog to shade or a cool indoor space immediately.\n"
+            "2. Cool belly, groin, armpits, paws, and neck with room-temperature water.\n"
+            "3. Offer small sips only if alert and able to swallow; arrange urgent care."
+        )
+    if scenario in {"fracture", "road_trauma"}:
+        return (
+            "1. Keep the dog still and limit movement; assume pain, fracture, or internal injury.\n"
+            "2. Slide onto a board, blanket, or cardboard for transport without twisting the spine.\n"
+            "3. Do not straighten limbs, pull legs, or force walking."
+        )
+    if scenario == "poisoning":
+        return (
+            "1. Move the dog away from the poison and keep the packet/container for the vet.\n"
+            "2. Do not induce vomiting or give milk, oil, salt, or home remedies.\n"
+            "3. Call an emergency veterinarian or poison service now with amount and time."
+        )
+    if scenario == "maggot_wound":
+        return (
+            "1. Keep the dog calm and protect the wound from more flies.\n"
+            "2. Cover loosely with clean gauze or cloth; use saline only for gentle surface rinsing.\n"
+            "3. Do not pour kerosene, engine oil, turpentine, acid, or harsh chemicals on maggots."
+        )
+    if scenario == "skin_disease":
+        return (
+            "1. Give clean water, food, and a quiet place away from flies and traffic.\n"
+            "2. Do not use kerosene, engine oil, acid, chili, or random skin medicines.\n"
+            "3. Arrange vet/rescue help if skin is open, foul-smelling, bleeding, or the dog is weak."
+        )
+    if scenario == "puppy_gi":
+        return (
+            "1. Keep the puppy warm, quiet, and away from other dogs.\n"
+            "2. Offer tiny amounts of water only if alert and not vomiting repeatedly.\n"
+            "3. Bloody diarrhea or weakness in a puppy needs urgent veterinary help."
+        )
+    if scenario == "eye_injury":
+        return (
+            "1. Stop the dog rubbing the eye and keep it calm in shade.\n"
+            "2. If available, moisten the eye area with sterile saline; do not use random drops.\n"
+            "3. Swelling, bleeding, or a closed/bulging eye needs urgent veterinary care."
+        )
+    if scenario == "fearful_aggressive":
+        return (
+            "1. Create distance and ask people to step back quietly.\n"
+            "2. Do not corner, grab, stare at, or punish the dog.\n"
+            "3. Call experienced rescue if the dog is injured but cannot be approached safely."
+        )
+    if scenario == "healthy_or_low_risk":
+        return (
+            "1. Observe from a comfortable distance for breathing, walking, appetite, and alertness.\n"
+            "2. Offer clean water and shade if the dog is outdoors.\n"
+            "3. Get help if vomiting, diarrhea, limping, wounds, collapse, or breathing trouble appears."
+        )
+    if scenario == "no_dog_visible":
+        return (
+            "1. Retake the photo with the dog visible, well-lit, and not blocked by objects.\n"
+            "2. Add a short note about what happened and any symptoms you can see.\n"
+            "3. If there is an emergency off-camera, describe it in chat and call local help."
+        )
+    if triage.urgency_tier in {"life_threatening", "urgent"}:
+        return (
+            "1. Keep the dog still, calm, and away from traffic or crowds.\n"
+            "2. Check breathing, bleeding, responsiveness, and whether the dog can stand.\n"
+            "3. Contact local rescue or an emergency veterinarian now if any red flag is present."
+        )
+    return None
+
+
 @router.post("/chat")
 async def chat(request: ChatRequest):
     """Chat with IndieAid about dog first aid and care."""
     settings = get_settings()
 
-    context, sources = _retrieve_relevant(request.message)
+    triage_task = asyncio.create_task(
+        classify_situation(
+            request.message,
+            request.context_from_analysis,
+            _last_assistant_message(request.history),
+        )
+    )
+
+    retrieval_query = request.message
     if request.context_from_analysis:
-        context = f"Previous analysis of the dog:\n{request.context_from_analysis}\n\n---\n\n{context}"
+        retrieval_query = f"{request.message}\n{request.context_from_analysis}"
+    context, sources = _retrieve_relevant(retrieval_query)
+    if request.context_from_analysis:
+        context = (
+            "Previous analysis of the dog:\n"
+            f"{_clip_text(request.context_from_analysis, 800)}\n\n---\n\n{context}"
+        )
+
+    triage = await triage_task
+    if not triage.info_sufficient:
+        reply = _build_clarifying_reply(triage, request.language)
+        cards, is_emergency = _build_action_cards(request.message, reply, request.language)
+        return {
+            "response": reply,
+            "sources": sources,
+            "action_cards": cards,
+            "is_emergency": is_emergency,
+            "triage": _triage_dict(triage),
+        }
 
     lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
+    contact_context = " ".join(
+        [request.message, request.context_from_analysis or ""]
+        + [msg.content for msg in request.history[-6:]]
+    )
     system = SYSTEM_PROMPT.format(
         language_instruction=lang_instruction,
         context=context,
-        emergency_contacts=_INDIA_EMERGENCY_CONTACTS,
+        emergency_contact=_matching_emergency_contact(contact_context),
+        triage=json.dumps(_triage_dict(triage), ensure_ascii=False),
     )
 
     reminder = LANGUAGE_REMINDERS.get(request.language, "")
     messages = [{"role": "system", "content": system}]
-    for msg in request.history[-10:]:
-        messages.append({"role": msg.role, "content": msg.content})
+    messages.extend(_history_for_model(request.history))
     messages.append({"role": "user", "content": request.message + reminder})
 
     if not settings.groq_api_key:
-        fallback = _fallback_chat(request.message, context, request.language)
+        fallback = _fallback_chat(request.message, context, request.language, triage)
         cards, is_emergency = _build_action_cards(request.message, fallback, request.language)
-        return {"response": fallback, "sources": sources, "action_cards": cards, "is_emergency": is_emergency}
+        is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+        return {
+            "response": fallback,
+            "sources": sources,
+            "action_cards": cards,
+            "is_emergency": is_emergency,
+            "triage": _triage_dict(triage),
+        }
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -314,12 +527,26 @@ async def chat(request: ChatRequest):
             data = response.json()
             reply = data["choices"][0]["message"]["content"]
             cards, is_emergency = _build_action_cards(request.message, reply, request.language)
-            return {"response": reply, "sources": sources, "action_cards": cards, "is_emergency": is_emergency}
+            is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+            return {
+                "response": reply,
+                "sources": sources,
+                "action_cards": cards,
+                "is_emergency": is_emergency,
+                "triage": _triage_dict(triage),
+            }
     except Exception as exc:
         logger.error("Chat failed: %s", exc)
-        fallback = _fallback_chat(request.message, context, request.language)
+        fallback = _fallback_chat(request.message, context, request.language, triage)
         cards, is_emergency = _build_action_cards(request.message, fallback, request.language)
-        return {"response": fallback, "sources": sources, "action_cards": cards, "is_emergency": is_emergency}
+        is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+        return {
+            "response": fallback,
+            "sources": sources,
+            "action_cards": cards,
+            "is_emergency": is_emergency,
+            "triage": _triage_dict(triage),
+        }
 
 
 _FALLBACK_WITH_KB = {
@@ -375,9 +602,17 @@ _FALLBACK_GENERIC = {
 }
 
 
-def _fallback_chat(message: str, context: str, language: str = "en") -> str:
-    del message
+def _fallback_chat(
+    message: str,
+    context: str,
+    language: str = "en",
+    triage: TriageResult | None = None,
+) -> str:
     lang = language if language in ("en", "hi", "mr") else "en"
+    if triage:
+        triage_fallback = _fallback_for_triage(message, context, triage)
+        if triage_fallback:
+            return triage_fallback
     if context and "No specific first aid articles" not in context:
-        return _FALLBACK_WITH_KB[lang].format(context=context)
+        return "1. Use the relevant first-aid guidance below now.\n\n" + _FALLBACK_WITH_KB[lang].format(context=context)
     return _FALLBACK_GENERIC[lang]

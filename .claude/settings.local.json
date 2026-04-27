@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:pfahyd.org)",
+      "WebFetch(domain:voicelessindia.org)",
+      "WebFetch(domain:helpinsuffering.org)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh api *)"
+    ]
+  }
+}

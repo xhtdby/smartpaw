@@ -15,3 +15,6 @@ Thumbs.db
 
 #test files
 test*
+!backend/tests/
+!backend/tests/**
+backend/tests/fixtures/_cache/

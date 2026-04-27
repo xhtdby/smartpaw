@@ -46,6 +46,7 @@ export default function AnalyzePage() {
   const router = useRouter();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
+  const [userContext, setUserContext] = useState("");
   const [mlResult, setMlResult] = useState<MultilingualAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -64,8 +65,13 @@ export default function AnalyzePage() {
             dog_detected: true,
             emotion: mlResult.emotion,
             condition: langData.condition || mlResult.condition,
+            user_context: mlResult.user_context,
+            urgency_signals: mlResult.urgency_signals,
+            unknown_factors: mlResult.unknown_factors,
+            scenario_type: mlResult.scenario_type,
             safety: langData.safety,
             first_aid: langData.first_aid,
+            triage_questions: langData.triage_questions,
             empathetic_summary: langData.empathetic_summary,
             when_to_call_professional: langData.when_to_call_professional,
             approach_tips: langData.approach_tips,
@@ -73,7 +79,18 @@ export default function AnalyzePage() {
             language,
           } as AnalysisResult;
         })()
-      : { dog_detected: false, first_aid: [], empathetic_summary: t("analyze.no_dog"), disclaimer: "", language } as AnalysisResult
+      : {
+          dog_detected: false,
+          user_context: mlResult.user_context,
+          urgency_signals: mlResult.urgency_signals,
+          unknown_factors: mlResult.unknown_factors,
+          scenario_type: mlResult.scenario_type,
+          first_aid: [],
+          triage_questions: [],
+          empathetic_summary: t("analyze.no_dog"),
+          disclaimer: "",
+          language,
+        } as AnalysisResult
     : null;
 
   useEffect(() => {
@@ -141,7 +158,7 @@ export default function AnalyzePage() {
     setError("");
     try {
       // Single endpoint: vision model runs once, text LLM runs 3x in parallel server-side
-      const data = await analyzeImageMultilingual(image);
+      const data = await analyzeImageMultilingual(image, userContext);
       setMlResult(data);
 
       // Save English context for chat (condition data always comes from the shared vision pass)
@@ -152,6 +169,10 @@ export default function AnalyzePage() {
         data.condition?.physical_condition || "",
         data.condition?.visible_injuries?.length ? `Injuries: ${data.condition.visible_injuries.join(", ")}` : "",
         data.condition?.health_concerns?.length ? `Concerns: ${data.condition.health_concerns.join(", ")}` : "",
+        data.user_context ? `User context: ${data.user_context}` : "",
+        data.scenario_type ? `Scenario: ${data.scenario_type}` : "",
+        data.urgency_signals?.length ? `Urgency signals: ${data.urgency_signals.join(", ")}` : "",
+        data.unknown_factors?.length ? `Unknown factors: ${data.unknown_factors.join(", ")}` : "",
         enLang?.safety ? `Safety: ${enLang.safety.level} - ${enLang.safety.reason}` : "",
       ].filter(Boolean).join("\n") : null;
 
@@ -178,6 +199,7 @@ export default function AnalyzePage() {
     if (preview) URL.revokeObjectURL(preview);
     setPreview("");
     setImage(null);
+    setUserContext("");
     setMlResult(null);
     setError("");
   };
@@ -276,7 +298,17 @@ export default function AnalyzePage() {
           />
 
           {!result && (
-            <div className="flex gap-3">
+            <div className="space-y-3">
+              <textarea
+                value={userContext}
+                onChange={(event) => setUserContext(event.target.value)}
+                maxLength={800}
+                rows={3}
+                aria-label="Scene details"
+                placeholder="Anything urgent we should know? (optional - e.g. 'fell into a well 30 mins ago, can hear it whining')"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-[var(--color-warm-400)]"
+              />
+              <div className="flex gap-3">
               <button
                 onClick={analyze}
                 disabled={loading}
@@ -287,6 +319,7 @@ export default function AnalyzePage() {
               <button onClick={reset} className="px-4 bg-gray-100 rounded-xl text-gray-600">
                 ✕
               </button>
+              </div>
             </div>
           )}
         </div>
@@ -412,6 +445,24 @@ export default function AnalyzePage() {
                       </ul>
                     </div>
                   )}
+                </div>
+              )}
+
+              {result.triage_questions && result.triage_questions.length > 0 && (
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <h3 className="font-bold text-[var(--color-warm-700)] mb-3">
+                    Quick checks
+                  </h3>
+                  <ol className="space-y-2">
+                    {result.triage_questions.map((question, index) => (
+                      <li key={index} className="flex gap-3 text-sm">
+                        <span className="bg-[var(--color-warm-100)] text-[var(--color-warm-700)] rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs shrink-0">
+                          {index + 1}
+                        </span>
+                        <span className="text-gray-700">{question}</span>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               )}
 
