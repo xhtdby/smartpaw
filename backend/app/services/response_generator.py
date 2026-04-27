@@ -675,6 +675,82 @@ async def generate_empathetic_response(
     return _normalize_response_payload(raw, emotion_result, condition_result, language)
 
 
+def generate_fast_empathetic_response(
+    emotion_result: dict,
+    condition_result: dict,
+    language: str = "en",
+    user_context: str | None = None,
+) -> dict:
+    """Build a fast non-LLM analysis payload for upload flows.
+
+    The analyze endpoint must return quickly; richer free-form guidance belongs
+    in chat. This keeps the upload path to one vision call plus local shaping.
+    """
+    payload = _fallback_response(emotion_result, condition_result, language)
+    context_triage = heuristic_classify_situation(user_context or "") if user_context else None
+    if not context_triage:
+        return payload
+
+    payload["urgency_tier"] = context_triage.urgency_tier
+    payload["info_sufficient"] = context_triage.info_sufficient
+    payload["needs_helpline_first"] = context_triage.needs_helpline_first
+
+    if not context_triage.info_sufficient:
+        if language == "hi":
+            payload["triage_questions"] = [
+                "क्या कुत्ता सामान्य सांस ले रहा है और प्रतिक्रिया दे रहा है?",
+                "अभी मुख्य समस्या क्या दिख रही है?",
+            ]
+        elif language == "mr":
+            payload["triage_questions"] = [
+                "कुत्रा नीट श्वास घेतोय आणि प्रतिसाद देतोय का?",
+                "आत्ता मुख्य त्रास काय दिसतोय?",
+            ]
+        else:
+            payload["triage_questions"] = [
+                "Is the dog breathing normally and responding?",
+                "What is the main symptom or recent event?",
+            ]
+        payload["first_aid_steps"] = []
+        payload["safety_level"] = "caution"
+        return payload
+
+    if context_triage.urgency_tier in {"life_threatening", "urgent"}:
+        payload["safety_level"] = "danger" if context_triage.urgency_tier == "life_threatening" else "caution"
+
+    if context_triage.scenario_type == "fall_entrapment":
+        if language == "hi":
+            payload["safety_reason"] = "कुत्ता गहरे या बंद स्थान में फंसा हो सकता है; बचाव उपकरण की जरूरत पड़ सकती है।"
+            payload["empathetic_summary"] = "यह आपात स्थिति है। पहले बचाव सहायता बुलाएं और किनारे पर भीड़ न लगने दें।"
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "अभी स्थानीय रेस्क्यू/फायर सेवा को कॉल करें।"},
+                {"step_number": 2, "instruction": "खुद कुएं में न उतरें और लोगों को किनारे से दूर रखें।"},
+                {"step_number": 3, "instruction": "ऊपर से शांत आवाज में कुत्ते पर नजर रखें।"},
+            ]
+        elif language == "mr":
+            payload["safety_reason"] = "कुत्रा खोल किंवा बंद जागेत अडकला असू शकतो; बचाव साधनांची गरज लागू शकते."
+            payload["empathetic_summary"] = "ही आपत्कालीन स्थिती आहे. आधी बचाव मदत बोलवा आणि काठाजवळ गर्दी होऊ देऊ नका."
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "आत्ताच स्थानिक रेस्क्यू/फायर सेवेला कॉल करा."},
+                {"step_number": 2, "instruction": "स्वतः विहिरीत उतरू नका आणि लोकांना काठापासून दूर ठेवा."},
+                {"step_number": 3, "instruction": "वरून शांत आवाजात कुत्र्यावर लक्ष ठेवा."},
+            ]
+        else:
+            payload["safety_reason"] = "The dog may be trapped in a deep or confined space and may need rescue equipment."
+            payload["empathetic_summary"] = "This is an emergency. Call rescue help first and keep people back from the edge."
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "Call local rescue/fire services now."},
+                {"step_number": 2, "instruction": "Do not climb into the well; keep bystanders away from the edge."},
+                {"step_number": 3, "instruction": "Watch breathing and movement from above while help is coming."},
+            ]
+        payload["when_to_call_professional"] = ""
+
+    if context_triage.urgency_tier == "life_threatening":
+        payload["first_aid_steps"] = payload.get("first_aid_steps", [])[:3]
+
+    return payload
+
+
 async def _translate_payload_once(source_payload: dict, language: str, repair: bool = False) -> dict | None:
     language_name = TRANSLATION_INSTRUCTIONS.get(language)
     if not language_name:

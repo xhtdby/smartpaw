@@ -4,12 +4,13 @@ const API_BASE = _raw.startsWith("http") ? _raw : `https://${_raw}`;
 async function fetchWithRetry(
   input: RequestInfo,
   init?: RequestInit,
-  retries = 2
+  retries = 1,
+  timeoutMs = 120000
 ): Promise<Response> {
   for (let i = 0; i <= retries; i++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       const res = await fetch(input, { ...init, signal: controller.signal });
       clearTimeout(timeout);
       if (res.ok || res.status < 500 || i === retries) return res;

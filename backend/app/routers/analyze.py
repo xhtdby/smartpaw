@@ -1,6 +1,5 @@
 """Image analysis endpoints for single-language and multilingual responses."""
 
-import asyncio
 import io
 import logging
 
@@ -20,7 +19,7 @@ from app.models.schemas import (
 from app.services.condition_analyzer import analyze_condition
 from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
-from app.services.response_generator import generate_empathetic_response
+from app.services.response_generator import generate_fast_empathetic_response
 from app.services.triage import heuristic_classify_situation
 from app.services.vision_analyzer import analyze_vision
 
@@ -224,7 +223,7 @@ async def analyze_dog_image(
         )
 
     localized_payload = _ensure_payload_condition(
-        await generate_empathetic_response(emotion_result, condition_result, language, user_context=user_context),
+        generate_fast_empathetic_response(emotion_result, condition_result, language, user_context=user_context),
         condition_result,
     )
     localized_condition = localized_payload.get("condition", condition_result)
@@ -290,10 +289,10 @@ async def analyze_dog_image_multilingual(
             scenario_type=vision_metadata.get("scenario_type", "no_dog_visible"),
         )
 
-    en_raw, hi_raw, mr_raw = await asyncio.gather(
-        generate_empathetic_response(emotion_result, condition_result, "en", user_context=user_context),
-        generate_empathetic_response(emotion_result, condition_result, "hi", user_context=user_context),
-        generate_empathetic_response(emotion_result, condition_result, "mr", user_context=user_context),
+    en_raw, hi_raw, mr_raw = (
+        generate_fast_empathetic_response(emotion_result, condition_result, "en", user_context=user_context),
+        generate_fast_empathetic_response(emotion_result, condition_result, "hi", user_context=user_context),
+        generate_fast_empathetic_response(emotion_result, condition_result, "mr", user_context=user_context),
     )
     en_payload = _ensure_payload_condition(en_raw, condition_result)
     hi_payload = _ensure_payload_condition(hi_raw, condition_result)
