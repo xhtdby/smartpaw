@@ -83,8 +83,7 @@ Deployment checks:
 - Stage 0 first-pass fixes are in draft PR #7 and may not be merged into `main` yet.
 - The chat still needs a typed mode architecture; first-pass heuristics are only a bridge.
 - Analysis-to-chat still creates a fake prefilled user message.
-- Analysis fallback text is too generic across healthy, mild, urgent, and unavailable cases.
-- Image analysis output can still sound like a formal clinical report instead of a calm IndieAid observation.
+- Stage 6 added explicit analysis statuses and warmer scenario fallback families, but deployed image-analysis quality still needs human checks with real model access.
 - Fixture labels under `backend/tests/fixtures/` are not trustworthy as visual truth.
 - Some tests are still biased toward emergency checklist behavior.
 - Railway durability for SQLite and uploaded report images is not proven.
@@ -92,15 +91,9 @@ Deployment checks:
 
 ## Active Task Queue
 
-1. Stage 1: keep this context doc concise, linked to `README.md` and `PLAN.md`, and safe for future agents to load.
-2. Stage 2: clean up test truth and fixture categories so tests stop rewarding mislabeled image assumptions.
-3. Stage 3: add typed LLM-forward routing with `mode` and `context_used`.
-4. Stage 4: add mode-specific response generation across English, Hindi, and Marathi.
-5. Stage 5: replace fake analysis-to-chat prefilled messages with a visible structured context banner.
-6. Stage 6: improve analysis quality and unavailable/uncertain fallback families.
-7. Stage 7: align Learn, cards, resources, and app feel with warm/care/emergency modes.
-8. Stage 8: audit report persistence and production durability.
-9. Stage 9: complete local and deployed end-to-end human verification.
+1. Stage 7: align Learn, cards, resources, and app feel with warm/care/emergency modes.
+2. Stage 8: audit report persistence and production durability.
+3. Stage 9: complete local and deployed end-to-end human verification.
 
 ## Discovered Issues Log
 
@@ -108,3 +101,4 @@ Deployment checks:
 - 2026-04-28: Railway production URL was not discoverable from repo metadata during Stage 0, so `/health` could not be checked.
 - 2026-04-28: Stage 2 found the old `quick` and `detailed` image fixture suites reused four external image URLs across 165 labels, including emergency scenarios. They are quarantined and should not be used as visual truth.
 - 2026-04-28: Example chat showed "dead / she's dead / not an emergency, she's just dead" bouncing back into emergency or active-triage questions. Added `deceased_pet` as a stable non-emergency care scenario with quiet cards and aftercare/grief wording.
+- 2026-04-28: Stage 6 added `analysis_status` (`complete`, `uncertain`, `no_dog_visible`, `unavailable`) so model outages no longer masquerade as "no dog visible"; local fallback families now distinguish healthy, mild, urgent, no-dog, and unavailable paths.

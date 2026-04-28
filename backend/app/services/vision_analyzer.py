@@ -76,6 +76,25 @@ def _default_condition() -> dict:
     }
 
 
+def unavailable_result() -> dict:
+    """Contract payload for cases where the vision model cannot run."""
+    return {
+        "dog_detected": False,
+        "analysis_status": "unavailable",
+        "dog_confidence": 0.0,
+        "dog_description": "Analysis unavailable",
+        "emotion": {
+            "label": "unknown",
+            "confidence": 0.0,
+            "description": "Analysis unavailable",
+        },
+        "condition": _default_condition(),
+        "urgency_signals": [],
+        "unknown_factors": ["analysis_unavailable"],
+        "scenario_type": "analysis_unavailable",
+    }
+
+
 def _strip_code_fences(content: str) -> str:
     text = content.strip()
     if text.startswith("```"):
@@ -133,11 +152,23 @@ def _normalize_result(payload: dict) -> dict:
         "body_language": str(condition_payload.get("body_language") or _default_condition()["body_language"]).strip(),
     }
 
+    analysis_status = str(payload.get("analysis_status") or "").strip().lower()
+    if analysis_status not in {"complete", "uncertain", "no_dog_visible", "unavailable"}:
+        analysis_status = "complete" if dog_detected else "no_dog_visible"
+
     if not dog_detected:
-        condition = _default_condition()
+        condition = {
+            "breed_guess": "Unable to determine (no dog visible)",
+            "estimated_age": "Unknown",
+            "physical_condition": "No dog was visible in the image.",
+            "visible_injuries": [],
+            "health_concerns": [],
+            "body_language": "No dog visible",
+        }
 
     return {
         "dog_detected": dog_detected,
+        "analysis_status": analysis_status,
         "dog_confidence": _normalize_confidence(payload.get("dog_confidence"), 0.0),
         "dog_description": str(payload.get("dog_description", "")).strip(),
         "emotion": {
@@ -159,7 +190,7 @@ async def analyze_vision(image_bytes: bytes, user_context: str | None = None) ->
     settings = get_settings()
     if not settings.groq_api_key:
         logger.warning("Groq API key not configured, skipping combined vision analysis.")
-        return None
+        return unavailable_result()
 
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     buf = io.BytesIO()

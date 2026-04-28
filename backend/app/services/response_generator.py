@@ -333,8 +333,122 @@ def _fallback_condition(condition_result: dict, language: str) -> dict:
     }
 
 
+def _lower_values(items: object) -> str:
+    if not isinstance(items, list):
+        return ""
+    return " ".join(str(item).lower() for item in items if str(item).strip())
+
+
+def _analysis_family(emotion_label: str, condition_result: dict, user_context: str | None = None) -> str:
+    condition_text = " ".join(
+        [
+            str(condition_result.get("breed_guess", "")),
+            str(condition_result.get("physical_condition", "")),
+            _lower_values(condition_result.get("visible_injuries")),
+            _lower_values(condition_result.get("health_concerns")),
+            str(condition_result.get("body_language", "")),
+            str(user_context or ""),
+        ]
+    ).lower()
+
+    if "analysis unavailable" in condition_text or "could not analyze" in condition_text:
+        return "unavailable"
+    if "no dog visible" in condition_text or "no dog was visible" in condition_text:
+        return "no_dog_visible"
+    if any(term in condition_text for term in ["not breathing", "collapse", "collapsed", "severe bleeding", "spurting", "hit by car", "road accident", "poison", "heatstroke", "trapped", "fracture"]):
+        return "immediate_emergency"
+    if any(term in condition_text for term in ["bleeding", "wound", "maggot", "cannot stand", "limping badly", "swollen eye", "eye injury"]):
+        return "urgent_stable"
+    if any(term in condition_text for term in ["skin", "tick", "mange", "rash", "thin", "underweight", "limp", "diarrhea", "vomit"]):
+        return "mild_concern"
+    if emotion_label in {"sad", "fearful"}:
+        return "sad_quiet"
+    if any(term in condition_text for term in ["stray", "community", "street"]):
+        return "healthy_stray"
+    return "healthy_pet"
+
+
+def _fallback_family_response(family: str, language: str) -> dict | None:
+    if language == "hi":
+        data = {
+            "healthy_pet": (
+                "safe",
+                "\u092b\u094b\u091f\u094b \u092e\u0947\u0902 \u0924\u0941\u0930\u0902\u0924 \u0916\u0924\u0930\u0947 \u0915\u093e \u0938\u093e\u092b \u0938\u0902\u0915\u0947\u0924 \u0928\u0939\u0940\u0902 \u0926\u093f\u0916 \u0930\u0939\u093e\u0964",
+                "\u092b\u094b\u091f\u094b \u092e\u0947\u0902 \u092f\u0939 \u0915\u0941\u0924\u094d\u0924\u093e \u0915\u093e\u092b\u0940 \u0938\u094d\u0925\u093f\u0930 \u0926\u093f\u0916 \u0930\u0939\u093e \u0939\u0948\u0964 \u0925\u094b\u0921\u093c\u093e \u092a\u093e\u0928\u0940, \u0936\u093e\u0902\u0924 \u0926\u0942\u0930\u0940, \u0914\u0930 \u0906\u0917\u0947 \u0915\u094b\u0908 \u092c\u0926\u0932\u093e\u0935 \u0926\u093f\u0916\u0947 \u0924\u094b \u0927\u094d\u092f\u093e\u0928 \u0930\u0916\u0928\u093e \u0915\u093e\u092b\u0940 \u0939\u0948\u0964",
+            ),
+            "unavailable": (
+                "caution",
+                "\u0935\u093f\u091c\u0928 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964",
+                "\u092e\u0948\u0902 \u0907\u0938 \u092b\u094b\u091f\u094b \u0915\u094b \u0905\u092d\u0940 \u092a\u0922\u093c \u0928\u0939\u0940\u0902 \u0938\u0915\u093e\u0964 \u0905\u0917\u0930 \u0938\u093e\u0902\u0938, \u0916\u0942\u0928, \u0917\u093f\u0930\u0928\u093e, \u091c\u0939\u0930 \u092f\u093e \u0938\u0921\u093c\u0915 \u091a\u094b\u091f \u0915\u093e \u0936\u0915 \u0939\u0948, \u0924\u094b \u091a\u0948\u091f \u092e\u0947\u0902 \u0924\u0941\u0930\u0902\u0924 \u0935\u093f\u0935\u0930\u0923 \u0926\u0947\u0902\u0964",
+            ),
+        }
+        level, reason, summary = data.get(family, data["healthy_pet"])
+    elif language == "mr":
+        data = {
+            "healthy_pet": (
+                "safe",
+                "\u092b\u094b\u091f\u094b\u0924 \u0924\u093e\u0924\u0921\u0940\u091a\u094d\u092f\u093e \u0927\u094b\u0915\u094d\u092f\u093e\u091a\u093e \u0938\u094d\u092a\u0937\u094d\u091f \u0938\u0902\u0915\u0947\u0924 \u0926\u093f\u0938\u0924 \u0928\u093e\u0939\u0940\u0964",
+                "\u092b\u094b\u091f\u094b\u0924 \u0939\u093e \u0915\u0941\u0924\u094d\u0930\u093e \u0924\u0941\u0932\u0928\u0947\u0928\u0947 \u0938\u094d\u0925\u093f\u0930 \u0926\u093f\u0938\u0924\u094b\u0964 \u0938\u094d\u0935\u091a\u094d\u091b \u092a\u093e\u0923\u0940, \u0936\u093e\u0902\u0924 \u0905\u0902\u0924\u0930, \u0906\u0923\u093f \u0915\u093e\u0939\u0940 \u092c\u0926\u0932 \u0926\u093f\u0938\u0932\u093e \u0924\u0930 \u0928\u093f\u0930\u0940\u0915\u094d\u0937\u0923 \u092a\u0941\u0930\u0947\u0938\u0947 \u0906\u0939\u0947\u0964",
+            ),
+            "unavailable": (
+                "caution",
+                "\u0935\u093f\u091c\u0928 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u093e\u0939\u0940\u0964",
+                "\u092e\u0940 \u0939\u093e \u092b\u094b\u091f\u094b \u0938\u0927\u094d\u092f\u093e \u0935\u093e\u091a\u0942 \u0936\u0915\u0932\u094b \u0928\u093e\u0939\u0940\u0964 \u0936\u094d\u0935\u093e\u0938, \u0930\u0915\u094d\u0924, \u0915\u094b\u0938\u0933\u0923\u0947, \u0935\u093f\u0937 \u0915\u093f\u0902\u0935\u093e \u0930\u0938\u094d\u0924\u094d\u092f\u093e\u0935\u0930\u0940\u0932 \u0905\u092a\u0918\u093e\u0924\u093e\u091a\u093e \u0936\u0902\u0915\u093e \u0905\u0938\u0947\u0932, \u0924\u0930 \u091a\u0945\u091f\u092e\u0927\u094d\u092f\u0947 \u0924\u092a\u0936\u0940\u0932 \u0926\u094d\u092f\u093e\u0964",
+            ),
+        }
+        level, reason, summary = data.get(family, data["healthy_pet"])
+    else:
+        data = {
+            "healthy_pet": ("safe", "No immediate danger is clear from the photo.", "The dog looks fairly settled in this photo. Offer clean water, keep things calm, and watch for any new changes rather than treating this like an urgent case."),
+            "healthy_stray": ("safe", "No immediate danger is clear, but keep a respectful distance.", "This community dog looks fairly stable from the photo. Give space, offer water or food only if safe, and avoid crowding or grabbing."),
+            "sad_quiet": ("caution", "The dog looks quiet or uncertain, but no clear emergency is visible.", "The photo suggests a quieter or unsure dog rather than a definite emergency. Keep the area calm, check breathing and ability to stand, and watch for worsening signs."),
+            "mild_concern": ("caution", "There may be a mild concern worth monitoring.", "I can see a possible care concern, but this does not read like an immediate emergency from the available information. Keep the dog comfortable and watch closely for worsening signs."),
+            "urgent_stable": ("caution", "A visible concern may need prompt veterinary or rescue help.", "This looks like it may need prompt care. Keep the dog calm, avoid handling painful areas, and arrange veterinary or rescue help if the concern is confirmed."),
+            "immediate_emergency": ("danger", "The photo or context suggests a possible emergency.", "This may be urgent. Focus on safety first, limit movement, and contact a vet, rescue group, or emergency help now."),
+            "no_dog_visible": ("caution", "No dog is visible enough to assess.", "I could not see a dog clearly in this photo. Try another image with the dog well lit and fully visible."),
+            "unavailable": ("caution", "Vision analysis is unavailable right now.", "I could not analyze this photo right now. If the dog may be in danger, use the chat and describe breathing, bleeding, movement, and what happened."),
+        }
+        level, reason, summary = data.get(family, data["healthy_pet"])
+
+    steps_by_family = {
+        "healthy_pet": [],
+        "healthy_stray": [{"step_number": 1, "instruction": "Offer water or food only from a calm, safe distance."}],
+        "sad_quiet": [{"step_number": 1, "instruction": "Check from a distance whether breathing looks normal and whether the dog can stand."}],
+        "mild_concern": [{"step_number": 1, "instruction": "Monitor appetite, water intake, energy, stool, and any visible skin or eye changes."}],
+        "urgent_stable": [{"step_number": 1, "instruction": "Avoid pressing or pulling painful areas; keep the dog quiet while arranging help."}],
+        "immediate_emergency": [{"step_number": 1, "instruction": "Keep yourself safe, limit the dog's movement, and contact urgent veterinary or rescue help now."}],
+        "no_dog_visible": [],
+        "unavailable": [],
+    }
+    return {
+        "safety_level": level,
+        "safety_reason": reason,
+        "empathetic_summary": summary,
+        "first_aid_steps": steps_by_family.get(family, []),
+        "triage_questions": [],
+        "urgency_tier": "urgent" if family in {"urgent_stable", "immediate_emergency"} else "low_risk",
+        "info_sufficient": family not in {"no_dog_visible", "unavailable"},
+        "needs_helpline_first": family == "immediate_emergency",
+        "when_to_call_professional": (
+            "Get professional help now if breathing is abnormal, bleeding is heavy, the dog cannot stand, pain is severe, or symptoms worsen."
+            if language == "en" and family not in {"healthy_pet", "healthy_stray", "no_dog_visible", "unavailable"}
+            else ""
+        ),
+        "approach_tips": (
+            "Approach slowly from the side, avoid direct staring, and stop if the dog seems fearful or defensive."
+            if language == "en" and family not in {"no_dog_visible", "unavailable"}
+            else ""
+        ),
+    }
+
+
 def _fallback_response(emotion_result: dict, condition_result: dict, language: str) -> dict:
     emotion_label = str(emotion_result.get("label", "unknown")).strip().lower()
+    family = _analysis_family(emotion_label, condition_result)
+    family_payload = _fallback_family_response(family, language)
+    if family_payload is not None:
+        return family_payload
+
     emotion_text = FALLBACK_EMOTION_TEXT.get(language, FALLBACK_EMOTION_TEXT["en"]).get(
         emotion_label,
         FALLBACK_EMOTION_TEXT.get(language, FALLBACK_EMOTION_TEXT["en"])["unknown"],
@@ -691,6 +805,14 @@ def generate_fast_empathetic_response(
     if not context_triage:
         return payload
 
+    context_text = (user_context or "").lower()
+    if context_triage.scenario_type == "unclear" and any(
+        phrase in context_text for phrase in ["hit by a car", "road accident", "vehicle hit", "car hit"]
+    ):
+        context_triage.scenario_type = "road_trauma"
+        context_triage.urgency_tier = "life_threatening" if "cannot stand" in context_text else "urgent"
+        context_triage.needs_helpline_first = True
+
     payload["urgency_tier"] = context_triage.urgency_tier
     payload["info_sufficient"] = context_triage.info_sufficient
     payload["needs_helpline_first"] = context_triage.needs_helpline_first
@@ -717,6 +839,65 @@ def generate_fast_empathetic_response(
 
     if context_triage.urgency_tier in {"life_threatening", "urgent"}:
         payload["safety_level"] = "danger" if context_triage.urgency_tier == "life_threatening" else "caution"
+
+    if context_triage.scenario_type in {"road_trauma", "fracture"}:
+        if language == "hi":
+            payload["safety_reason"] = "\u091a\u094b\u091f \u092f\u093e \u0905\u092a\u0918\u093e\u0924 \u0915\u0947 \u092c\u093e\u0926 \u0926\u0930\u094d\u0926, \u092b\u094d\u0930\u0948\u0915\u094d\u091a\u0930 \u092f\u093e \u0905\u0902\u0926\u0930\u0942\u0928\u0940 \u091a\u094b\u091f \u0915\u093e \u0916\u0924\u0930\u093e \u0939\u094b \u0938\u0915\u0924\u093e \u0939\u0948\u0964"
+            payload["empathetic_summary"] = "\u0907\u0938\u0947 \u0917\u0902\u092d\u0940\u0930 \u092e\u093e\u0928\u0947\u0902\u0964 \u0915\u0941\u0924\u094d\u0924\u0947 \u0915\u094b \u091a\u0932\u093e\u090f\u0902 \u0928\u0939\u0940\u0902, \u0936\u093e\u0902\u0924 \u0930\u0916\u0947\u0902, \u0914\u0930 \u092a\u0936\u0941-\u091a\u093f\u0915\u093f\u0924\u094d\u0938\u0915 \u092f\u093e \u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942 \u092e\u0926\u0926 \u091c\u0932\u094d\u0926\u0940 \u0932\u0947\u0902\u0964"
+        elif language == "mr":
+            payload["safety_reason"] = "\u0905\u092a\u0918\u093e\u0924\u093e\u0928\u0902\u0924\u0930 \u0935\u0947\u0926\u0928\u093e, \u092b\u094d\u0930\u0945\u0915\u094d\u091a\u0930 \u0915\u093f\u0902\u0935\u093e \u0905\u0902\u0924\u0930\u094d\u0917\u0924 \u091c\u0916\u092e\u0947\u091a\u093e \u0927\u094b\u0915\u093e \u0905\u0938\u0942 \u0936\u0915\u0924\u094b\u0964"
+            payload["empathetic_summary"] = "\u0939\u0940 \u0917\u0902\u092d\u0940\u0930 \u0938\u094d\u0925\u093f\u0924\u0940 \u092e\u093e\u0928\u093e\u0964 \u0915\u0941\u0924\u094d\u0930\u094d\u092f\u093e\u0932\u093e \u091a\u093e\u0932\u0935\u0942 \u0928\u0915\u093e, \u0936\u093e\u0902\u0924 \u0920\u0947\u0935\u093e, \u0906\u0923\u093f \u092a\u0936\u0941\u0935\u0948\u0926\u094d\u092f \u0915\u093f\u0902\u0935\u093e \u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942 \u092e\u0926\u0924 \u0932\u0935\u0915\u0930 \u0918\u094d\u092f\u093e\u0964"
+        else:
+            payload["safety_reason"] = "After a road accident or suspected fracture, pain, shock, or internal injury is possible."
+            payload["empathetic_summary"] = "Treat this as serious. Do not make the dog walk; keep them still and arrange veterinary or rescue help quickly."
+        if language == "hi":
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "\u0915\u0941\u0924\u094d\u0924\u0947 \u0915\u094b \u091c\u093f\u0924\u0928\u093e \u0939\u094b \u0938\u0915\u0947 \u0938\u094d\u0925\u093f\u0930 \u0930\u0916\u0947\u0902; \u092a\u0948\u0930 \u092f\u093e \u0930\u0940\u0922\u093c \u0915\u094b \u0928 \u0916\u0940\u0902\u091a\u0947\u0902\u0964"},
+                {"step_number": 2, "instruction": "\u092e\u0926\u0926 \u0939\u094b \u0924\u094b \u092c\u094b\u0930\u094d\u0921, \u0915\u0902\u092c\u0932 \u092f\u093e \u0915\u093f\u0938\u0940 \u0938\u0916\u094d\u0924 \u0938\u0924\u0939 \u092a\u0930 \u0932\u0947 \u091c\u093e\u090f\u0902\u0964"},
+                {"step_number": 3, "instruction": "\u0909\u0930\u094d\u091c\u0947\u0902\u091f \u0926\u0947\u0916\u092d\u093e\u0932 \u0915\u093e \u0907\u0902\u0924\u091c\u093e\u092e \u0915\u0930\u0924\u0947 \u0939\u0941\u090f \u0938\u093e\u0902\u0938 \u0914\u0930 \u092e\u0938\u0942\u0921\u093c\u094b\u0902 \u0915\u093e \u0930\u0902\u0917 \u0926\u0947\u0916\u0924\u0947 \u0930\u0939\u0947\u0902\u0964"},
+            ]
+        elif language == "mr":
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "\u0915\u0941\u0924\u094d\u0930\u094d\u092f\u093e\u0932\u093e \u0936\u0915\u094d\u092f \u0924\u093f\u0924\u0915\u0947 \u0938\u094d\u0925\u093f\u0930 \u0920\u0947\u0935\u093e; \u092a\u093e\u092f \u0915\u093f\u0902\u0935\u093e \u092a\u093e\u0920\u0940\u091a\u093e \u0915\u0923\u093e \u0913\u0922\u0942 \u0928\u0915\u093e\u0964"},
+                {"step_number": 2, "instruction": "\u092e\u0926\u0924 \u0905\u0938\u0947\u0932 \u0924\u0930 \u092c\u094b\u0930\u094d\u0921, \u092c\u094d\u0932\u0945\u0902\u0915\u0947\u091f \u0915\u093f\u0902\u0935\u093e \u0918\u091f\u094d\u091f \u092a\u0943\u0937\u094d\u0920\u092d\u093e\u0917\u093e\u0935\u0930 \u0935\u093e\u0939\u0924\u0942\u0915 \u0915\u0930\u093e\u0964"},
+                {"step_number": 3, "instruction": "\u0924\u093e\u0924\u0921\u0940\u091a\u0940 \u0915\u093e\u0933\u091c\u0940 \u0920\u0930\u0935\u0924\u093e\u0928\u093e \u0936\u094d\u0935\u093e\u0938 \u0906\u0923\u093f \u0939\u093f\u0930\u0921\u094d\u092f\u093e\u0902\u091a\u093e \u0930\u0902\u0917 \u092a\u093e\u0939\u0924 \u0930\u0939\u093e\u0964"},
+            ]
+        else:
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "Keep the dog as still as possible and avoid pulling injured legs or the spine."},
+                {"step_number": 2, "instruction": "Use a board, blanket, or firm surface for transport if help is available."},
+                {"step_number": 3, "instruction": "Watch breathing and gum color while arranging urgent care."},
+            ]
+
+    if context_triage.scenario_type == "poisoning":
+        payload["safety_level"] = "danger"
+        if language == "hi":
+            payload["safety_reason"] = "\u091c\u0939\u0930 \u092f\u093e \u0917\u0932\u0924 \u0926\u0935\u093e \u0915\u093e \u0936\u0915 \u0924\u0941\u0930\u0902\u0924 \u092e\u0926\u0926 \u092e\u093e\u0902\u0917\u0924\u093e \u0939\u0948\u0964"
+            payload["empathetic_summary"] = "\u0909\u0932\u094d\u091f\u0940 \u0915\u0930\u093e\u0928\u0947 \u0915\u0940 \u0915\u094b\u0936\u093f\u0936 \u0928 \u0915\u0930\u0947\u0902\u0964 \u091c\u094b \u0916\u093e\u092f\u093e \u0939\u094b \u0909\u0938\u0915\u093e \u092a\u0948\u0915\u0947\u091f \u092f\u093e \u0928\u093e\u092e \u0938\u093e\u0925 \u0930\u0916\u0947\u0902 \u0914\u0930 \u0924\u0941\u0930\u0902\u0924 \u0935\u0947\u091f/\u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942 \u0938\u0947 \u092c\u093e\u0924 \u0915\u0930\u0947\u0902\u0964"
+        elif language == "mr":
+            payload["safety_reason"] = "\u0935\u093f\u0937 \u0915\u093f\u0902\u0935\u093e \u091a\u0941\u0915\u0940\u091a\u094d\u092f\u093e \u0914\u0937\u0927\u093e\u091a\u093e \u0936\u0902\u0915\u093e \u0905\u0938\u0947\u0932 \u0924\u0930 \u0924\u093e\u0924\u0921\u0940\u0928\u0947 \u092e\u0926\u0924 \u0932\u093e\u0917\u0924\u0947\u0964"
+            payload["empathetic_summary"] = "\u0909\u0932\u091f\u0940 \u0915\u0930\u093e\u092f\u091a\u093e \u092a\u094d\u0930\u092f\u0924\u094d\u0928 \u0915\u0930\u0942 \u0928\u0915\u093e\u0964 \u091c\u0947 \u0916\u093e\u0932\u094d\u0932\u0947 \u0905\u0938\u0947\u0932 \u0924\u094d\u092f\u093e\u091a\u0947 \u0928\u093e\u0935 \u0915\u093f\u0902\u0935\u093e \u092a\u0945\u0915\u0947\u091f \u091c\u0935\u0933 \u0920\u0947\u0935\u093e \u0906\u0923\u093f \u0924\u0941\u0930\u0902\u0924 \u0935\u0947\u091f/\u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942\u0936\u0940 \u092c\u094b\u0932\u093e\u0964"
+        else:
+            payload["safety_reason"] = "Possible poisoning or unsafe medicine exposure needs urgent advice."
+            payload["empathetic_summary"] = "Do not try to make the dog vomit. Keep the package or substance name and call a vet or rescue line now."
+        if language == "hi":
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "\u0905\u0917\u0930 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0939\u094b \u0924\u094b \u0915\u0941\u0924\u094d\u0924\u0947 \u0915\u094b \u0936\u0915 \u0935\u093e\u0932\u0947 \u091c\u0939\u0930 \u0938\u0947 \u0926\u0942\u0930 \u0915\u0930\u0947\u0902\u0964"},
+                {"step_number": 2, "instruction": "\u091c\u092c\u0930\u0926\u0938\u094d\u0924\u0940 \u0909\u0932\u094d\u091f\u0940, \u0926\u0942\u0927, \u0924\u0947\u0932 \u092f\u093e \u0918\u0930\u0947\u0932\u0942 \u0928\u0941\u0938\u094d\u0916\u0947 \u0928 \u0926\u0947\u0902\u0964"},
+                {"step_number": 3, "instruction": "\u0935\u0947\u091f/\u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942 \u0932\u093e\u0907\u0928 \u0915\u094b \u092a\u0926\u093e\u0930\u094d\u0925 \u0915\u093e \u0928\u093e\u092e, \u092e\u093e\u0924\u094d\u0930\u093e \u0914\u0930 \u0938\u092e\u092f \u092c\u0924\u093e\u090f\u0902\u0964"},
+            ]
+        elif language == "mr":
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "\u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0905\u0938\u0947\u0932 \u0924\u0930 \u0915\u0941\u0924\u094d\u0930\u094d\u092f\u093e\u0932\u093e \u0938\u0902\u0936\u092f\u093f\u0924 \u0935\u093f\u0937\u093e\u092a\u093e\u0938\u0942\u0928 \u0926\u0942\u0930 \u0915\u0930\u093e\u0964"},
+                {"step_number": 2, "instruction": "\u091c\u092c\u0930\u0926\u0938\u094d\u0924\u0940 \u0909\u0932\u091f\u0940, \u0926\u0942\u0927, \u0924\u0947\u0932 \u0915\u093f\u0902\u0935\u093e \u0918\u0930\u0917\u0941\u0924\u0940 \u0909\u092a\u093e\u092f \u0926\u0947\u090a \u0928\u0915\u093e\u0964"},
+                {"step_number": 3, "instruction": "\u0935\u0947\u091f/\u0930\u0947\u0938\u094d\u0915\u094d\u092f\u0942 \u0932\u093e\u0907\u0928\u0932\u093e \u092a\u0926\u093e\u0930\u094d\u0925\u093e\u091a\u0947 \u0928\u093e\u0935, \u092a\u094d\u0930\u092e\u093e\u0923 \u0906\u0923\u093f \u0935\u0947\u0933 \u0938\u093e\u0902\u0917\u093e\u0964"},
+            ]
+        else:
+            payload["first_aid_steps"] = [
+                {"step_number": 1, "instruction": "Move the dog away from the suspected poison if you can do so safely."},
+                {"step_number": 2, "instruction": "Do not force vomiting, milk, oil, or home remedies."},
+                {"step_number": 3, "instruction": "Contact a vet/rescue line with the substance name, amount, and time eaten."},
+            ]
 
     if context_triage.scenario_type == "fall_entrapment":
         if language == "hi":

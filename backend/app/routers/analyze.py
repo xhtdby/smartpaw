@@ -21,7 +21,7 @@ from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
 from app.services.response_generator import generate_fast_empathetic_response
 from app.services.triage import heuristic_classify_situation
-from app.services.vision_analyzer import analyze_vision
+from app.services.vision_analyzer import analyze_vision, unavailable_result
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["analyze"])
@@ -39,6 +39,21 @@ NO_DOG_MESSAGES = {
     "mr": (
         "या फोटोमध्ये आम्हाला कुत्रा दिसला नाही. कृपया अधिक स्पष्ट फोटोसह पुन्हा प्रयत्न करा. "
         "कुत्रा स्पष्ट दिसत आहे आणि प्रकाश पुरेसा आहे याची खात्री करा. आम्ही मदतीसाठी तयार आहोत!"
+    ),
+}
+
+UNAVAILABLE_MESSAGES = {
+    "en": (
+        "I could not analyze this photo right now because the vision model is unavailable. "
+        "If the dog may be in danger, use the chat and describe what you can see."
+    ),
+    "hi": (
+        "\u092b\u093f\u0932\u0939\u093e\u0932 \u092b\u094b\u091f\u094b \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0928\u0939\u0940\u0902 \u0939\u094b \u0938\u0915\u093e \u0915\u094d\u092f\u094b\u0902\u0915\u093f \u0935\u093f\u091c\u0928 \u092e\u0949\u0921\u0932 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 "
+        "\u0905\u0917\u0930 \u0915\u0941\u0924\u094d\u0924\u093e \u0916\u0924\u0930\u0947 \u092e\u0947\u0902 \u0939\u094b \u0938\u0915\u0924\u093e \u0939\u0948, \u0924\u094b \u091a\u0948\u091f \u092e\u0947\u0902 \u091c\u094b \u0926\u093f\u0916 \u0930\u0939\u093e \u0939\u0948 \u0935\u0939 \u0932\u093f\u0916\u0947\u0902\u0964"
+    ),
+    "mr": (
+        "\u0938\u0927\u094d\u092f\u093e \u092b\u094b\u091f\u094b\u091a\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0924\u093e \u0906\u0932\u0947 \u0928\u093e\u0939\u0940 \u0915\u093e\u0930\u0923 \u0935\u093f\u091c\u0928 \u092e\u0949\u0921\u0947\u0932 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u093e\u0939\u0940\u0964 "
+        "\u0915\u0941\u0924\u094d\u0930\u093e \u0927\u094b\u0915\u094d\u092f\u093e\u0924 \u0905\u0938\u0942 \u0936\u0915\u0924\u094b \u0905\u0938\u0947 \u0935\u093e\u091f\u0924 \u0905\u0938\u0947\u0932, \u0924\u0930 \u091a\u0945\u091f\u092e\u0927\u094d\u092f\u0947 \u0915\u093e\u092f \u0926\u093f\u0938\u0924\u0947 \u0924\u0947 \u0932\u093f\u0939\u093e\u0964"
     ),
 }
 
@@ -115,6 +130,7 @@ def _ensure_payload_condition(payload: dict, condition_result: dict) -> dict:
 
 def _merge_context_triage(metadata: dict, user_context: str | None) -> dict:
     merged = {
+        "analysis_status": metadata.get("analysis_status", "complete"),
         "urgency_signals": list(metadata.get("urgency_signals", [])),
         "unknown_factors": list(metadata.get("unknown_factors", [])),
         "scenario_type": metadata.get("scenario_type", "unclear"),
@@ -141,9 +157,20 @@ async def _run_vision_pipeline(
     user_context: str | None = None,
 ) -> tuple[dict | None, dict, dict, dict]:
     """Use the combined vision call first, then fall back to the legacy multi-call path."""
+    settings = get_settings()
+    if not settings.groq_api_key and not settings.hf_api_token:
+        unavailable = unavailable_result()
+        return None, unavailable["emotion"], unavailable["condition"], {
+            "analysis_status": "unavailable",
+            "urgency_signals": unavailable["urgency_signals"],
+            "unknown_factors": unavailable["unknown_factors"],
+            "scenario_type": unavailable["scenario_type"],
+        }
+
     combined = await analyze_vision(image_bytes, user_context=user_context)
     if combined is not None:
         metadata = {
+            "analysis_status": combined.get("analysis_status", "complete"),
             "urgency_signals": combined.get("urgency_signals", []),
             "unknown_factors": combined.get("unknown_factors", []),
             "scenario_type": combined.get("scenario_type", "unclear"),
@@ -164,6 +191,7 @@ async def _run_vision_pipeline(
     detection = await detect_dog(image_bytes, confidence_threshold)
     if not detection:
         return None, {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}, {}, {
+            "analysis_status": "no_dog_visible",
             "urgency_signals": [],
             "unknown_factors": ["dog_not_visible"],
             "scenario_type": "no_dog_visible",
@@ -177,6 +205,7 @@ async def _run_vision_pipeline(
 
     condition_result = await analyze_condition(image_bytes)
     return detection, emotion_result, condition_result, {
+        "analysis_status": "uncertain",
         "urgency_signals": [],
         "unknown_factors": [],
         "scenario_type": "unclear",
@@ -212,9 +241,16 @@ async def analyze_dog_image(
     )
     vision_metadata = _merge_context_triage(vision_metadata, user_context)
     if not detection:
+        analysis_status = vision_metadata.get("analysis_status", "no_dog_visible")
+        summary = (
+            UNAVAILABLE_MESSAGES.get(language, UNAVAILABLE_MESSAGES["en"])
+            if analysis_status == "unavailable"
+            else NO_DOG_MESSAGES.get(language, NO_DOG_MESSAGES["en"])
+        )
         return AnalysisResponse(
             dog_detected=False,
-            empathetic_summary=NO_DOG_MESSAGES.get(language, NO_DOG_MESSAGES["en"]),
+            analysis_status=analysis_status,
+            empathetic_summary=summary,
             language=language,
             user_context=user_context,
             urgency_signals=vision_metadata.get("urgency_signals", []),
@@ -230,6 +266,7 @@ async def analyze_dog_image(
 
     return AnalysisResponse(
         dog_detected=True,
+        analysis_status=vision_metadata.get("analysis_status", "complete"),
         emotion=EmotionResult(
             label=emotion_result.get("label", "unknown"),
             confidence=emotion_result.get("confidence", 0.0),
@@ -283,6 +320,7 @@ async def analyze_dog_image_multilingual(
     if not detection:
         return MultilingualAnalysisResponse(
             dog_detected=False,
+            analysis_status=vision_metadata.get("analysis_status", "no_dog_visible"),
             user_context=user_context,
             urgency_signals=vision_metadata.get("urgency_signals", []),
             unknown_factors=vision_metadata.get("unknown_factors", []),
@@ -300,6 +338,7 @@ async def analyze_dog_image_multilingual(
 
     return MultilingualAnalysisResponse(
         dog_detected=True,
+        analysis_status=vision_metadata.get("analysis_status", "complete"),
         emotion=EmotionResult(
             label=emotion_result.get("label", "unknown"),
             confidence=emotion_result.get("confidence", 0.0),
