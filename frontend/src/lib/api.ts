@@ -260,5 +260,7 @@ export interface ChatResponse {
     scenario_type: string;
     needs_helpline_first: boolean;
     rationale: string;
+    mode: string;
+    context_used: boolean;
   };
 }

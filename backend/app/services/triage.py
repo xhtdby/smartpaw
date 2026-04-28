@@ -538,7 +538,7 @@ def _heuristic_classify_internal(
 
     if _contains_any(screen_text, [
         "vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool",
-        "दस्त", "जुलाब", "उल्टी", "ओकारी",
+        "दस्त", "जुलाब", "उल्टी", "ओकारी", "अतिसार",
     ]):
         urgent = _contains_any(screen_text, ["repeated", "again and again", "blood", "bloody", "weak", "collapse", "puppy"])
         return TriageResult(

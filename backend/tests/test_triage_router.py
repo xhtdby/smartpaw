@@ -210,3 +210,23 @@ def test_previous_assistant_text_does_not_affect_mode():
     )
     assert t.mode == "care"
     assert t.scenario_type == "vomiting_diarrhea"
+
+
+def test_marathi_mild_symptom_routes_care():
+    # "Dog is vomiting" in Marathi — should be care, not emergency
+    t = heuristic_classify_situation("कुत्र्याला ओकारी आहे")
+    assert t.mode == "care"
+    assert t.scenario_type == "vomiting_diarrhea"
+
+
+def test_marathi_repair_routes_repair():
+    t = heuristic_classify_situation("हे चुकीचे आहे")
+    assert t.mode == "repair"
+    assert t.scenario_type == "conversation_repair"
+
+
+def test_code_mixed_negation_does_not_route_emergency():
+    # "no seizure" in English-Hindi code-mix; the English negation pattern strips it
+    for msg in ["no seizure ho raha hai", "dog is not seizing koi problem nahi"]:
+        t = heuristic_classify_situation(msg)
+        assert t.mode != "emergency", f"Expected non-emergency for {msg!r}"
