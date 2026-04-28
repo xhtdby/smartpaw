@@ -98,3 +98,115 @@ def test_true_road_trauma_gets_emergency_cards():
     assert is_emergency is True
     assert "emergency" in [card["type"] for card in cards]
     assert "find_help" in [card["type"] for card in cards]
+
+
+# --- Stage 3: mode field ---
+
+
+def test_mode_warm_on_greeting():
+    for msg in ["hi", "hello", "what's up", "i have a cute dog"]:
+        t = heuristic_classify_situation(msg)
+        assert t.mode == "warm", f"Expected warm for {msg!r}, got {t.mode!r}"
+
+
+def test_mode_emergency_on_road_trauma():
+    t = heuristic_classify_situation("dog hit by car and cannot stand")
+    assert t.mode == "emergency"
+
+
+def test_mode_repair_on_correction():
+    t = heuristic_classify_situation("stop repeating yourself")
+    assert t.mode == "repair"
+
+
+def test_mode_care_on_mild_diarrhea():
+    t = heuristic_classify_situation("just started diarrhea no dehydration")
+    assert t.mode == "care"
+
+
+def test_mode_care_on_negated_symptom():
+    t = heuristic_classify_situation("no seizure is happening")
+    assert t.mode == "care"
+    assert t.mode != "emergency"
+
+
+# --- Stage 3: context_used ---
+
+
+def test_context_used_false_without_context():
+    t = heuristic_classify_situation("dog is limping")
+    assert t.context_used is False
+
+
+def test_context_used_true_when_message_references_context():
+    t = heuristic_classify_situation(
+        "what should i do",
+        analysis_context="Dog has a bleeding wound on the leg.",
+    )
+    assert t.context_used is True
+
+
+def test_context_used_false_when_message_is_self_sufficient():
+    t = heuristic_classify_situation(
+        "dog is limping",
+        analysis_context="Dog has a bleeding wound on the leg.",
+    )
+    assert t.context_used is False
+
+
+# --- Stage 3: Hindi/Marathi routing ---
+
+
+def test_hindi_greeting_routes_warm():
+    for msg in ["नमस्ते", "नमस्कार"]:
+        t = heuristic_classify_situation(msg)
+        assert t.scenario_type == "warm_conversation", f"Expected warm_conversation for {msg!r}"
+        assert t.mode == "warm"
+
+
+def test_code_mixed_diarrhea_routes_care():
+    t = heuristic_classify_situation("dog ko diarrhea hua no dehydration")
+    assert t.mode == "care"
+    assert t.scenario_type == "vomiting_diarrhea"
+
+
+def test_hindi_diarrhea_keyword_routes_care():
+    t = heuristic_classify_situation("कुत्ते को दस्त लगे हैं कोई निर्जलीकरण नहीं")
+    assert t.mode == "care"
+
+
+def test_hindi_negation_does_not_route_emergency():
+    t = heuristic_classify_situation("दौरा नहीं है")
+    assert t.mode != "emergency"
+
+
+def test_marathi_negation_does_not_route_emergency():
+    t = heuristic_classify_situation("झटके येत नाहीत")
+    assert t.mode != "emergency"
+
+
+def test_hindi_road_trauma_routes_emergency():
+    t = heuristic_classify_situation("कुत्ता गाड़ी से टकराया और खड़ा नहीं हो सकता")
+    assert t.scenario_type == "road_trauma"
+    assert t.mode == "emergency"
+
+
+def test_marathi_road_trauma_routes_emergency():
+    t = heuristic_classify_situation("कुत्र्याला गाडीने मारले आणि उभा राहू शकत नाही")
+    assert t.scenario_type == "road_trauma"
+    assert t.mode == "emergency"
+
+
+def test_code_mixed_road_accident_routes_emergency():
+    t = heuristic_classify_situation("mera dog road accident mein tha cannot stand")
+    assert t.scenario_type == "road_trauma"
+    assert t.mode == "emergency"
+
+
+def test_previous_assistant_text_does_not_affect_mode():
+    t = heuristic_classify_situation(
+        "just started diarrhoea no dehydration",
+        last_assistant_message="Eye injuries can worsen quickly. Watch for seizure, collapse, and bleeding.",
+    )
+    assert t.mode == "care"
+    assert t.scenario_type == "vomiting_diarrhea"

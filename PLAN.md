@@ -1,4 +1,4 @@
-Progress: Stage 2 complete - unverified image fixtures quarantined; next task is Stage 3 typed mode routing.
+Progress: Stage 3 complete - typed mode routing implemented; next task is Stage 4 mode-specific response generation.
 
 # IndieAid Revival Plan
 
