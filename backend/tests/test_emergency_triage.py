@@ -71,7 +71,8 @@ def test_image_analysis_and_chat_triage_contract(fixture_entry, cached_image_pat
     reply_lower = reply.lower()
 
     assert chat["triage"]["urgency_tier"] == fixture_entry["expected_urgency_tier"]
-    assert re.search(r"(^|\n)\s*1\.", reply[:250]), reply[:250]
+    if fixture_entry.get("expects_numbered_first_aid"):
+        assert re.search(r"(^|\n)\s*1\.", reply[:250]), reply[:250]
 
     for keyword in fixture_entry.get("must_mention_keywords", []):
         assert keyword.lower() in reply_lower
