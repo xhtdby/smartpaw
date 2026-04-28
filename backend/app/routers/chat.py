@@ -269,6 +269,7 @@ def _build_triage_action_cards(
         "healthy_or_low_risk",
         "mild_behavior_change",
         "no_dog_visible",
+        "deceased_pet",
     }
     if scenario in quiet_scenarios:
         return [], False
@@ -425,6 +426,21 @@ _SYMPTOM_NEGATED_FALLBACK: dict[str, str] = {
         "श्वास सामान्य असेल, कुत्रा उभा राहू शकत असेल, "
         "आणि जोरदार रक्तस्त्राव, कोसळणे, किंवा वेदना नसेल "
         "तर आपण टप्प्याटप्प्याने बघू."
+    ),
+}
+
+_DECEASED_FALLBACK: dict[str, str] = {
+    "en": (
+        "I'm sorry. If she has already passed, this does not need an emergency checklist. "
+        "If you are not completely sure she has passed, call a vet or rescue now; otherwise I can help with aftercare, what to do next, or just hear about her."
+    ),
+    "hi": (
+        "मुझे दुख है। अगर वह अब नहीं रही, तो इसे आपातकालीन चेकलिस्ट की तरह नहीं लेना है। "
+        "अगर आपको पूरी तरह यकीन नहीं है, तो अभी पशु-चिकित्सक या रेस्क्यू से बात करें; वरना मैं आगे क्या करना है या उसकी यादों के बारे में सुन सकता हूँ।"
+    ),
+    "mr": (
+        "मला वाईट वाटते। ती आता नसल्याची खात्री असेल, तर हे आपत्कालीन चेकलिस्टसारखे हाताळायचे नाही। "
+        "पूर्ण खात्री नसेल तर आत्ताच पशुवैद्य किंवा रेस्क्यूशी बोला; नाहीतर पुढे काय करायचे किंवा तिच्या आठवणींबद्दल मी ऐकू शकतो."
     ),
 }
 
@@ -705,6 +721,17 @@ async def chat(request: ChatRequest):
         + [msg.content for msg in request.history[-6:] if getattr(msg, "role", "") == "user"]
     )
 
+    if triage.scenario_type == "deceased_pet":
+        reply = _mode_fallback(request.message, context, request.language, triage, contact_context)
+        cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
+        return {
+            "response": reply,
+            "sources": sources,
+            "action_cards": cards,
+            "is_emergency": is_emergency,
+            "triage": _triage_dict(triage),
+        }
+
     if not triage.info_sufficient:
         reply = _build_clarifying_reply(triage, request.language)
         cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
@@ -843,6 +870,9 @@ def _mode_fallback(
     lang = language if language in ("en", "hi", "mr") else "en"
     mode = triage.mode
     scenario = triage.scenario_type
+
+    if scenario == "deceased_pet":
+        return _DECEASED_FALLBACK[lang]
 
     if mode == "warm":
         return _WARM_FALLBACK[lang]

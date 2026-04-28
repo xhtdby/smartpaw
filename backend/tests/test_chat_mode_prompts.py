@@ -3,6 +3,7 @@
 import pytest
 
 from app.routers.chat import (
+    _DECEASED_FALLBACK,
     _REPAIR_FALLBACK,
     _SYMPTOM_NEGATED_FALLBACK,
     _WARM_FALLBACK,
@@ -157,6 +158,31 @@ def test_symptom_negated_fallback_hindi_devanagari():
 
 def test_symptom_negated_fallback_marathi_devanagari():
     assert any("ऀ" <= c <= "ॿ" for c in _SYMPTOM_NEGATED_FALLBACK["mr"])
+
+
+# ---------------------------------------------------------------------------
+# Deceased pet fallback: stable, non-emergency, trilingual
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("lang", ["en", "hi", "mr"])
+def test_deceased_pet_fallback_non_empty_and_not_checklist(lang):
+    triage = _t("care", "deceased_pet")
+    reply = _mode_fallback("she\u2019s dead. remember?", "", lang, triage)
+    assert reply
+    assert "1." not in reply
+
+
+def test_deceased_pet_fallback_does_not_ask_active_triage_questions():
+    triage = _t("care", "deceased_pet")
+    reply = _mode_fallback("she\u2019s dead. remember?", "", "en", triage).lower()
+    assert "can stand" not in reply
+    assert "breathing normal" not in reply
+
+
+def test_deceased_pet_fallback_hindi_marathi_devanagari():
+    assert any("ऀ" <= c <= "ॿ" for c in _DECEASED_FALLBACK["hi"])
+    assert any("ऀ" <= c <= "ॿ" for c in _DECEASED_FALLBACK["mr"])
 
 
 # ---------------------------------------------------------------------------

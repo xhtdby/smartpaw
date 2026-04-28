@@ -11,7 +11,7 @@ The goal is not to make the app "less safe." The goal is to make it safer by dis
 Product modes:
 
 - `warm`: greetings, dog introductions, breed curiosity, learning, healthy-dog reassurance.
-- `care`: mild or uncertain symptoms, feeding, skin, ticks, diarrhea without red flags, routine vet planning, community-dog care.
+- `care`: mild or uncertain symptoms, feeding, skin, ticks, diarrhea without red flags, routine vet planning, community-dog care, deceased/passed-away pet aftercare.
 - `emergency`: choking, not breathing, collapse, seizure in progress, heavy bleeding, road trauma, poisoning, heatstroke, entrapment, human rabies exposure.
 - `repair`: user corrections, "stop repeating," "that's wrong," "new dog," "new topic," or "no, not that."
 
@@ -320,6 +320,7 @@ Actions:
 - Test local and deployed flows:
   - greeting,
   - cute/healthy dog,
+  - deceased/passed-away pet correction without emergency cards,
   - mild diarrhea with no dehydration,
   - vaccine or feeding question,
   - image analysis to chat follow-up,

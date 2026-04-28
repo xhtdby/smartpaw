@@ -1,3 +1,6 @@
+from fastapi.testclient import TestClient
+
+from app.main import app
 from app.routers.chat import _build_triage_action_cards
 from app.services.triage import TriageResult, heuristic_classify_situation
 
@@ -230,3 +233,57 @@ def test_code_mixed_negation_does_not_route_emergency():
     for msg in ["no seizure ho raha hai", "dog is not seizing koi problem nahi"]:
         t = heuristic_classify_situation(msg)
         assert t.mode != "emergency", f"Expected non-emergency for {msg!r}"
+
+
+def test_deceased_pet_routes_to_stable_non_emergency_state():
+    for msg in ["dead", "she\u2019s dead", "she's dead. remember?", "not an emergency, she's just dead"]:
+        t = heuristic_classify_situation(msg)
+        assert t.scenario_type == "deceased_pet", f"Expected deceased_pet for {msg!r}"
+        assert t.mode == "care"
+        assert t.urgency_tier == "low_risk"
+
+
+def test_not_an_emergency_only_routes_repair():
+    t = heuristic_classify_situation("not. an. emergency.")
+    assert t.scenario_type == "conversation_repair"
+    assert t.mode == "repair"
+
+
+def test_deceased_pet_cards_stay_quiet():
+    triage = heuristic_classify_situation("she\u2019s dead. remember?")
+    cards, is_emergency = _build_triage_action_cards(
+        "she\u2019s dead. remember?",
+        "This does not need an emergency checklist.",
+        "en",
+        triage,
+    )
+
+    assert cards == []
+    assert is_emergency is False
+
+
+def test_chat_endpoint_deceased_pet_bypasses_emergency_flow():
+    client = TestClient(app)
+    response = client.post(
+        "/api/chat",
+        json={
+            "message": "she\u2019s dead. remember?",
+            "language": "en",
+            "history": [
+                {"role": "user", "content": "look at this cutie"},
+                {
+                    "role": "assistant",
+                    "content": "What is your dog's name, and what brings you here today?",
+                },
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["triage"]["scenario_type"] == "deceased_pet"
+    assert payload["triage"]["mode"] == "care"
+    assert payload["is_emergency"] is False
+    assert payload["action_cards"] == []
+    assert "breathing" not in payload["response"].lower()
+    assert "can stand" not in payload["response"].lower()

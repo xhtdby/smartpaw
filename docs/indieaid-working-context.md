@@ -45,7 +45,7 @@ English, Hindi, and Marathi are equal product surfaces for this phase.
 Target modes:
 
 - `warm`: greeting, dog introduction, breed curiosity, learning, healthy-dog reassurance.
-- `care`: mild or uncertain symptoms, feeding, skin, ticks, diarrhea without red flags, routine vet planning, community-dog care.
+- `care`: mild or uncertain symptoms, feeding, skin, ticks, diarrhea without red flags, routine vet planning, community-dog care, deceased/passed-away pet aftercare.
 - `emergency`: choking, not breathing, collapse, seizure in progress, heavy bleeding, road trauma, poisoning, heatstroke, entrapment, human rabies exposure.
 - `repair`: corrections, "stop repeating," "that's wrong," "new dog," "new topic," negated emergency symptoms.
 
@@ -107,3 +107,4 @@ Deployment checks:
 - 2026-04-28: Vercel project metadata exists at `frontend/.vercel/project.json`, but deployment listing through the available connector returned `403 Forbidden` during Stage 0.
 - 2026-04-28: Railway production URL was not discoverable from repo metadata during Stage 0, so `/health` could not be checked.
 - 2026-04-28: Stage 2 found the old `quick` and `detailed` image fixture suites reused four external image URLs across 165 labels, including emergency scenarios. They are quarantined and should not be used as visual truth.
+- 2026-04-28: Example chat showed "dead / she's dead / not an emergency, she's just dead" bouncing back into emergency or active-triage questions. Added `deceased_pet` as a stable non-emergency care scenario with quiet cards and aftercare/grief wording.

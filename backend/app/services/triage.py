@@ -32,6 +32,7 @@ LOCAL_DECISION_SCENARIOS = {
     "symptom_negated",
     "mild_behavior_change",
     "no_dog_visible",
+    "deceased_pet",
 }
 
 
@@ -68,7 +69,7 @@ Rules:
 - Mark needs_helpline_first true when the scene needs rescue equipment or urgent dispatch: well/pit/drain/pipe entrapment, drowning, major road accident, trapped under vehicle, roof/height rescue, aggressive dog endangering people.
 - If the message is vague ("acting weird", "not ok", "help") and no analysis context gives specifics, set info_sufficient false and ask for the few missing facts needed to choose safe first aid.
 - Do not make info_sufficient false just because the city, exact age, or depth is unknown when the immediate hazard is already clear.
-- scenario_type examples: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, puppy_gi, eye_injury, fearful_aggressive, healthy_or_low_risk, no_dog_visible, unclear.
+- scenario_type examples: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, puppy_gi, eye_injury, fearful_aggressive, deceased_pet, healthy_or_low_risk, no_dog_visible, unclear.
 - Classify correctly for English, Hindi, Marathi, and code-mixed messages. Output fields are language-neutral.
 """
 
@@ -151,8 +152,20 @@ def _contains_any(text: str, patterns: list[str]) -> bool:
     return any(pattern in text for pattern in patterns)
 
 
+def _normalize_turn_text(text: str) -> str:
+    normalized = text.lower()
+    for old, new in {
+        "\u2018": "'",
+        "\u2019": "'",
+        "\u201c": '"',
+        "\u201d": '"',
+    }.items():
+        normalized = normalized.replace(old, new)
+    return normalized
+
+
 def _is_context_dependent(user_message: str) -> bool:
-    text = re.sub(r"\s+", " ", user_message.lower()).strip()
+    text = re.sub(r"\s+", " ", _normalize_turn_text(user_message)).strip()
     if not text:
         return False
 
@@ -199,6 +212,8 @@ def _strip_negated_emergency_terms(text: str) -> str:
 
 
 def _is_repair_or_meta_intent(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
     repair_patterns = [
         "stop repeating",
         "you are repeating",
@@ -214,8 +229,10 @@ def _is_repair_or_meta_intent(text: str) -> bool:
         "forget that",
         "reset",
         "you misunderstood",
+        "not an emergency",
+        "not emergency",
     ]
-    if _contains_any(text, repair_patterns):
+    if _contains_any(text, repair_patterns) or _contains_any(normalized, repair_patterns):
         return True
     hindi_marathi_repair = [
         "यह गलत है",
@@ -227,6 +244,46 @@ def _is_repair_or_meta_intent(text: str) -> bool:
         "मैंने यह नहीं पूछा",
     ]
     return _contains_any(text, hindi_marathi_repair)
+
+
+def _is_deceased_pet_context(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9'\s]+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+
+    if re.search(r"\b(?:not|isn't|isnt|wasn't|wasnt)\s+(?:dead|deceased)\b", normalized):
+        return False
+    if re.search(r"\b(?:alive|still alive)\b", normalized):
+        return False
+
+    if normalized in {"dead", "deceased", "died"}:
+        return True
+
+    death_patterns = [
+        r"\b(?:dog|puppy|pup|pet|he|she|they|it)\s*(?:is|are|was|were|'s|'re)?\s*(?:just|already)?\s*(?:dead|deceased)\b",
+        r"\b(?:my|this|that|the)\s+(?:dog|puppy|pup|pet)\s+(?:is|was|has)?\s*(?:dead|deceased|died)\b",
+        r"\b(?:dog|puppy|pup|pet|he|she|they|it)\s+(?:died|passed away|has passed|had passed)\b",
+        r"\b(?:passed away|has passed|had passed|no longer alive)\b",
+        r"\b(?:mar gaya|mar gayi|mar gya|mar gyi|gujar gaya|gujar gayi|expired)\b",
+    ]
+    if any(re.search(pattern, normalized) for pattern in death_patterns):
+        return True
+
+    devanagari_death_patterns = [
+        "मर गया",
+        "मर गई",
+        "मर गयी",
+        "मृत",
+        "गुज़र गया",
+        "गुजर गया",
+        "गुज़र गई",
+        "गुजर गई",
+        "मेला",
+        "मेली",
+        "मरण पावला",
+        "मरण पावली",
+        "निधन",
+    ]
+    return _contains_any(text, devanagari_death_patterns)
 
 
 def _is_warm_conversation(text: str) -> bool:
@@ -260,11 +317,12 @@ def _heuristic_classify_internal(
     conversation context for the model, not evidence for a new triage scenario.
     """
     del last_assistant_message
-    user_compact = re.sub(r"\s+", " ", user_message.lower()).strip()
+    user_compact = re.sub(r"\s+", " ", _normalize_turn_text(user_message)).strip()
     context = analysis_context if analysis_context and _is_context_dependent(user_message) else ""
     combined = " ".join(
         part for part in [user_message, context] if part
-    ).lower()
+    )
+    combined = _normalize_turn_text(combined)
     compact = re.sub(r"\s+", " ", combined).strip()
     screen_text = _strip_negated_emergency_terms(compact)
 
@@ -273,6 +331,14 @@ def _heuristic_classify_internal(
             info_sufficient=False,
             missing_facts=["what_happened", "current_symptoms"],
             rationale="No situation details were provided.",
+        )
+
+    if _is_deceased_pet_context(user_compact):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            scenario_type="deceased_pet",
+            rationale="The user is talking about a dog who has already died, not an active emergency.",
         )
 
     if _is_repair_or_meta_intent(user_compact):
