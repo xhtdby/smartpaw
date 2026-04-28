@@ -278,6 +278,32 @@ def _build_action_cards(query: str, response: str, language: str) -> tuple[list[
     return cards, is_emergency
 
 
+def _build_triage_action_cards(
+    query: str,
+    response: str,
+    language: str,
+    triage: TriageResult,
+) -> tuple[list[dict[str, Any]], bool]:
+    if not triage.info_sufficient:
+        return [], False
+
+    lang = language if language in ("en", "hi", "mr") else "en"
+    cards, keyword_emergency = _build_action_cards(query, response, language)
+    triage_emergency = triage.urgency_tier in {"life_threatening", "urgent"}
+
+    if not triage_emergency:
+        cards = [card for card in cards if card.get("type") != "emergency"]
+        if triage.urgency_tier == "low_risk" and triage.scenario_type not in {"lost_dog", "routine_care"}:
+            cards = [card for card in cards if card.get("type") != "find_help"]
+        return cards, False
+
+    if not any(card.get("type") == "emergency" for card in cards):
+        cards.insert(0, {"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
+    if not any(card.get("type") == "find_help" for card in cards):
+        cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
+    return cards, triage_emergency or keyword_emergency
+
+
 def _matching_emergency_contact(text: str) -> str:
     haystack = text.lower()
     for city, contact in _CITY_EMERGENCY_CONTACTS.items():
@@ -346,11 +372,52 @@ def _triage_dict(triage: TriageResult) -> dict[str, Any]:
     return triage.model_dump()
 
 
-def _fallback_for_triage(message: str, context: str, triage: TriageResult) -> str | None:
-    contact = _matching_emergency_contact(message + " " + context)
+FAST_TRIAGE_SCENARIOS = {
+    "fall_entrapment",
+    "choking_airway",
+    "seizure_collapse",
+    "severe_bleeding",
+    "heatstroke",
+    "road_trauma",
+    "poisoning",
+    "maggot_wound",
+    "skin_disease",
+    "puppy_gi",
+    "eye_injury",
+    "fearful_aggressive",
+    "rabies_exposure",
+    "healthy_or_low_risk",
+    "lost_dog",
+    "feeding_weak_dog",
+    "routine_care",
+    "tick_infestation",
+    "vomiting_diarrhea",
+    "burn_injury",
+    "unsafe_medicine",
+    "unsafe_home_remedy",
+    "injured_transport",
+    "no_dog_visible",
+}
+
+
+def _fallback_for_triage(
+    message: str,
+    context: str,
+    triage: TriageResult,
+    contact_context: str | None = None,
+) -> str | None:
+    contact = _matching_emergency_contact(contact_context or f"{message} {context}")
     scenario = triage.scenario_type
 
     if scenario == "fall_entrapment":
+        lower_question = any(word in message.lower() for word in ["rope", "food", "water", "basket", "lower"])
+        if lower_question:
+            return (
+                f"{contact}\n"
+                "1. Do not lower yourself into the well and do not throw food or loose objects down.\n"
+                "2. If rescuers ask, lower only a wide cloth/basket/loop from above; never tighten anything around the neck.\n"
+                "3. Keep talking softly and keep people away from the edge until trained help arrives."
+            )
         return (
             f"{contact}\n"
             "1. Call rescue/fire services now; this needs ropes or confined-space equipment.\n"
@@ -387,11 +454,23 @@ def _fallback_for_triage(message: str, context: str, triage: TriageResult) -> st
             "2. Slide onto a board, blanket, or cardboard for transport without twisting the spine.\n"
             "3. Do not straighten limbs, pull legs, or force walking."
         )
+    if scenario == "injured_transport":
+        return (
+            "1. Prepare the vehicle first so the dog only has to be moved once.\n"
+            "2. Use a blanket, board, or sturdy cardboard to support the whole body.\n"
+            "3. Do not lift by legs, collar, tail, or scruff; keep the back and neck as straight as possible."
+        )
     if scenario == "poisoning":
         return (
             "1. Move the dog away from the poison and keep the packet/container for the vet.\n"
             "2. Do not induce vomiting or give milk, oil, salt, or home remedies.\n"
             "3. Call an emergency veterinarian or poison service now with amount and time."
+        )
+    if scenario == "unsafe_medicine":
+        return (
+            "1. Do not give human painkillers or leftover medicines unless a veterinarian specifically tells you.\n"
+            "2. If the dog already swallowed it, note the medicine name, strength, amount, and time.\n"
+            "3. Call a veterinarian or poison service now if any human medicine was swallowed."
         )
     if scenario == "maggot_wound":
         return (
@@ -399,17 +478,41 @@ def _fallback_for_triage(message: str, context: str, triage: TriageResult) -> st
             "2. Cover loosely with clean gauze or cloth; use saline only for gentle surface rinsing.\n"
             "3. Do not pour kerosene, engine oil, turpentine, acid, or harsh chemicals on maggots."
         )
+    if scenario == "unsafe_home_remedy":
+        return (
+            "1. Do not use kerosene, engine oil, turpentine, acid, chili, or thick pastes on wounds or skin.\n"
+            "2. If something was already applied, gently prevent licking and rinse only with clean water/saline if safe.\n"
+            "3. Use a clean loose cloth for transport and arrange vet/rescue help for open, painful, or infected wounds."
+        )
+    if scenario == "tick_infestation":
+        return (
+            "1. Check gum color and energy; pale gums, fever, bleeding, or weakness needs urgent veterinary care.\n"
+            "2. Remove visible ticks with tweezers, pulling straight out close to the skin.\n"
+            "3. Do not pour pesticides, kerosene, engine oil, or harsh chemicals on the dog."
+        )
     if scenario == "skin_disease":
         return (
             "1. Give clean water, food, and a quiet place away from flies and traffic.\n"
             "2. Do not use kerosene, engine oil, acid, chili, or random skin medicines.\n"
             "3. Arrange vet/rescue help if skin is open, foul-smelling, bleeding, or the dog is weak."
         )
+    if scenario == "burn_injury":
+        return (
+            "1. Move the dog away from heat or chemical exposure and keep it calm.\n"
+            "2. Cool the burned area with clean room-temperature running water for several minutes.\n"
+            "3. Do not apply oil, butter, toothpaste, ice, or harsh antiseptics."
+        )
     if scenario == "puppy_gi":
         return (
             "1. Keep the puppy warm, quiet, and away from other dogs.\n"
             "2. Offer tiny amounts of water only if alert and not vomiting repeatedly.\n"
             "3. Bloody diarrhea or weakness in a puppy needs urgent veterinary help."
+        )
+    if scenario == "vomiting_diarrhea":
+        return (
+            "1. Offer small sips of water only if the dog is alert and not vomiting continuously.\n"
+            "2. Do not give human anti-diarrhea, pain, antibiotic, or nausea medicines.\n"
+            "3. Blood, repeated vomiting, weakness, bloated belly, or a puppy case needs urgent veterinary care."
         )
     if scenario == "eye_injury":
         return (
@@ -423,11 +526,35 @@ def _fallback_for_triage(message: str, context: str, triage: TriageResult) -> st
             "2. Do not corner, grab, stare at, or punish the dog.\n"
             "3. Call experienced rescue if the dog is injured but cannot be approached safely."
         )
+    if scenario == "rabies_exposure":
+        return (
+            "1. Wash the bite or scratch with soap and running water for 15 minutes.\n"
+            "2. Go to a doctor or emergency clinic today for rabies post-exposure advice.\n"
+            "3. If safe, note where the dog is; do not try to catch an aggressive dog yourself."
+        )
     if scenario == "healthy_or_low_risk":
         return (
             "1. Observe from a comfortable distance for breathing, walking, appetite, and alertness.\n"
             "2. Offer clean water and shade if the dog is outdoors.\n"
             "3. Get help if vomiting, diarrhea, limping, wounds, collapse, or breathing trouble appears."
+        )
+    if scenario == "lost_dog":
+        return (
+            "1. Keep the dog in a safe, shaded area away from traffic if it is calm enough.\n"
+            "2. Check for a collar tag, ask nearby guards/shops, and post a clear photo with location.\n"
+            "3. If the dog is injured, aggressive, or blocking traffic, call local rescue instead of forcing contact."
+        )
+    if scenario == "feeding_weak_dog":
+        return (
+            "1. Offer clean water first, in a shallow bowl, and watch if the dog can swallow normally.\n"
+            "2. Give a small amount of bland food; do not give a large meal to a very thin or weak dog.\n"
+            "3. Avoid spicy food, bones, sweets, milk-heavy meals, and human medicines."
+        )
+    if scenario == "routine_care":
+        return (
+            "1. This is not an emergency if the puppy is bright, eating, and breathing normally.\n"
+            "2. Book a veterinarian visit for a vaccine and deworming schedule based on age and prior records.\n"
+            "3. Keep the puppy away from sick/unvaccinated dogs until the vet says protection is adequate."
         )
     if scenario == "no_dog_visible":
         return (
@@ -468,9 +595,13 @@ async def chat(request: ChatRequest):
         )
 
     triage = await triage_task
+    contact_context = " ".join(
+        [request.message, request.context_from_analysis or ""]
+        + [msg.content for msg in request.history[-6:]]
+    )
     if not triage.info_sufficient:
         reply = _build_clarifying_reply(triage, request.language)
-        cards, is_emergency = _build_action_cards(request.message, reply, request.language)
+        cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
         return {
             "response": reply,
             "sources": sources,
@@ -479,11 +610,19 @@ async def chat(request: ChatRequest):
             "triage": _triage_dict(triage),
         }
 
+    if request.language == "en" and triage.scenario_type in FAST_TRIAGE_SCENARIOS:
+        reply = _fallback_for_triage(request.message, context, triage, contact_context)
+        if reply:
+            cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
+            return {
+                "response": reply,
+                "sources": sources,
+                "action_cards": cards,
+                "is_emergency": is_emergency,
+                "triage": _triage_dict(triage),
+            }
+
     lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
-    contact_context = " ".join(
-        [request.message, request.context_from_analysis or ""]
-        + [msg.content for msg in request.history[-6:]]
-    )
     system = SYSTEM_PROMPT.format(
         language_instruction=lang_instruction,
         context=context,
@@ -497,9 +636,8 @@ async def chat(request: ChatRequest):
     messages.append({"role": "user", "content": request.message + reminder})
 
     if not settings.groq_api_key:
-        fallback = _fallback_chat(request.message, context, request.language, triage)
-        cards, is_emergency = _build_action_cards(request.message, fallback, request.language)
-        is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+        fallback = _fallback_chat(request.message, context, request.language, triage, contact_context)
+        cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
             "sources": sources,
@@ -526,8 +664,7 @@ async def chat(request: ChatRequest):
             response.raise_for_status()
             data = response.json()
             reply = data["choices"][0]["message"]["content"]
-            cards, is_emergency = _build_action_cards(request.message, reply, request.language)
-            is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+            cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
             return {
                 "response": reply,
                 "sources": sources,
@@ -537,9 +674,8 @@ async def chat(request: ChatRequest):
             }
     except Exception as exc:
         logger.error("Chat failed: %s", exc)
-        fallback = _fallback_chat(request.message, context, request.language, triage)
-        cards, is_emergency = _build_action_cards(request.message, fallback, request.language)
-        is_emergency = is_emergency or triage.urgency_tier in {"life_threatening", "urgent"}
+        fallback = _fallback_chat(request.message, context, request.language, triage, contact_context)
+        cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
             "sources": sources,
@@ -607,10 +743,11 @@ def _fallback_chat(
     context: str,
     language: str = "en",
     triage: TriageResult | None = None,
+    contact_context: str | None = None,
 ) -> str:
     lang = language if language in ("en", "hi", "mr") else "en"
     if triage:
-        triage_fallback = _fallback_for_triage(message, context, triage)
+        triage_fallback = _fallback_for_triage(message, context, triage, contact_context)
         if triage_fallback:
             return triage_fallback
     if context and "No specific first aid articles" not in context:

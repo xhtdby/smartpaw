@@ -15,6 +15,32 @@ from app.services.groq_retry import groq_post_with_retry
 logger = logging.getLogger(__name__)
 
 URGENCY_TIERS = {"life_threatening", "urgent", "moderate", "low_risk", "unclear"}
+LOCAL_DECISION_SCENARIOS = {
+    "fall_entrapment",
+    "choking_airway",
+    "seizure_collapse",
+    "severe_bleeding",
+    "heatstroke",
+    "road_trauma",
+    "poisoning",
+    "maggot_wound",
+    "skin_disease",
+    "puppy_gi",
+    "eye_injury",
+    "fearful_aggressive",
+    "rabies_exposure",
+    "healthy_or_low_risk",
+    "lost_dog",
+    "feeding_weak_dog",
+    "routine_care",
+    "tick_infestation",
+    "vomiting_diarrhea",
+    "burn_injury",
+    "unsafe_medicine",
+    "unsafe_home_remedy",
+    "injured_transport",
+    "no_dog_visible",
+}
 
 
 class TriageResult(BaseModel):
@@ -110,8 +136,9 @@ def heuristic_classify_situation(
     last_assistant_message: str | None = None,
 ) -> TriageResult:
     """Deterministic fallback used when the model is unavailable."""
-    del last_assistant_message
-    combined = " ".join(part for part in [user_message, analysis_context or ""] if part).lower()
+    combined = " ".join(
+        part for part in [user_message, analysis_context or "", last_assistant_message or ""] if part
+    ).lower()
     compact = re.sub(r"\s+", " ", combined).strip()
 
     if not compact:
@@ -161,6 +188,29 @@ def heuristic_classify_situation(
             rationale="The user says there is no visible dog to assess.",
         )
 
+    if _contains_any(
+        compact,
+        ["paracetamol", "acetaminophen", "ibuprofen", "aspirin", "painkiller", "pain killer", "human medicine"],
+    ):
+        return TriageResult(
+            urgency_tier="urgent" if _contains_any(compact, ["gave", "given", "ate", "swallowed"]) else "moderate",
+            info_sufficient=True,
+            missing_facts=["medicine_name", "amount", "time_given"],
+            scenario_type="unsafe_medicine",
+            rationale="Human medicines and painkillers can be dangerous for dogs.",
+        )
+
+    if _contains_any(compact, ["kerosene", "engine oil", "turpentine", "acid", "chili", "turmeric"]) and _contains_any(
+        compact, ["wound", "maggot", "skin", "apply", "put", "use"]
+    ):
+        return TriageResult(
+            urgency_tier="moderate",
+            info_sufficient=True,
+            missing_facts=["what_was_applied", "skin_or_wound_status"],
+            scenario_type="unsafe_home_remedy",
+            rationale="Harsh or unproven home remedies can worsen wounds or poison the dog.",
+        )
+
     if _contains_any(compact, ["well", "borewell", "pit", "shaft", "drain", "pipe", "sewer"]) and _contains_any(
         compact, ["fell", "fall", "fallen", "stuck", "trapped", "inside", "in a", "into"]
     ):
@@ -171,6 +221,18 @@ def heuristic_classify_situation(
             scenario_type="fall_entrapment",
             needs_helpline_first=True,
             rationale="Entrapment in a confined vertical space needs rapid rescue help.",
+        )
+
+    if _contains_any(compact, ["bite", "bit", "scratch", "scratched", "saliva"]) and _contains_any(
+        compact, ["my hand", "me", "person", "human", "skin", "blood", "broke the skin", "broken skin"]
+    ):
+        return TriageResult(
+            urgency_tier="urgent",
+            info_sufficient=True,
+            missing_facts=["wound_washed", "rabies_vaccine_status", "dog_observable"],
+            scenario_type="rabies_exposure",
+            needs_helpline_first=False,
+            rationale="A bite or scratch that breaks human skin needs rabies exposure assessment.",
         )
 
     if _contains_any(compact, ["heatstroke", "heat stroke", "overheat", "overheated"]):
@@ -238,6 +300,16 @@ def heuristic_classify_situation(
             rationale="Maggot wounds need prompt wound care and rescue/vet treatment.",
         )
 
+    if _contains_any(compact, ["tick", "ticks", "flea", "fleas"]):
+        urgent = _contains_any(compact, ["weak", "pale", "bleeding", "fever", "not eating"])
+        return TriageResult(
+            urgency_tier="urgent" if urgent else "moderate",
+            info_sufficient=True,
+            missing_facts=["gum_color", "fever_or_weakness"],
+            scenario_type="tick_infestation",
+            rationale="Ticks can cause skin irritation and serious tick-borne illness when the dog is weak.",
+        )
+
     if _contains_any(compact, ["mange", "hair loss", "itchy skin", "skin disease", "crusty skin"]):
         return TriageResult(
             urgency_tier="moderate",
@@ -254,6 +326,24 @@ def heuristic_classify_situation(
             missing_facts=["can_bear_weight", "pain_level"],
             scenario_type="fracture",
             rationale="Possible fracture needs immobilization and veterinary assessment.",
+        )
+
+    if _contains_any(compact, ["transport", "carry", "lift", "move him", "move her", "take to vet"]):
+        return TriageResult(
+            urgency_tier="moderate",
+            info_sufficient=True,
+            missing_facts=["possible_spinal_injury", "dog_size"],
+            scenario_type="injured_transport",
+            rationale="Transport advice should minimize pain and spinal movement.",
+        )
+
+    if _contains_any(compact, ["burn", "burned", "scald", "fire", "hot water", "chemical burn"]):
+        return TriageResult(
+            urgency_tier="urgent",
+            info_sufficient=True,
+            missing_facts=["burn_location", "burn_size", "chemical_or_heat"],
+            scenario_type="burn_injury",
+            rationale="Burns can worsen and may need urgent pain control and wound care.",
         )
 
     if _contains_any(compact, ["eye", "eyeball", "blind", "squinting"]):
@@ -274,6 +364,16 @@ def heuristic_classify_situation(
             rationale="Puppies can dehydrate and crash quickly.",
         )
 
+    if _contains_any(compact, ["vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool"]):
+        urgent = _contains_any(compact, ["repeated", "again and again", "blood", "bloody", "weak", "collapse", "puppy"])
+        return TriageResult(
+            urgency_tier="urgent" if urgent else "moderate",
+            info_sufficient=True,
+            missing_facts=["can_keep_water_down", "blood_present", "duration"],
+            scenario_type="vomiting_diarrhea",
+            rationale="Vomiting or diarrhea can become urgent if repeated, bloody, or causing weakness.",
+        )
+
     if _contains_any(compact, ["aggressive", "biting", "growling", "lunging", "cornered"]):
         return TriageResult(
             urgency_tier="urgent",
@@ -282,6 +382,33 @@ def heuristic_classify_situation(
             scenario_type="fearful_aggressive",
             needs_helpline_first=True,
             rationale="An aggressive or cornered dog needs distance and rescue support.",
+        )
+
+    if _contains_any(compact, ["lost dog", "found a dog", "missing dog", "stray followed", "near my building"]):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            missing_facts=["collar_or_tag", "safe_hold_location"],
+            scenario_type="lost_dog",
+            rationale="This is a welfare/logistics case unless injury or danger is present.",
+        )
+
+    if _contains_any(compact, ["feed", "food", "eat", "weak street dog", "hungry"]):
+        return TriageResult(
+            urgency_tier="low_risk" if not _contains_any(compact, ["collapse", "cannot stand", "very weak"]) else "moderate",
+            info_sufficient=True,
+            missing_facts=["can_swallow", "vomiting_or_diarrhea"],
+            scenario_type="feeding_weak_dog",
+            rationale="Feeding advice should be cautious, especially for weak or starved dogs.",
+        )
+
+    if _contains_any(compact, ["vaccine", "vaccination", "vaccines", "deworm", "deworming"]):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            missing_facts=["age", "previous_vaccines"],
+            scenario_type="routine_care",
+            rationale="Routine preventive care is not an emergency.",
         )
 
     if _contains_any(compact, ["healthy", "normal", "sleeping", "playing"]):
@@ -309,7 +436,11 @@ async def classify_situation(
     """Classify a chat turn before generating a full response."""
     fallback = heuristic_classify_situation(user_message, analysis_context, last_assistant_message)
     settings = get_settings()
-    if not settings.groq_api_key:
+    if (
+        not settings.groq_api_key
+        or not fallback.info_sufficient
+        or fallback.scenario_type in LOCAL_DECISION_SCENARIOS
+    ):
         return fallback
 
     user_content = {
