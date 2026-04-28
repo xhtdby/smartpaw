@@ -1,4 +1,4 @@
-Progress: Stage 0 complete - draft PR #7 opened; next task is Stage 1 context doc.
+Progress: Stage 1 complete - context doc added; next task is Stage 2 test truth cleanup.
 
 # IndieAid Revival Plan
 
@@ -38,6 +38,7 @@ Confirmed remaining risks:
 - The chat still needs a real mode architecture, not only first-pass heuristics.
 - The analysis-to-chat handoff still uses a fake prefilled user message.
 - Analysis fallback text is still too generic across healthy, mild, urgent, and unavailable cases.
+- Image analysis output still risks sounding like a formal clinical report instead of a calm, caring observation from IndieAid.
 - Fixture image labels are not trustworthy as visual truth.
 - Some tests are still biased toward emergency checklist behavior.
 - Railway persistence for SQLite and report image uploads is not yet proven durable.
@@ -230,7 +231,7 @@ Definition of done:
 
 ### Stage 6: Analysis Quality and Vision Fallbacks
 
-Purpose: Make image analysis feel observant and honest instead of repetitive.
+Purpose: Make image analysis feel observant, honest, and warm instead of repetitive or overly formal.
 
 Actions:
 
@@ -243,6 +244,10 @@ Actions:
   - immediate emergency,
   - no dog visible,
   - analysis unavailable.
+- Rewrite image-analysis summaries so they sound like IndieAid speaking to a caring human, not like a veterinary intake form.
+- Keep structured labels internally, but avoid leading the user experience with stiff labels such as "Condition Assessment" language when a simpler observation would be kinder and clearer.
+- For non-emergency images, prefer gentle observations, one or two practical next steps, and clear watch-for signs over formal checklist formatting.
+- For emergency images, keep the tone direct and urgent, but still human.
 - Add an explicit analysis status such as `complete`, `uncertain`, `no_dog_visible`, or `unavailable`.
 - Provide equivalent fallback response families in English, Hindi, and Marathi.
 - If no vision key/model is configured, return `unavailable`, not "no dog detected."
@@ -253,6 +258,7 @@ Actions:
 Definition of done:
 
 - A healthy dog does not get the same advice as an injured dog.
+- A healthy or mildly concerning analysis does not read like a medical report.
 - A model outage does not pretend to know what is in the image.
 - Analysis results still give clear next steps for real emergencies.
 - Analysis summaries, safety wording, and fallback families are mode-appropriate in English, Hindi, and Marathi.
@@ -385,12 +391,13 @@ Always-on tests, no API key:
 - Analysis context expiry/clear behavior.
 - Action-card relevance.
 - Fallback response families.
+- Image-analysis summary tone checks for healthy, mild-care, emergency, no-dog, and unavailable cases.
 - API schema compatibility.
 
 Optional tests, API key required:
 
 - Small vision sanity suite with verified fixtures.
-- Small LLM quality suite for warmth, proportionality, escalation, uncertainty, repetition, and naturalness in English, Hindi, and Marathi.
+- Small LLM quality suite for warmth, proportionality, escalation, uncertainty, repetition, image-analysis tone, and naturalness in English, Hindi, and Marathi.
 - Do not let API-key tests be the only protection against routing regressions.
 
 Minimum commands before pushing code:
