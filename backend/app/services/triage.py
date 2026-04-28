@@ -15,6 +15,9 @@ from app.services.groq_retry import groq_post_with_retry
 logger = logging.getLogger(__name__)
 
 URGENCY_TIERS = {"life_threatening", "urgent", "moderate", "low_risk", "unclear"}
+_VALID_MODES = frozenset({"warm", "care", "emergency", "repair"})
+_DEVANAGARI_WARM = frozenset(["नमस्ते", "नमस्कार", "हाय", "हेलो", "सुप्रभात", "शुभ संध्या"])
+
 LOCAL_DECISION_SCENARIOS = {
     "fall_entrapment",
     "choking_airway",
@@ -39,6 +42,8 @@ class TriageResult(BaseModel):
     scenario_type: str = "unclear"
     needs_helpline_first: bool = False
     rationale: str = ""
+    mode: str = "care"
+    context_used: bool = False
 
 
 TRIAGE_SYSTEM_PROMPT = """You classify urgent dog rescue / first-aid chat messages.
@@ -50,15 +55,21 @@ Return ONLY valid JSON:
   "missing_facts": ["short_snake_case_fact"],
   "scenario_type": "short_snake_case",
   "needs_helpline_first": true | false,
-  "rationale": "one short line"
+  "rationale": "one short line",
+  "mode": "warm" | "care" | "emergency" | "repair"
 }
 
 Rules:
+- mode "warm": greetings, dog introductions, healthy-dog curiosity, breed questions, no symptom present.
+- mode "care": any symptom, concern, or care question that is not an emergency.
+- mode "emergency": life_threatening urgency tier; requires immediate action.
+- mode "repair": user is correcting or redirecting the conversation, not reporting a new situation.
 - Mark life_threatening for entrapment in wells/pits/drains, drowning, choking, not breathing, collapse, repeated seizure, heavy bleeding, heatstroke collapse, major road trauma, suspected spinal injury, severe poisoning signs.
 - Mark needs_helpline_first true when the scene needs rescue equipment or urgent dispatch: well/pit/drain/pipe entrapment, drowning, major road accident, trapped under vehicle, roof/height rescue, aggressive dog endangering people.
 - If the message is vague ("acting weird", "not ok", "help") and no analysis context gives specifics, set info_sufficient false and ask for the few missing facts needed to choose safe first aid.
 - Do not make info_sufficient false just because the city, exact age, or depth is unknown when the immediate hazard is already clear.
 - scenario_type examples: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, puppy_gi, eye_injury, fearful_aggressive, healthy_or_low_risk, no_dog_visible, unclear.
+- Classify correctly for English, Hindi, Marathi, and code-mixed messages. Output fields are language-neutral.
 """
 
 
@@ -105,6 +116,15 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         str(raw.get("scenario_type", fallback.scenario_type)).strip().lower(),
     ).strip("_") or fallback.scenario_type
 
+    raw_mode = str(raw.get("mode", "")).strip().lower()
+    if raw_mode not in _VALID_MODES:
+        raw_mode = fallback.mode
+    # Safety overrides: deterministic gates cannot be downgraded by the LLM
+    if fallback.urgency_tier == "life_threatening":
+        raw_mode = "emergency"
+    if fallback.scenario_type == "conversation_repair":
+        raw_mode = "repair"
+
     return TriageResult(
         urgency_tier=urgency_tier,
         info_sufficient=bool(raw.get("info_sufficient", fallback.info_sufficient)),
@@ -112,7 +132,19 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         scenario_type=scenario_type,
         needs_helpline_first=bool(raw.get("needs_helpline_first", fallback.needs_helpline_first)),
         rationale=str(raw.get("rationale", fallback.rationale)).strip()[:220],
+        mode=raw_mode,
+        context_used=fallback.context_used,
     )
+
+
+def _derive_mode(urgency_tier: str, scenario_type: str) -> str:
+    if scenario_type == "conversation_repair":
+        return "repair"
+    if scenario_type == "warm_conversation":
+        return "warm"
+    if urgency_tier == "life_threatening":
+        return "emergency"
+    return "care"
 
 
 def _contains_any(text: str, patterns: list[str]) -> bool:
@@ -183,10 +215,23 @@ def _is_repair_or_meta_intent(text: str) -> bool:
         "reset",
         "you misunderstood",
     ]
-    return _contains_any(text, repair_patterns)
+    if _contains_any(text, repair_patterns):
+        return True
+    hindi_marathi_repair = [
+        "यह गलत है",
+        "ये गलत है",
+        "बार बार मत",
+        "बार-बार मत",
+        "हे चुकीचे",
+        "परत परत सांगू नकोस",
+        "मैंने यह नहीं पूछा",
+    ]
+    return _contains_any(text, hindi_marathi_repair)
 
 
 def _is_warm_conversation(text: str) -> bool:
+    if text.strip() in _DEVANAGARI_WARM:
+        return True
     normalized = re.sub(r"[^a-z0-9\s']+", " ", text.lower())
     normalized = re.sub(r"\s+", " ", normalized).strip()
     if normalized in {"hi", "hello", "hey", "what's up", "whats up", "good morning", "good evening"}:
@@ -204,7 +249,7 @@ def _is_warm_conversation(text: str) -> bool:
     return _contains_any(normalized, warm_patterns)
 
 
-def heuristic_classify_situation(
+def _heuristic_classify_internal(
     user_message: str,
     analysis_context: str | None = None,
     last_assistant_message: str | None = None,
@@ -392,8 +437,14 @@ def heuristic_classify_situation(
             rationale="Heavy bleeding needs immediate pressure and urgent help.",
         )
 
-    if _contains_any(screen_text, ["hit by car", "road accident", "vehicle", "bike hit", "car hit", "hit by bike", "hit by a bike", "run over"]):
-        tier = "life_threatening" if _contains_any(screen_text, ["cannot stand", "can't stand", "dragging", "collapsed"]) else "urgent"
+    if _contains_any(screen_text, [
+        "hit by car", "road accident", "vehicle", "bike hit", "car hit", "hit by bike", "hit by a bike", "run over",
+        "गाड़ी से टकराया", "गाड़ी ने मारा", "गाडीने मारले", "सड़क दुर्घटना", "वाहन ने मारा",
+    ]):
+        tier = "life_threatening" if _contains_any(screen_text, [
+            "cannot stand", "can't stand", "dragging", "collapsed",
+            "खड़ा नहीं", "उठ नहीं", "उभा राहू शकत नाही",
+        ]) else "urgent"
         return TriageResult(
             urgency_tier=tier,
             info_sufficient=True,
@@ -485,7 +536,10 @@ def heuristic_classify_situation(
             rationale="Puppies can dehydrate and crash quickly.",
         )
 
-    if _contains_any(screen_text, ["vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool"]):
+    if _contains_any(screen_text, [
+        "vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool",
+        "दस्त", "जुलाब", "उल्टी", "ओकारी", "अतिसार",
+    ]):
         urgent = _contains_any(screen_text, ["repeated", "again and again", "blood", "bloody", "weak", "collapse", "puppy"])
         return TriageResult(
             urgency_tier="urgent" if urgent else "moderate",
@@ -567,6 +621,18 @@ def heuristic_classify_situation(
         scenario_type="unclear",
         rationale="Some detail is present, but the exact first-aid category is unclear.",
     )
+
+
+def heuristic_classify_situation(
+    user_message: str,
+    analysis_context: str | None = None,
+    last_assistant_message: str | None = None,
+) -> TriageResult:
+    """Public wrapper: classify then attach mode and context_used."""
+    result = _heuristic_classify_internal(user_message, analysis_context, last_assistant_message)
+    result.mode = _derive_mode(result.urgency_tier, result.scenario_type)
+    result.context_used = bool(analysis_context and _is_context_dependent(user_message))
+    return result
 
 
 async def classify_situation(
