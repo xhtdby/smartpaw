@@ -142,32 +142,66 @@ DEFAULT_CONTACT_LINE = (
     "emergency veterinarian/rescue service. For unsafe human situations in India, call 112."
 )
 
-SYSTEM_PROMPT = """You are IndieAid, a dog first-aid assistant. Help the rescuer act in the next few minutes.
+_PROMPT_EMERGENCY = """You are IndieAid responding to an urgent dog emergency. Be concise and action-first.
 
-Core rules:
-- Lead with concrete action. Do not open with disclaimers or generic caution.
-- Put safety warnings inside action steps, unless the dog is attacking or the scene has traffic, fire, electrocution, height, or confined-space risk.
-- Never recommend prescription drugs, injections, antibiotics, steroids, painkillers, dewormers, random human medicines, kerosene, turpentine, engine oil, acid, or chili.
-- Safe first aid may include shade, water only if the dog can swallow, direct pressure, saline rinse, diluted povidone-iodine on superficial wounds, clean cloth/gauze, warmth, quiet isolation, and careful transport.
-- Be honest about uncertainty; do not diagnose.
-- Keep the reply under 700 tokens.
+Rules:
+- If a helpline call is needed first, give the contact number FIRST, then 1-3 numbered steps
+- Otherwise: give 1-3 numbered immediate actions — no greeting, no preamble, no disclaimer opener
+- Safe first aid only: shade, water only if swallowing, direct pressure, saline rinse, careful transport
+- NEVER recommend prescription drugs, injections, antibiotics, steroids, painkillers, kerosene, turpentine, engine oil, acid, or chili
+- No "watch for" section — this is urgent action time
+- Under 350 tokens
 
-Adaptive response shape:
-- If TRIAGE.info_sufficient is false: ask only 1-2 targeted questions; do not use section headings.
-- If TRIAGE.urgency_tier is life_threatening and TRIAGE.needs_helpline_first is true: give the contact line first, then 1-3 numbered immediate actions. No "watch for" section.
-- If TRIAGE.urgency_tier is life_threatening: give 1-3 numbered immediate actions. No "watch for" section.
-- Otherwise use: **Immediate steps**, **When to escalate**, **Who to call**, **Watch for**.
-
-CONTACT LINE:
+CONTACT:
 {emergency_contact}
 
 TRIAGE:
 {triage}
 
-{language_instruction}
+{language_instruction}"""
 
-KNOWLEDGE BASE CONTEXT:
-{context}"""
+_PROMPT_CARE = """You are IndieAid, a dog-care assistant helping with a mild symptom or care question.
+
+This is NOT an emergency. Keep your response proportionate.
+
+Guidance:
+- Describe what you observe and the most likely possibilities without claiming certainty
+- Clearly separate: what to watch at home, when to call a vet, and what would be an emergency signal
+- If you need 1-2 more details for better advice, ask those specific questions — not a long checklist
+- Safe first aid only: shade, water if alert, gentle observation, saline rinse, clean cloth
+- Never recommend prescription drugs, antibiotics, steroids, human medicines, or unproven remedies
+- Under 500 tokens
+
+TRIAGE:
+{triage}
+
+KNOWLEDGE BASE:
+{context}
+
+{language_instruction}"""
+
+_PROMPT_WARM = """You are IndieAid, a warm and curious dog-care assistant.
+
+The user is greeting you, introducing their dog, or asking a general question with no urgent symptom.
+
+Respond in 2-4 friendly sentences:
+- Be genuinely warm and curious about their dog
+- You may ask about the dog's name, age, breed, or what they are curious about
+- You may invite care, feeding, grooming, training, or breed questions
+- Do NOT open with "Of course!" or "I'm here to help!"
+- Do NOT add disclaimers, checklists, or warnings unless the user describes a symptom
+
+{language_instruction}"""
+
+_PROMPT_REPAIR = """You are IndieAid. The user is correcting or redirecting the conversation, not reporting a new emergency.
+
+Your response:
+- Acknowledge the correction in one short sentence — do not over-apologize
+- Do NOT repeat any emergency steps, warnings, or the previous topic
+- Ask one open question: what they would like to focus on now
+- Keep it to 2-3 sentences total
+
+{language_instruction}"""
 
 LANGUAGE_INSTRUCTIONS = {
     "en": "LANGUAGE: Respond in English.",
@@ -353,23 +387,71 @@ def _triage_dict(triage: TriageResult) -> dict[str, Any]:
     return triage.model_dump()
 
 
-FAST_TRIAGE_SCENARIOS = {
-    "fall_entrapment",
-    "choking_airway",
-    "seizure_collapse",
-    "severe_bleeding",
-    "heatstroke",
-    "road_trauma",
-    "poisoning",
-    "rabies_exposure",
+_WARM_FALLBACK: dict[str, str] = {
+    "en": (
+        "Hi! I'm here. Tell me about your dog — name, age, indie mix or known breed, "
+        "or whatever you're curious about."
+    ),
+    "hi": (
+        "नमस्ते! बताइए — कुत्ते का नाम, उम्र, नस्ल क्या है, "
+        "या आप किस बारे में जानना चाहते हैं?"
+    ),
+    "mr": (
+        "नमस्कार! सांगा — कुत्र्याचे नाव, वय, जात काय आहे, "
+        "किंवा तुम्हाला कशाबद्दल जाणायचे आहे?"
+    ),
 }
 
-DIRECT_REPLY_SCENARIOS = {
-    "conversation_repair",
-    "warm_conversation",
-    "symptom_negated",
-    "mild_behavior_change",
+_REPAIR_FALLBACK: dict[str, str] = {
+    "en": "Got it — I'll set that aside. What would you like to focus on right now?",
+    "hi": "ठीक है — मैं उसे छोड़ता हूँ। अभी आप किस बारे में बात करना चाहते हैं?",
+    "mr": "समजले — ते सोडतो. आत्ता तुम्हाला कशाबद्दल बोलायचे आहे?",
 }
+
+_SYMPTOM_NEGATED_FALLBACK: dict[str, str] = {
+    "en": (
+        "Got it — I won't treat that as active. "
+        "What are you seeing right now? If breathing is normal, the dog can stand, "
+        "and there's no heavy bleeding, collapse, or pain, we can take this step by step."
+    ),
+    "hi": (
+        "ठीक है — वह लक्षण सक्रिय नहीं है। अभी क्या दिख रहा है? "
+        "अगर सांस सामान्य है, कुत्ता खड़ा हो सकता है, "
+        "और कोई गंभीर रक्तस्त्राव, बेहोशी, या दर्द नहीं है, "
+        "तो हम मिलकर धीरे-धीरे आगे बढ़ते हैं।"
+    ),
+    "mr": (
+        "ठीक आहे — तो लक्षण सक्रिय नाही. आत्ता काय दिसतंय? "
+        "श्वास सामान्य असेल, कुत्रा उभा राहू शकत असेल, "
+        "आणि जोरदार रक्तस्त्राव, कोसळणे, किंवा वेदना नसेल "
+        "तर आपण टप्प्याटप्प्याने बघू."
+    ),
+}
+
+
+def _build_system_prompt(
+    triage: TriageResult,
+    lang_instruction: str,
+    context: str,
+    contact: str,
+) -> str:
+    mode = triage.mode
+    triage_json = json.dumps(_triage_dict(triage), ensure_ascii=False)
+    if mode == "emergency":
+        return _PROMPT_EMERGENCY.format(
+            language_instruction=lang_instruction,
+            emergency_contact=contact,
+            triage=triage_json,
+        )
+    if mode == "warm":
+        return _PROMPT_WARM.format(language_instruction=lang_instruction)
+    if mode == "repair":
+        return _PROMPT_REPAIR.format(language_instruction=lang_instruction)
+    return _PROMPT_CARE.format(
+        language_instruction=lang_instruction,
+        triage=triage_json,
+        context=context,
+    )
 
 
 def _fallback_for_triage(
@@ -594,6 +676,7 @@ async def chat(request: ChatRequest):
         [request.message, request.context_from_analysis or ""]
         + [msg.content for msg in request.history[-6:] if getattr(msg, "role", "") == "user"]
     )
+
     if not triage.info_sufficient:
         reply = _build_clarifying_reply(triage, request.language)
         cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
@@ -605,33 +688,8 @@ async def chat(request: ChatRequest):
             "triage": _triage_dict(triage),
         }
 
-    if request.language == "en" and triage.scenario_type in FAST_TRIAGE_SCENARIOS | DIRECT_REPLY_SCENARIOS:
-        reply = _fallback_for_triage(request.message, context, triage, contact_context)
-        if reply:
-            cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)
-            return {
-                "response": reply,
-                "sources": sources,
-                "action_cards": cards,
-                "is_emergency": is_emergency,
-                "triage": _triage_dict(triage),
-            }
-
-    lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
-    system = SYSTEM_PROMPT.format(
-        language_instruction=lang_instruction,
-        context=context,
-        emergency_contact=_matching_emergency_contact(contact_context),
-        triage=json.dumps(_triage_dict(triage), ensure_ascii=False),
-    )
-
-    reminder = LANGUAGE_REMINDERS.get(request.language, "")
-    messages = [{"role": "system", "content": system}]
-    messages.extend(_history_for_model(request.history))
-    messages.append({"role": "user", "content": request.message + reminder})
-
     if not settings.groq_api_key:
-        fallback = _fallback_chat(request.message, context, request.language, triage, contact_context)
+        fallback = _mode_fallback(request.message, context, request.language, triage, contact_context)
         cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
@@ -640,6 +698,19 @@ async def chat(request: ChatRequest):
             "is_emergency": is_emergency,
             "triage": _triage_dict(triage),
         }
+
+    lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
+    contact = _matching_emergency_contact(contact_context)
+    system = _build_system_prompt(triage, lang_instruction, context, contact)
+
+    reminder = LANGUAGE_REMINDERS.get(request.language, "")
+    messages = [{"role": "system", "content": system}]
+    messages.extend(_history_for_model(request.history))
+    messages.append({"role": "user", "content": request.message + reminder})
+
+    mode = triage.mode
+    temperature = 0.2 if mode == "emergency" else 0.5 if mode == "warm" else 0.35
+    max_tokens = 350 if mode == "emergency" else 250 if mode in ("warm", "repair") else 550
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
@@ -652,8 +723,8 @@ async def chat(request: ChatRequest):
                 json={
                     "model": settings.groq_text_model,
                     "messages": messages,
-                    "temperature": 0.35,
-                    "max_tokens": 700,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
                 },
             )
             response.raise_for_status()
@@ -669,7 +740,7 @@ async def chat(request: ChatRequest):
             }
     except Exception as exc:
         logger.error("Chat failed: %s", exc)
-        fallback = _fallback_chat(request.message, context, request.language, triage, contact_context)
+        fallback = _mode_fallback(request.message, context, request.language, triage, contact_context)
         cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
@@ -733,18 +804,32 @@ _FALLBACK_GENERIC = {
 }
 
 
-def _fallback_chat(
+def _mode_fallback(
     message: str,
     context: str,
-    language: str = "en",
-    triage: TriageResult | None = None,
+    language: str,
+    triage: TriageResult,
     contact_context: str | None = None,
 ) -> str:
+    """Return a mode-appropriate deterministic reply when the LLM is unavailable."""
     lang = language if language in ("en", "hi", "mr") else "en"
-    if triage:
-        triage_fallback = _fallback_for_triage(message, context, triage, contact_context)
-        if triage_fallback:
-            return triage_fallback
+    mode = triage.mode
+    scenario = triage.scenario_type
+
+    if mode == "warm":
+        return _WARM_FALLBACK[lang]
+
+    if mode == "repair" or scenario == "conversation_repair":
+        return _REPAIR_FALLBACK[lang]
+
+    if scenario == "symptom_negated":
+        return _SYMPTOM_NEGATED_FALLBACK[lang]
+
+    if lang == "en":
+        scenario_reply = _fallback_for_triage(message, context, triage, contact_context)
+        if scenario_reply:
+            return scenario_reply
+
     if context and "No specific first aid articles" not in context:
-        return "1. Use the relevant first-aid guidance below now.\n\n" + _FALLBACK_WITH_KB[lang].format(context=context)
+        return _FALLBACK_WITH_KB[lang].format(context=context)
     return _FALLBACK_GENERIC[lang]
