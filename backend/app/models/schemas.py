@@ -105,11 +105,30 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class AnalysisContextCondition(BaseModel):
+    physical_condition: str = ""
+    visible_injuries: list[str] = []
+    health_concerns: list[str] = []
+    body_language: str = ""
+
+
+class AnalysisContext(BaseModel):
+    source: str = "image_analysis"
+    created_at: str  # ISO-8601 timestamp
+    scenario_type: str = "unclear"
+    urgency_signals: list[str] = []
+    unknown_factors: list[str] = []
+    emotion: Optional[EmotionResult] = None
+    condition: Optional[AnalysisContextCondition] = None
+    user_context: Optional[str] = None
+
+
 class ChatRequest(BaseModel):
     message: str
     language: str = "en"
     history: list[ChatMessage] = []
-    context_from_analysis: Optional[str] = None
+    context_from_analysis: Optional[str] = None  # legacy; kept for compatibility
+    analysis_context: Optional[AnalysisContext] = None  # structured; wins when both present
 
 
 class LanguageResult(BaseModel):

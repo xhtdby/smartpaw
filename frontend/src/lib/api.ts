@@ -121,17 +121,20 @@ export async function sendChatMessage(
   message: string,
   language: string = "en",
   history: ChatMessage[] = [],
-  analysisContext?: string
+  analysisContext?: AnalysisContext | string
 ): Promise<ChatResponse> {
+  const body: Record<string, unknown> = { message, language, history };
+  if (analysisContext) {
+    if (typeof analysisContext === "string") {
+      body.context_from_analysis = analysisContext;
+    } else {
+      body.analysis_context = analysisContext;
+    }
+  }
   const res = await fetchWithRetry(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message,
-      language,
-      history,
-      context_from_analysis: analysisContext,
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("Chat failed");
   return res.json();
@@ -239,6 +242,22 @@ export interface Report {
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+export interface AnalysisContext {
+  source: "image_analysis";
+  created_at: string; // ISO-8601
+  scenario_type?: string;
+  urgency_signals?: string[];
+  unknown_factors?: string[];
+  emotion?: { label: string; confidence: number };
+  condition?: {
+    physical_condition: string;
+    visible_injuries: string[];
+    health_concerns: string[];
+    body_language: string;
+  };
+  user_context?: string;
 }
 
 export interface ActionCard {

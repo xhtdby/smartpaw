@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect, Suspense, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard } from "@/lib/api";
+import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard, type AnalysisContext } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const STORAGE_KEY = "indieaid-chat-history";
@@ -159,6 +158,44 @@ function ActionCards({ cards }: { cards: ActionCard[] }) {
 }
 
 // ---------------------------------------------------------------------------
+// Analysis context banner — shown when photo analysis context is active
+// ---------------------------------------------------------------------------
+const STALE_MS = 30 * 60 * 1000; // 30 minutes
+
+function AnalysisBanner({
+  onClear,
+  onNewDog,
+  label,
+  clearLabel,
+  newDogLabel,
+}: {
+  onClear: () => void;
+  onNewDog: () => void;
+  label: string;
+  clearLabel: string;
+  newDogLabel: string;
+}) {
+  return (
+    <div className="bg-[var(--color-warm-50)] border border-[var(--color-warm-300)] rounded-xl px-4 py-2.5 flex items-center gap-3 mb-3">
+      <span className="text-base shrink-0">📷</span>
+      <p className="flex-1 text-sm text-[var(--color-warm-700)]">{label}</p>
+      <button
+        onClick={onClear}
+        className="text-xs text-[var(--color-warm-600)] hover:text-[var(--color-warm-800)] underline shrink-0"
+      >
+        {clearLabel}
+      </button>
+      <button
+        onClick={onNewDog}
+        className="text-xs text-[var(--color-warm-600)] hover:text-[var(--color-warm-800)] underline shrink-0"
+      >
+        {newDogLabel}
+      </button>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Emergency banner — shown at top when last reply flagged is_emergency
 // ---------------------------------------------------------------------------
 function EmergencyBanner({ label }: { label: string }) {
@@ -183,12 +220,11 @@ interface EnrichedMessage extends ChatMessage {
 
 function ChatInner() {
   const { language, t } = useLanguage();
-  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [analysisContext, setAnalysisContext] = useState<string | undefined>();
+  const [analysisContext, setAnalysisContext] = useState<AnalysisContext | string | undefined>();
   const [lastEmergency, setLastEmergency] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
@@ -200,13 +236,23 @@ function ChatInner() {
       const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) setMessages(JSON.parse(saved));
     } catch { /* ignore */ }
-    const ctx = localStorage.getItem(ANALYSIS_KEY) || localStorage.getItem(LEGACY_ANALYSIS_KEY);
-    if (ctx) setAnalysisContext(ctx);
-    if (searchParams.get("from") === "analysis" && ctx) {
-      const autoMsg = `I just analyzed a dog photo. Here's what was found:\n${ctx}\n\nWhat should I do next?`;
-      setInput(autoMsg);
+    const raw = localStorage.getItem(ANALYSIS_KEY) || localStorage.getItem(LEGACY_ANALYSIS_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as AnalysisContext;
+        // Discard context older than 30 minutes
+        if (parsed.created_at && Date.now() - new Date(parsed.created_at).getTime() > STALE_MS) {
+          localStorage.removeItem(ANALYSIS_KEY);
+          localStorage.removeItem(LEGACY_ANALYSIS_KEY);
+        } else {
+          setAnalysisContext(parsed);
+        }
+      } catch {
+        // Legacy plain-text context
+        setAnalysisContext(raw);
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -259,16 +305,20 @@ function ChatInner() {
     }
   };
 
+  const clearAnalysisContext = () => {
+    setAnalysisContext(undefined);
+    localStorage.removeItem(ANALYSIS_KEY);
+    localStorage.removeItem(LEGACY_ANALYSIS_KEY);
+  };
+
   const clearHistory = () => {
     setMessages([]);
     setSources([]);
     setLastEmergency(false);
-    setAnalysisContext(undefined);
+    clearAnalysisContext();
     setInput("");
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_STORAGE_KEY);
-    localStorage.removeItem(ANALYSIS_KEY);
-    localStorage.removeItem(LEGACY_ANALYSIS_KEY);
   };
 
   return (
@@ -295,6 +345,17 @@ function ChatInner() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+
+        {/* Analysis context banner — shown when photo context is active */}
+        {analysisContext && (
+          <AnalysisBanner
+            label={t("chat.analysis_banner")}
+            clearLabel={t("chat.analysis_banner.clear")}
+            newDogLabel={t("chat.analysis_banner.new_dog")}
+            onClear={clearAnalysisContext}
+            onNewDog={clearHistory}
+          />
+        )}
 
         {/* Emergency banner — shown when last assistant message was emergency */}
         {lastEmergency && messages.length > 0 && (

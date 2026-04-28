@@ -649,31 +649,59 @@ def _fallback_for_triage(
     return None
 
 
+def _effective_context(request: ChatRequest) -> str | None:
+    """Return analysis context text; structured analysis_context wins over legacy string."""
+    if request.analysis_context:
+        ctx = request.analysis_context
+        parts: list[str] = []
+        if ctx.emotion:
+            parts.append(f"Emotion: {ctx.emotion.label}")
+        if ctx.condition:
+            c = ctx.condition
+            if c.physical_condition:
+                parts.append(c.physical_condition)
+            if c.visible_injuries:
+                parts.append(f"Injuries: {', '.join(c.visible_injuries)}")
+            if c.health_concerns:
+                parts.append(f"Concerns: {', '.join(c.health_concerns)}")
+        if ctx.user_context:
+            parts.append(f"User context: {ctx.user_context}")
+        if ctx.scenario_type and ctx.scenario_type != "unclear":
+            parts.append(f"Scenario: {ctx.scenario_type}")
+        if ctx.urgency_signals:
+            parts.append(f"Urgency signals: {', '.join(ctx.urgency_signals)}")
+        if ctx.unknown_factors:
+            parts.append(f"Unknown factors: {', '.join(ctx.unknown_factors)}")
+        return "\n".join(parts) or None
+    return request.context_from_analysis or None
+
+
 @router.post("/chat")
 async def chat(request: ChatRequest):
     """Chat with IndieAid about dog first aid and care."""
     settings = get_settings()
+    analysis_ctx = _effective_context(request)
 
     triage_task = asyncio.create_task(
         classify_situation(
             request.message,
-            request.context_from_analysis,
+            analysis_ctx,
         )
     )
 
     retrieval_query = request.message
-    if request.context_from_analysis:
-        retrieval_query = f"{request.message}\n{request.context_from_analysis}"
+    if analysis_ctx:
+        retrieval_query = f"{request.message}\n{analysis_ctx}"
     context, sources = _retrieve_relevant(retrieval_query)
-    if request.context_from_analysis:
+    if analysis_ctx:
         context = (
             "Previous analysis of the dog:\n"
-            f"{_clip_text(request.context_from_analysis, 800)}\n\n---\n\n{context}"
+            f"{_clip_text(analysis_ctx, 800)}\n\n---\n\n{context}"
         )
 
     triage = await triage_task
     contact_context = " ".join(
-        [request.message, request.context_from_analysis or ""]
+        [request.message, analysis_ctx or ""]
         + [msg.content for msg in request.history[-6:] if getattr(msg, "role", "") == "user"]
     )
 
