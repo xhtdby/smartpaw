@@ -106,3 +106,4 @@ Deployment checks:
 
 - 2026-04-28: Vercel project metadata exists at `frontend/.vercel/project.json`, but deployment listing through the available connector returned `403 Forbidden` during Stage 0.
 - 2026-04-28: Railway production URL was not discoverable from repo metadata during Stage 0, so `/health` could not be checked.
+- 2026-04-28: Stage 2 found the old `quick` and `detailed` image fixture suites reused four external image URLs across 165 labels, including emergency scenarios. They are quarantined and should not be used as visual truth.

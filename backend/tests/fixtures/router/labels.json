@@ -1,0 +1,65 @@
+[
+  {
+    "id": "warm-greeting-en",
+    "fixture_type": "text_router",
+    "user_message": "hi",
+    "scenario_type": "warm_conversation",
+    "expected_urgency_tier": "low_risk",
+    "expected_card_types": [],
+    "expects_numbered_first_aid": false
+  },
+  {
+    "id": "warm-dog-intro-en",
+    "fixture_type": "text_router",
+    "user_message": "i have a cute dog",
+    "scenario_type": "warm_conversation",
+    "expected_urgency_tier": "low_risk",
+    "expected_card_types": [],
+    "expects_numbered_first_aid": false
+  },
+  {
+    "id": "care-mild-diarrhea-en",
+    "fixture_type": "text_router",
+    "user_message": "just started diarrhea no dehydration",
+    "scenario_type": "vomiting_diarrhea",
+    "expected_urgency_tier": "moderate",
+    "expected_card_types": ["learn"],
+    "expects_numbered_first_aid": false
+  },
+  {
+    "id": "repair-stop-repeating-en",
+    "fixture_type": "text_router",
+    "user_message": "stop repeating yourself",
+    "scenario_type": "conversation_repair",
+    "expected_urgency_tier": "low_risk",
+    "expected_card_types": [],
+    "expects_numbered_first_aid": false
+  },
+  {
+    "id": "repair-negated-seizure-en",
+    "fixture_type": "text_router",
+    "user_message": "no seizure is happening",
+    "scenario_type": "symptom_negated",
+    "expected_urgency_tier": "low_risk",
+    "expected_card_types": [],
+    "expects_numbered_first_aid": false
+  },
+  {
+    "id": "emergency-poisoning-en",
+    "fixture_type": "text_router",
+    "user_message": "my dog ate chocolate",
+    "scenario_type": "poisoning",
+    "expected_urgency_tier": "urgent",
+    "expected_card_types": ["emergency", "learn", "find_help"],
+    "expects_numbered_first_aid": true
+  },
+  {
+    "id": "emergency-road-trauma-en",
+    "fixture_type": "text_router",
+    "user_message": "dog hit by car and cannot stand",
+    "scenario_type": "road_trauma",
+    "expected_urgency_tier": "life_threatening",
+    "expected_card_types": ["emergency", "learn", "find_help"],
+    "expects_numbered_first_aid": true
+  }
+]

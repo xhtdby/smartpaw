@@ -81,9 +81,9 @@ def _analysis_context(payload: dict) -> str:
     )
 
 
-def test_quick_fixture_chat_quality_with_groq_judge(fixture_entry, cached_image_path):
-    if fixture_entry["suite"] != "quick":
-        pytest.skip("quality judge is limited to the quick suite")
+def test_verified_image_fixture_chat_quality_with_groq_judge(fixture_entry, cached_image_path):
+    if not fixture_entry.get("include_quality_judge"):
+        pytest.skip("quality judge is opt-in for verified image fixtures")
 
     client = TestClient(app)
     with cached_image_path.open("rb") as image_file:

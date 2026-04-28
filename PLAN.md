@@ -1,4 +1,4 @@
-Progress: Stage 1 complete - context doc added; next task is Stage 2 test truth cleanup.
+Progress: Stage 2 complete - unverified image fixtures quarantined; next task is Stage 3 typed mode routing.
 
 # IndieAid Revival Plan
 

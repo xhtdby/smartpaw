@@ -1,0 +1,96 @@
+[
+  {
+    "id": "healthy-visible-dog",
+    "fixture_type": "mock_vision",
+    "input": {
+      "dog_detected": true,
+      "dog_confidence": 0.91,
+      "dog_description": "A relaxed standing dog is visible.",
+      "emotion": {
+        "label": "relaxed",
+        "confidence": 0.82,
+        "description": "Loose posture and calm face."
+      },
+      "condition": {
+        "breed_guess": "Indian pariah / mixed breed",
+        "estimated_age": "adult",
+        "physical_condition": "The dog appears stable with no obvious visible injury.",
+        "visible_injuries": [],
+        "health_concerns": [],
+        "body_language": "Relaxed stance"
+      },
+      "urgency_signals": [],
+      "unknown_factors": ["appetite", "recent_history"],
+      "scenario_type": "healthy_or_low_risk"
+    },
+    "expected": {
+      "dog_detected": true,
+      "scenario_type": "healthy_or_low_risk",
+      "emotion_label": "relaxed",
+      "urgency_signals": []
+    }
+  },
+  {
+    "id": "no-dog-visible",
+    "fixture_type": "mock_vision",
+    "input": {
+      "dog_detected": false,
+      "dog_confidence": 0.04,
+      "dog_description": "A landscape is visible.",
+      "emotion": {
+        "label": "happy",
+        "confidence": 0.7,
+        "description": "Invalid because no dog is visible."
+      },
+      "condition": {
+        "breed_guess": "Unknown",
+        "estimated_age": "Unknown",
+        "physical_condition": "No dog visible.",
+        "visible_injuries": ["cut"],
+        "health_concerns": ["bleeding"],
+        "body_language": "Unknown"
+      },
+      "urgency_signals": ["visible_bleeding"],
+      "unknown_factors": ["dog_not_visible"],
+      "scenario_type": "no_dog_visible"
+    },
+    "expected": {
+      "dog_detected": false,
+      "scenario_type": "no_dog_visible",
+      "emotion_label": "unknown",
+      "visible_injuries": [],
+      "health_concerns": []
+    }
+  },
+  {
+    "id": "context-road-trauma",
+    "fixture_type": "mock_vision",
+    "input": {
+      "dog_detected": true,
+      "dog_confidence": 0.84,
+      "dog_description": "A dog is lying on a roadside.",
+      "emotion": {
+        "label": "fearful",
+        "confidence": 0.66,
+        "description": "Tense posture."
+      },
+      "condition": {
+        "breed_guess": "mixed breed",
+        "estimated_age": "adult",
+        "physical_condition": "The image is concerning but injury details are uncertain.",
+        "visible_injuries": [],
+        "health_concerns": [],
+        "body_language": "Lying still"
+      },
+      "urgency_signals": ["context_life_threatening"],
+      "unknown_factors": ["breathing_status"],
+      "scenario_type": "road_trauma"
+    },
+    "expected": {
+      "dog_detected": true,
+      "scenario_type": "road_trauma",
+      "emotion_label": "fearful",
+      "urgency_signals": ["context_life_threatening"]
+    }
+  }
+]
