@@ -190,30 +190,8 @@ LANGUAGE_REMINDERS = {
 }
 
 # ---------------------------------------------------------------------------
-# Action card detection — server-side, keyword-based (no LLM involvement)
+# Action cards are route-based. Do not infer scenarios from generated text.
 # ---------------------------------------------------------------------------
-
-_GUIDE_KEYWORDS: dict[str, list[str]] = {
-    "trauma": ["bleed", "wound", "fracture", "accident", "road", "trauma", "bite", "puncture", "cut", "injur", "hit by", "crush"],
-    "skin": ["mange", "maggot", "tick", "skin", "itch", "hair loss", "scab", "myiasis", "fur", "patch"],
-    "heat": ["heatstroke", "heat stroke", "dehydrat", "pant", "overheat", "cool", "hot weather", "sun"],
-    "poison": ["poison", "toxic", "ingest", "swallow", "xylitol", "chocolate", "pesticide", "rat poison", "chemical"],
-    "puppies": ["puppy", "puppies", "newborn", "diarrh", "vomit", "parvo", "litter", "orphan", "neonatal"],
-    "approach": ["aggress", "growl", "fearful", "biting", "approach", "bite risk", "scared", "attack"],
-}
-
-_EMERGENCY_KEYWORDS = [
-    "urgent", "emergency", "immediately", "rush", "cannot breathe", "not breathing",
-    "collapsed", "collapse", "seizure", "heavy bleeding", "poison", "unconscious",
-    "unresponsive", "critical", "life-threatening", "call vet", "vet urgently",
-    "veterinary care urgently", "escalate", "112", "ambulance", "well",
-    "borewell", "trapped", "entrap", "rescue", "choking", "heatstroke",
-]
-
-_FIND_HELP_KEYWORDS = [
-    "veterinarian", "vet", "rescue", "call", "help", "hospital", "professional",
-    "contact", "clinic", "ngo", "organization",
-]
 
 _GUIDE_LABELS: dict[str, dict[str, str]] = {
     "approach": {"en": "Learn: Approach Safely", "hi": "जानें: सुरक्षित पास जाएँ", "mr": "शिका: सुरक्षितपणे जवळ जा"},
@@ -237,30 +215,66 @@ _EMERGENCY_LABEL: dict[str, str] = {
 }
 
 
-def _build_action_cards(query: str, response: str, language: str) -> tuple[list[dict[str, Any]], bool]:
+def _build_triage_action_cards(
+    query: str,
+    response: str,
+    language: str,
+    triage: TriageResult,
+) -> tuple[list[dict[str, Any]], bool]:
+    del query, response
+    if not triage.info_sufficient:
+        return [], False
+
     lang = language if language in ("en", "hi", "mr") else "en"
-    combined = (query + " " + response).lower()
+    scenario = triage.scenario_type
 
-    is_emergency = any(kw in combined for kw in _EMERGENCY_KEYWORDS)
+    quiet_scenarios = {
+        "conversation_repair",
+        "warm_conversation",
+        "symptom_negated",
+        "healthy_or_low_risk",
+        "mild_behavior_change",
+        "no_dog_visible",
+    }
+    if scenario in quiet_scenarios:
+        return [], False
 
-    matched_guides: list[str] = []
-    for guide_id, keywords in _GUIDE_KEYWORDS.items():
-        if any(kw in combined for kw in keywords):
-            matched_guides.append(guide_id)
-    matched_guides = matched_guides[:2]  # at most 2 learn cards
+    emergency_scenarios = {
+        "fall_entrapment",
+        "choking_airway",
+        "seizure_collapse",
+        "severe_bleeding",
+        "heatstroke",
+        "road_trauma",
+        "poisoning",
+        "rabies_exposure",
+    }
+    guide_by_scenario = {
+        "severe_bleeding": "trauma",
+        "road_trauma": "trauma",
+        "fracture": "trauma",
+        "injured_transport": "trauma",
+        "burn_injury": "trauma",
+        "maggot_wound": "skin",
+        "skin_disease": "skin",
+        "tick_infestation": "skin",
+        "heatstroke": "heat",
+        "poisoning": "poison",
+        "unsafe_medicine": "poison",
+        "puppy_gi": "puppies",
+        "vomiting_diarrhea": "puppies",
+        "fearful_aggressive": "approach",
+        "fall_entrapment": "approach",
+    }
 
-    needs_find_help = is_emergency or any(kw in combined for kw in _FIND_HELP_KEYWORDS)
-
+    is_emergency = scenario in emergency_scenarios and triage.urgency_tier in {"life_threatening", "urgent"}
     cards: list[dict[str, Any]] = []
 
     if is_emergency:
-        cards.append({
-            "type": "emergency",
-            "label": _EMERGENCY_LABEL[lang],
-            "href": "/nearby",
-        })
+        cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
 
-    for guide_id in matched_guides:
+    guide_id = guide_by_scenario.get(scenario)
+    if guide_id:
         cards.append({
             "type": "learn",
             "label": _GUIDE_LABELS[guide_id][lang],
@@ -268,40 +282,14 @@ def _build_action_cards(query: str, response: str, language: str) -> tuple[list[
             "guide_id": guide_id,
         })
 
+    needs_find_help = is_emergency or (
+        triage.urgency_tier == "urgent"
+        and scenario not in {"routine_care", "feeding_weak_dog", "lost_dog"}
+    )
     if needs_find_help:
-        cards.append({
-            "type": "find_help",
-            "label": _FIND_HELP_LABEL[lang],
-            "href": "/nearby",
-        })
+        cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
 
     return cards, is_emergency
-
-
-def _build_triage_action_cards(
-    query: str,
-    response: str,
-    language: str,
-    triage: TriageResult,
-) -> tuple[list[dict[str, Any]], bool]:
-    if not triage.info_sufficient:
-        return [], False
-
-    lang = language if language in ("en", "hi", "mr") else "en"
-    cards, keyword_emergency = _build_action_cards(query, response, language)
-    triage_emergency = triage.urgency_tier in {"life_threatening", "urgent"}
-
-    if not triage_emergency:
-        cards = [card for card in cards if card.get("type") != "emergency"]
-        if triage.urgency_tier == "low_risk" and triage.scenario_type not in {"lost_dog", "routine_care"}:
-            cards = [card for card in cards if card.get("type") != "find_help"]
-        return cards, False
-
-    if not any(card.get("type") == "emergency" for card in cards):
-        cards.insert(0, {"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
-    if not any(card.get("type") == "find_help" for card in cards):
-        cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
-    return cards, triage_emergency or keyword_emergency
 
 
 def _matching_emergency_contact(text: str) -> str:
@@ -310,13 +298,6 @@ def _matching_emergency_contact(text: str) -> str:
         if re.search(rf"\b{re.escape(city)}\b", haystack):
             return contact
     return DEFAULT_CONTACT_LINE
-
-
-def _last_assistant_message(history: list[Any]) -> str | None:
-    for msg in reversed(history):
-        if getattr(msg, "role", "") == "assistant":
-            return getattr(msg, "content", "")
-    return None
 
 
 def _history_for_model(history: list[Any]) -> list[dict[str, str]]:
@@ -380,23 +361,14 @@ FAST_TRIAGE_SCENARIOS = {
     "heatstroke",
     "road_trauma",
     "poisoning",
-    "maggot_wound",
-    "skin_disease",
-    "puppy_gi",
-    "eye_injury",
-    "fearful_aggressive",
     "rabies_exposure",
-    "healthy_or_low_risk",
-    "lost_dog",
-    "feeding_weak_dog",
-    "routine_care",
-    "tick_infestation",
-    "vomiting_diarrhea",
-    "burn_injury",
-    "unsafe_medicine",
-    "unsafe_home_remedy",
-    "injured_transport",
-    "no_dog_visible",
+}
+
+DIRECT_REPLY_SCENARIOS = {
+    "conversation_repair",
+    "warm_conversation",
+    "symptom_negated",
+    "mild_behavior_change",
 }
 
 
@@ -408,6 +380,30 @@ def _fallback_for_triage(
 ) -> str | None:
     contact = _matching_emergency_contact(contact_context or f"{message} {context}")
     scenario = triage.scenario_type
+
+    if scenario == "conversation_repair":
+        return (
+            "You're right - I may have carried the previous topic forward. "
+            "Tell me what is happening now, and I will treat it as a fresh question."
+        )
+    if scenario == "warm_conversation":
+        return (
+            "Hi, I'm here. Tell me about the dog - name, age, indie mix or known breed, "
+            "or anything you are curious about. If something looks worrying, describe that too."
+        )
+    if scenario == "symptom_negated":
+        return (
+            "Got it - I will not treat that symptom as active. What are you seeing right now? "
+            "If breathing is normal, the dog can stand, and there is no heavy bleeding, collapse, "
+            "poison exposure, or severe pain, we can keep this in care mode."
+        )
+    if scenario == "mild_behavior_change":
+        return (
+            "That does not sound like an emergency from what you have said. Check whether the dog is "
+            "eating, drinking, walking normally, breathing comfortably, and responding to you. "
+            "Call a vet or rescue sooner if this is new and worsening, lasts more than a day, "
+            "or comes with vomiting, diarrhea, pain, collapse, or refusal to eat."
+        )
 
     if scenario == "fall_entrapment":
         lower_question = any(word in message.lower() for word in ["rope", "food", "water", "basket", "lower"])
@@ -580,7 +576,6 @@ async def chat(request: ChatRequest):
         classify_situation(
             request.message,
             request.context_from_analysis,
-            _last_assistant_message(request.history),
         )
     )
 
@@ -597,7 +592,7 @@ async def chat(request: ChatRequest):
     triage = await triage_task
     contact_context = " ".join(
         [request.message, request.context_from_analysis or ""]
-        + [msg.content for msg in request.history[-6:]]
+        + [msg.content for msg in request.history[-6:] if getattr(msg, "role", "") == "user"]
     )
     if not triage.info_sufficient:
         reply = _build_clarifying_reply(triage, request.language)
@@ -610,7 +605,7 @@ async def chat(request: ChatRequest):
             "triage": _triage_dict(triage),
         }
 
-    if request.language == "en" and triage.scenario_type in FAST_TRIAGE_SCENARIOS:
+    if request.language == "en" and triage.scenario_type in FAST_TRIAGE_SCENARIOS | DIRECT_REPLY_SCENARIOS:
         reply = _fallback_for_triage(request.message, context, triage, contact_context)
         if reply:
             cards, is_emergency = _build_triage_action_cards(request.message, reply, request.language, triage)

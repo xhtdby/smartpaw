@@ -245,6 +245,11 @@ function ChatInner() {
         localStorage.removeItem(LEGACY_ANALYSIS_KEY);
       }
     } catch {
+      if (analysisContext) {
+        setAnalysisContext(undefined);
+        localStorage.removeItem(ANALYSIS_KEY);
+        localStorage.removeItem(LEGACY_ANALYSIS_KEY);
+      }
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: t("chat.error.network") },
@@ -258,8 +263,12 @@ function ChatInner() {
     setMessages([]);
     setSources([]);
     setLastEmergency(false);
+    setAnalysisContext(undefined);
+    setInput("");
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem(ANALYSIS_KEY);
+    localStorage.removeItem(LEGACY_ANALYSIS_KEY);
   };
 
   return (

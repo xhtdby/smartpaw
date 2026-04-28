@@ -23,22 +23,11 @@ LOCAL_DECISION_SCENARIOS = {
     "heatstroke",
     "road_trauma",
     "poisoning",
-    "maggot_wound",
-    "skin_disease",
-    "puppy_gi",
-    "eye_injury",
-    "fearful_aggressive",
     "rabies_exposure",
-    "healthy_or_low_risk",
-    "lost_dog",
-    "feeding_weak_dog",
-    "routine_care",
-    "tick_infestation",
-    "vomiting_diarrhea",
-    "burn_injury",
-    "unsafe_medicine",
-    "unsafe_home_remedy",
-    "injured_transport",
+    "conversation_repair",
+    "warm_conversation",
+    "symptom_negated",
+    "mild_behavior_change",
     "no_dog_visible",
 }
 
@@ -130,22 +119,123 @@ def _contains_any(text: str, patterns: list[str]) -> bool:
     return any(pattern in text for pattern in patterns)
 
 
+def _is_context_dependent(user_message: str) -> bool:
+    text = re.sub(r"\s+", " ", user_message.lower()).strip()
+    if not text:
+        return False
+
+    dependent_phrases = [
+        "what should i do",
+        "what do i do",
+        "what next",
+        "next step",
+        "next steps",
+        "is it urgent",
+        "is this urgent",
+        "same dog",
+        "this dog",
+        "the dog",
+        "that dog",
+        "photo",
+        "image",
+        "analysis",
+        "above",
+    ]
+    if _contains_any(text, dependent_phrases):
+        return True
+
+    words = text.split()
+    pronouns = {"it", "he", "she", "him", "her", "they", "them", "this", "that"}
+    generic_help = {"help", "now", "next", "urgent"}
+    return len(words) <= 8 and bool(set(words) & pronouns) and bool(set(words) & generic_help)
+
+
+def _strip_negated_emergency_terms(text: str) -> str:
+    stripped = text
+    negated_patterns = [
+        r"\bno\s+(?:seizure|seizures|seizing|bleeding|blood|choking|dehydration|vomiting|vomit|diarrhea|diarrhoea)\b",
+        r"\bnot\s+(?:seizing|bleeding|choking|dehydrated|vomiting|limping|collapsed|unconscious)\b",
+        r"\b(?:isn't|isnt|wasn't|wasnt)\s+(?:seizing|bleeding|choking|dehydrated|vomiting|limping|collapsed|unconscious)\b",
+        r"\bwithout\s+(?:bleeding|blood|vomiting|diarrhea|diarrhoea|dehydration)\b",
+        r"\bbreathing\s+(?:fine|normally|normal|ok|okay)\b",
+        r"\bcan\s+(?:breathe|breath|walk|stand)\b",
+        r"\bblood\s+stopped\b",
+    ]
+    for pattern in negated_patterns:
+        stripped = re.sub(pattern, " ", stripped)
+    return re.sub(r"\s+", " ", stripped).strip()
+
+
+def _is_repair_or_meta_intent(text: str) -> bool:
+    repair_patterns = [
+        "stop repeating",
+        "you are repeating",
+        "you're repeating",
+        "why did you say",
+        "that is wrong",
+        "that's wrong",
+        "you got it wrong",
+        "not what i asked",
+        "not that",
+        "new topic",
+        "different dog",
+        "forget that",
+        "reset",
+        "you misunderstood",
+    ]
+    return _contains_any(text, repair_patterns)
+
+
+def _is_warm_conversation(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", text.lower())
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    if normalized in {"hi", "hello", "hey", "what's up", "whats up", "good morning", "good evening"}:
+        return True
+    warm_patterns = [
+        "cute dog",
+        "my dog is cute",
+        "i have a dog",
+        "i have an indie",
+        "meet my dog",
+        "look at my dog",
+        "all good",
+        "just saying hi",
+    ]
+    return _contains_any(normalized, warm_patterns)
+
+
 def heuristic_classify_situation(
     user_message: str,
     analysis_context: str | None = None,
     last_assistant_message: str | None = None,
 ) -> TriageResult:
-    """Deterministic fallback used when the model is unavailable."""
+    """Deterministic fallback used when the model is unavailable.
+
+    Assistant replies are intentionally ignored here. Generated warning text is
+    conversation context for the model, not evidence for a new triage scenario.
+    """
+    del last_assistant_message
+    user_compact = re.sub(r"\s+", " ", user_message.lower()).strip()
+    context = analysis_context if analysis_context and _is_context_dependent(user_message) else ""
     combined = " ".join(
-        part for part in [user_message, analysis_context or "", last_assistant_message or ""] if part
+        part for part in [user_message, context] if part
     ).lower()
     compact = re.sub(r"\s+", " ", combined).strip()
+    screen_text = _strip_negated_emergency_terms(compact)
 
     if not compact:
         return TriageResult(
             info_sufficient=False,
             missing_facts=["what_happened", "current_symptoms"],
             rationale="No situation details were provided.",
+        )
+
+    if _is_repair_or_meta_intent(user_compact):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            scenario_type="conversation_repair",
+            rationale="The user is correcting or steering the conversation, not reporting a new emergency.",
         )
 
     vague_only = (
@@ -180,6 +270,37 @@ def heuristic_classify_situation(
             rationale="The message is too vague to choose safe first aid.",
         )
 
+    if _is_warm_conversation(user_compact) and not _contains_any(
+        screen_text,
+        [
+            "poison",
+            "xylitol",
+            "chocolate",
+            "not breathing",
+            "cannot breathe",
+            "can't breathe",
+            "choking",
+            "bleeding",
+            "blood",
+            "collapse",
+            "collapsed",
+            "seizure",
+            "hit by",
+            "accident",
+            "maggot",
+            "diarrhea",
+            "diarrhoea",
+            "vomit",
+            "wound",
+        ],
+    ):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            scenario_type="warm_conversation",
+            rationale="The user is starting a normal friendly dog-care conversation.",
+        )
+
     if _contains_any(compact, ["no dog", "dog is not visible", "no animal visible"]):
         return TriageResult(
             urgency_tier="low_risk",
@@ -200,8 +321,8 @@ def heuristic_classify_situation(
             rationale="Human medicines and painkillers can be dangerous for dogs.",
         )
 
-    if _contains_any(compact, ["kerosene", "engine oil", "turpentine", "acid", "chili", "turmeric"]) and _contains_any(
-        compact, ["wound", "maggot", "skin", "apply", "put", "use"]
+    if _contains_any(screen_text, ["kerosene", "engine oil", "turpentine", "acid", "chili", "turmeric"]) and _contains_any(
+        screen_text, ["wound", "maggot", "skin", "apply", "put", "use"]
     ):
         return TriageResult(
             urgency_tier="moderate",
@@ -211,8 +332,8 @@ def heuristic_classify_situation(
             rationale="Harsh or unproven home remedies can worsen wounds or poison the dog.",
         )
 
-    if _contains_any(compact, ["well", "borewell", "pit", "shaft", "drain", "pipe", "sewer"]) and _contains_any(
-        compact, ["fell", "fall", "fallen", "stuck", "trapped", "inside", "in a", "into"]
+    if _contains_any(screen_text, ["well", "borewell", "pit", "shaft", "drain", "pipe", "sewer"]) and _contains_any(
+        screen_text, ["fell", "fall", "fallen", "stuck", "trapped", "inside", "in a", "into"]
     ):
         return TriageResult(
             urgency_tier="life_threatening",
@@ -223,8 +344,8 @@ def heuristic_classify_situation(
             rationale="Entrapment in a confined vertical space needs rapid rescue help.",
         )
 
-    if _contains_any(compact, ["bite", "bit", "scratch", "scratched", "saliva"]) and _contains_any(
-        compact, ["my hand", "me", "person", "human", "skin", "blood", "broke the skin", "broken skin"]
+    if _contains_any(screen_text, ["bite", "bit", "scratch", "scratched", "saliva"]) and _contains_any(
+        screen_text, ["my hand", "me", "person", "human", "skin", "blood", "broke the skin", "broken skin"]
     ):
         return TriageResult(
             urgency_tier="urgent",
@@ -235,16 +356,16 @@ def heuristic_classify_situation(
             rationale="A bite or scratch that breaks human skin needs rabies exposure assessment.",
         )
 
-    if _contains_any(compact, ["heatstroke", "heat stroke", "overheat", "overheated"]):
+    if _contains_any(screen_text, ["heatstroke", "heat stroke", "overheat", "overheated"]):
         return TriageResult(
-            urgency_tier="life_threatening" if _contains_any(compact, ["collapse", "confused", "vomit"]) else "urgent",
+            urgency_tier="life_threatening" if _contains_any(screen_text, ["collapse", "confused", "vomit"]) else "urgent",
             info_sufficient=True,
             missing_facts=["temperature_exposure", "can_swallow"],
             scenario_type="heatstroke",
             rationale="Heat illness can deteriorate quickly.",
         )
 
-    if _contains_any(compact, ["not breathing", "cannot breathe", "can't breathe", "choking", "blue gums"]):
+    if _contains_any(screen_text, ["not breathing", "cannot breathe", "can't breathe", "choking", "blue gums"]):
         return TriageResult(
             urgency_tier="life_threatening",
             info_sufficient=True,
@@ -253,7 +374,7 @@ def heuristic_classify_situation(
             rationale="Airway or breathing distress can become fatal within minutes.",
         )
 
-    if _contains_any(compact, ["unconscious", "unresponsive", "collapsed", "collapse", "repeated seizure"]):
+    if _contains_any(screen_text, ["unconscious", "unresponsive", "collapsed", "collapse", "repeated seizure"]):
         return TriageResult(
             urgency_tier="life_threatening",
             info_sufficient=True,
@@ -262,7 +383,7 @@ def heuristic_classify_situation(
             rationale="Collapse or unresponsiveness is an emergency sign.",
         )
 
-    if _contains_any(compact, ["heavy bleeding", "blood pouring", "non-stop bleeding", "spurting blood"]):
+    if _contains_any(screen_text, ["heavy bleeding", "blood pouring", "non-stop bleeding", "spurting blood"]):
         return TriageResult(
             urgency_tier="life_threatening",
             info_sufficient=True,
@@ -271,8 +392,8 @@ def heuristic_classify_situation(
             rationale="Heavy bleeding needs immediate pressure and urgent help.",
         )
 
-    if _contains_any(compact, ["hit by car", "road accident", "vehicle", "bike hit", "car hit", "hit by bike", "hit by a bike", "run over"]):
-        tier = "life_threatening" if _contains_any(compact, ["cannot stand", "can't stand", "dragging", "collapsed"]) else "urgent"
+    if _contains_any(screen_text, ["hit by car", "road accident", "vehicle", "bike hit", "car hit", "hit by bike", "hit by a bike", "run over"]):
+        tier = "life_threatening" if _contains_any(screen_text, ["cannot stand", "can't stand", "dragging", "collapsed"]) else "urgent"
         return TriageResult(
             urgency_tier=tier,
             info_sufficient=True,
@@ -282,7 +403,7 @@ def heuristic_classify_situation(
             rationale="Road trauma can involve fractures, spinal injury, or internal injury.",
         )
 
-    if _contains_any(compact, ["poison", "xylitol", "rat poison", "pesticide", "organophosphate", "chocolate"]):
+    if _contains_any(screen_text, ["poison", "xylitol", "rat poison", "pesticide", "organophosphate", "chocolate"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -291,7 +412,7 @@ def heuristic_classify_situation(
             rationale="Suspected toxin exposure needs fast identification and vet guidance.",
         )
 
-    if _contains_any(compact, ["maggot", "myiasis"]):
+    if _contains_any(screen_text, ["maggot", "myiasis"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -300,8 +421,8 @@ def heuristic_classify_situation(
             rationale="Maggot wounds need prompt wound care and rescue/vet treatment.",
         )
 
-    if _contains_any(compact, ["tick", "ticks", "flea", "fleas"]):
-        urgent = _contains_any(compact, ["weak", "pale", "bleeding", "fever", "not eating"])
+    if _contains_any(screen_text, ["tick", "ticks", "flea", "fleas"]):
+        urgent = _contains_any(screen_text, ["weak", "pale", "bleeding", "fever", "not eating"])
         return TriageResult(
             urgency_tier="urgent" if urgent else "moderate",
             info_sufficient=True,
@@ -310,7 +431,7 @@ def heuristic_classify_situation(
             rationale="Ticks can cause skin irritation and serious tick-borne illness when the dog is weak.",
         )
 
-    if _contains_any(compact, ["mange", "hair loss", "itchy skin", "skin disease", "crusty skin"]):
+    if _contains_any(screen_text, ["mange", "hair loss", "itchy skin", "skin disease", "crusty skin"]):
         return TriageResult(
             urgency_tier="moderate",
             info_sufficient=True,
@@ -319,7 +440,7 @@ def heuristic_classify_situation(
             rationale="Skin disease is described without immediate collapse or severe wound signs.",
         )
 
-    if _contains_any(compact, ["fracture", "broken leg", "limping", "can't walk", "cannot walk"]):
+    if _contains_any(screen_text, ["fracture", "broken leg", "limping", "can't walk", "cannot walk"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -328,7 +449,7 @@ def heuristic_classify_situation(
             rationale="Possible fracture needs immobilization and veterinary assessment.",
         )
 
-    if _contains_any(compact, ["transport", "carry", "lift", "move him", "move her", "take to vet"]):
+    if _contains_any(screen_text, ["transport", "carry", "lift", "move him", "move her", "take to vet"]):
         return TriageResult(
             urgency_tier="moderate",
             info_sufficient=True,
@@ -337,7 +458,7 @@ def heuristic_classify_situation(
             rationale="Transport advice should minimize pain and spinal movement.",
         )
 
-    if _contains_any(compact, ["burn", "burned", "scald", "fire", "hot water", "chemical burn"]):
+    if _contains_any(screen_text, ["burn", "burned", "scald", "fire", "hot water", "chemical burn"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -346,7 +467,7 @@ def heuristic_classify_situation(
             rationale="Burns can worsen and may need urgent pain control and wound care.",
         )
 
-    if _contains_any(compact, ["eye", "eyeball", "blind", "squinting"]):
+    if _contains_any(screen_text, ["eye", "eyeball", "blind", "squinting"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -355,7 +476,7 @@ def heuristic_classify_situation(
             rationale="Eye injuries can worsen quickly without examination.",
         )
 
-    if _contains_any(compact, ["puppy", "puppies"]) and _contains_any(compact, ["diarrhea", "diarrhoea", "vomit", "bloody"]):
+    if _contains_any(screen_text, ["puppy", "puppies"]) and _contains_any(screen_text, ["diarrhea", "diarrhoea", "vomit", "bloody"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -364,8 +485,8 @@ def heuristic_classify_situation(
             rationale="Puppies can dehydrate and crash quickly.",
         )
 
-    if _contains_any(compact, ["vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool"]):
-        urgent = _contains_any(compact, ["repeated", "again and again", "blood", "bloody", "weak", "collapse", "puppy"])
+    if _contains_any(screen_text, ["vomit", "vomiting", "diarrhea", "diarrhoea", "loose motion", "bloody stool"]):
+        urgent = _contains_any(screen_text, ["repeated", "again and again", "blood", "bloody", "weak", "collapse", "puppy"])
         return TriageResult(
             urgency_tier="urgent" if urgent else "moderate",
             info_sufficient=True,
@@ -374,7 +495,7 @@ def heuristic_classify_situation(
             rationale="Vomiting or diarrhea can become urgent if repeated, bloody, or causing weakness.",
         )
 
-    if _contains_any(compact, ["aggressive", "biting", "growling", "lunging", "cornered"]):
+    if _contains_any(screen_text, ["aggressive", "biting", "growling", "lunging", "cornered"]):
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -393,9 +514,9 @@ def heuristic_classify_situation(
             rationale="This is a welfare/logistics case unless injury or danger is present.",
         )
 
-    if _contains_any(compact, ["feed", "food", "eat", "weak street dog", "hungry"]):
+    if _contains_any(screen_text, ["feed", "food", "eat", "weak street dog", "hungry"]):
         return TriageResult(
-            urgency_tier="low_risk" if not _contains_any(compact, ["collapse", "cannot stand", "very weak"]) else "moderate",
+            urgency_tier="low_risk" if not _contains_any(screen_text, ["collapse", "cannot stand", "very weak"]) else "moderate",
             info_sufficient=True,
             missing_facts=["can_swallow", "vomiting_or_diarrhea"],
             scenario_type="feeding_weak_dog",
@@ -419,6 +540,26 @@ def heuristic_classify_situation(
             rationale="No urgent warning sign is described.",
         )
 
+    if _contains_any(compact, ["sad", "quiet", "a little sad", "low energy", "less active"]) and not _contains_any(
+        screen_text,
+        ["collapse", "cannot stand", "can't stand", "not eating", "not drinking", "breathing", "pain", "vomit", "diarrhea", "diarrhoea"],
+    ):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            missing_facts=["appetite", "drinking", "duration"],
+            scenario_type="mild_behavior_change",
+            rationale="Mild behavior change is described without red flags.",
+        )
+
+    if screen_text != compact:
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            scenario_type="symptom_negated",
+            rationale="The user negated the concerning symptom instead of reporting it as active.",
+        )
+
     return TriageResult(
         urgency_tier="moderate",
         info_sufficient=True,
@@ -431,10 +572,11 @@ def heuristic_classify_situation(
 async def classify_situation(
     user_message: str,
     analysis_context: str | None,
-    last_assistant_message: str | None,
+    last_assistant_message: str | None = None,
 ) -> TriageResult:
     """Classify a chat turn before generating a full response."""
-    fallback = heuristic_classify_situation(user_message, analysis_context, last_assistant_message)
+    del last_assistant_message
+    fallback = heuristic_classify_situation(user_message, analysis_context)
     settings = get_settings()
     if (
         not settings.groq_api_key
@@ -446,7 +588,6 @@ async def classify_situation(
     user_content = {
         "user_message": user_message,
         "analysis_context": analysis_context or "",
-        "last_assistant_message": last_assistant_message or "",
         "heuristic_hint": fallback.model_dump(),
     }
 
