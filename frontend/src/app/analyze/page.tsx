@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult } from "@/lib/api";
+import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult, type AnalysisContext } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
 const SAFETY_COLORS: Record<string, string> = {
@@ -161,23 +161,26 @@ export default function AnalyzePage() {
       const data = await analyzeImageMultilingual(image, userContext);
       setMlResult(data);
 
-      // Save English context for chat (condition data always comes from the shared vision pass)
-      const enLang = data.languages?.["en"];
-      const ctx = data.dog_detected ? [
-        data.emotion ? `Emotion: ${data.emotion.label}` : "",
-        data.condition?.breed_guess ? `Breed: ${data.condition.breed_guess}` : "",
-        data.condition?.physical_condition || "",
-        data.condition?.visible_injuries?.length ? `Injuries: ${data.condition.visible_injuries.join(", ")}` : "",
-        data.condition?.health_concerns?.length ? `Concerns: ${data.condition.health_concerns.join(", ")}` : "",
-        data.user_context ? `User context: ${data.user_context}` : "",
-        data.scenario_type ? `Scenario: ${data.scenario_type}` : "",
-        data.urgency_signals?.length ? `Urgency signals: ${data.urgency_signals.join(", ")}` : "",
-        data.unknown_factors?.length ? `Unknown factors: ${data.unknown_factors.join(", ")}` : "",
-        enLang?.safety ? `Safety: ${enLang.safety.level} - ${enLang.safety.reason}` : "",
-      ].filter(Boolean).join("\n") : null;
-
-      if (ctx) {
-        localStorage.setItem("indieaid-analysis-context", ctx);
+      // Save structured context for chat handoff
+      if (data.dog_detected) {
+        const analysisCtx: AnalysisContext = {
+          source: "image_analysis",
+          created_at: new Date().toISOString(),
+          scenario_type: data.scenario_type,
+          urgency_signals: data.urgency_signals ?? [],
+          unknown_factors: data.unknown_factors ?? [],
+          emotion: data.emotion,
+          condition: data.condition
+            ? {
+                physical_condition: data.condition.physical_condition,
+                visible_injuries: data.condition.visible_injuries,
+                health_concerns: data.condition.health_concerns,
+                body_language: data.condition.body_language,
+              }
+            : undefined,
+          user_context: data.user_context ?? undefined,
+        };
+        localStorage.setItem("indieaid-analysis-context", JSON.stringify(analysisCtx));
         localStorage.removeItem("smartpaw-analysis-context");
       }
     } catch (err) {
