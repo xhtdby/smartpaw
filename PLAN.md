@@ -1,4 +1,4 @@
-Progress: Stage 5 complete - analysis-to-chat handoff implemented; next task is Stage 6 analysis quality and vision fallbacks.
+Progress: Stage 6 complete - analysis quality and vision fallbacks improved; next task is Stage 7 learn/cards/resources and app feel.
 
 # IndieAid Revival Plan
 

@@ -28,6 +28,7 @@ class FirstAidStep(BaseModel):
 
 class AnalysisResponse(BaseModel):
     dog_detected: bool
+    analysis_status: str = "complete"  # "complete", "uncertain", "no_dog_visible", "unavailable"
     emotion: Optional[EmotionResult] = None
     safety: Optional[SafetyLevel] = None
     condition: Optional[ConditionAssessment] = None
@@ -147,6 +148,7 @@ class LanguageResult(BaseModel):
 
 class MultilingualAnalysisResponse(BaseModel):
     dog_detected: bool
+    analysis_status: str = "complete"  # "complete", "uncertain", "no_dog_visible", "unavailable"
     emotion: Optional[EmotionResult] = None
     condition: Optional[ConditionAssessment] = None
     user_context: Optional[str] = None

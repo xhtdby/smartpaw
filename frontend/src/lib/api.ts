@@ -147,6 +147,7 @@ export function getReportImageUrl(reportId: string): string {
 // Types
 export interface AnalysisResult {
   dog_detected: boolean;
+  analysis_status?: "complete" | "uncertain" | "no_dog_visible" | "unavailable" | string;
   emotion?: { label: string; confidence: number };
   safety?: { level: string; reason: string };
   condition?: {
@@ -172,6 +173,7 @@ export interface AnalysisResult {
 
 export interface MultilingualAnalysisResult {
   dog_detected: boolean;
+  analysis_status?: "complete" | "uncertain" | "no_dog_visible" | "unavailable" | string;
   emotion?: { label: string; confidence: number };
   condition?: {
     breed_guess: string;

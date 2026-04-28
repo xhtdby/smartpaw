@@ -41,6 +41,16 @@ const EXTRA_COPY = {
   },
 } as const;
 
+const unavailableAnalysisCopy = (language: string) => {
+  if (language === "hi") {
+    return "\u092b\u093f\u0932\u0939\u093e\u0932 \u092b\u094b\u091f\u094b \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0928\u0939\u0940\u0902 \u0939\u094b \u0938\u0915\u093e \u0915\u094d\u092f\u094b\u0902\u0915\u093f \u0935\u093f\u091c\u0928 \u092e\u0949\u0921\u0932 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0905\u0917\u0930 \u0915\u0941\u0924\u094d\u0924\u093e \u0916\u0924\u0930\u0947 \u092e\u0947\u0902 \u0939\u094b, \u0924\u094b \u091a\u0948\u091f \u092e\u0947\u0902 \u091c\u094b \u0926\u093f\u0916 \u0930\u0939\u093e \u0939\u0948 \u0935\u0939 \u0932\u093f\u0916\u0947\u0902\u0964";
+  }
+  if (language === "mr") {
+    return "\u0938\u0927\u094d\u092f\u093e \u092b\u094b\u091f\u094b\u091a\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0924\u093e \u0906\u0932\u0947 \u0928\u093e\u0939\u0940 \u0915\u093e\u0930\u0923 \u0935\u093f\u091c\u0928 \u092e\u0949\u0921\u0947\u0932 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u093e\u0939\u0940\u0964 \u0915\u0941\u0924\u094d\u0930\u093e \u0927\u094b\u0915\u094d\u092f\u093e\u0924 \u0905\u0938\u0947\u0932 \u0924\u0930 \u091a\u0945\u091f\u092e\u0927\u094d\u092f\u0947 \u0915\u093e\u092f \u0926\u093f\u0938\u0924\u0947 \u0924\u0947 \u0932\u093f\u0939\u093e\u0964";
+  }
+  return "I could not analyze this photo right now because the vision model is unavailable. If the dog may be in danger, open chat and describe what you can see.";
+};
+
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
@@ -63,6 +73,7 @@ export default function AnalyzePage() {
           if (!langData) return null;
           return {
             dog_detected: true,
+            analysis_status: mlResult.analysis_status,
             emotion: mlResult.emotion,
             condition: langData.condition || mlResult.condition,
             user_context: mlResult.user_context,
@@ -81,13 +92,17 @@ export default function AnalyzePage() {
         })()
       : {
           dog_detected: false,
+          analysis_status: mlResult.analysis_status,
           user_context: mlResult.user_context,
           urgency_signals: mlResult.urgency_signals,
           unknown_factors: mlResult.unknown_factors,
           scenario_type: mlResult.scenario_type,
           first_aid: [],
           triage_questions: [],
-          empathetic_summary: t("analyze.no_dog"),
+          empathetic_summary:
+            mlResult.analysis_status === "unavailable"
+              ? unavailableAnalysisCopy(language)
+              : t("analyze.no_dog"),
           disclaimer: "",
           language,
         } as AnalysisResult
