@@ -1,4 +1,4 @@
-Progress: Stage 0 complete - draft PR #7 opened; next task is Stage 1 context doc.
+Progress: Stage 1 complete - context doc added; next task is Stage 2 test truth cleanup.
 
 # IndieAid Revival Plan
 
