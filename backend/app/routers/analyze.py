@@ -132,6 +132,7 @@ def _ensure_payload_condition(payload: dict, condition_result: dict) -> dict:
 def _merge_context_triage(metadata: dict, user_context: str | None) -> dict:
     merged = {
         "analysis_status": metadata.get("analysis_status", "complete"),
+        "species": metadata.get("species", "dog"),
         "urgency_signals": list(metadata.get("urgency_signals", [])),
         "unknown_factors": list(metadata.get("unknown_factors", [])),
         "scenario_type": metadata.get("scenario_type", "unclear"),
@@ -140,6 +141,8 @@ def _merge_context_triage(metadata: dict, user_context: str | None) -> dict:
         return merged
 
     triage = heuristic_classify_situation(user_context)
+    if triage.species != "dog" or merged.get("species") in {"", "dog", None}:
+        merged["species"] = triage.species
     if triage.scenario_type != "unclear":
         merged["scenario_type"] = triage.scenario_type
     if triage.urgency_tier in {"life_threatening", "urgent"}:
@@ -163,6 +166,7 @@ async def _run_vision_pipeline(
         unavailable = unavailable_result()
         return None, unavailable["emotion"], unavailable["condition"], {
             "analysis_status": "unavailable",
+            "species": unavailable.get("species", "other"),
             "urgency_signals": unavailable["urgency_signals"],
             "unknown_factors": unavailable["unknown_factors"],
             "scenario_type": unavailable["scenario_type"],
@@ -172,6 +176,7 @@ async def _run_vision_pipeline(
     if combined is not None:
         metadata = {
             "analysis_status": combined.get("analysis_status", "complete"),
+            "species": combined.get("species", "dog"),
             "urgency_signals": combined.get("urgency_signals", []),
             "unknown_factors": combined.get("unknown_factors", []),
             "scenario_type": combined.get("scenario_type", "unclear"),
@@ -193,6 +198,7 @@ async def _run_vision_pipeline(
     if not detection:
         return None, {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}, {}, {
             "analysis_status": "no_dog_visible",
+            "species": "other",
             "urgency_signals": [],
             "unknown_factors": ["dog_not_visible"],
             "scenario_type": "no_dog_visible",
@@ -207,6 +213,7 @@ async def _run_vision_pipeline(
     condition_result = await analyze_condition(image_bytes)
     return detection, emotion_result, condition_result, {
         "analysis_status": "uncertain",
+        "species": "dog",
         "urgency_signals": [],
         "unknown_factors": [],
         "scenario_type": "unclear",
@@ -251,6 +258,7 @@ async def analyze_dog_image(
         return AnalysisResponse(
             dog_detected=False,
             analysis_status=analysis_status,
+            species=vision_metadata.get("species", "other"),
             empathetic_summary=summary,
             language=language,
             user_context=user_context,
@@ -273,6 +281,7 @@ async def analyze_dog_image(
     return AnalysisResponse(
         dog_detected=True,
         analysis_status=vision_metadata.get("analysis_status", "complete"),
+        species=vision_metadata.get("species", "dog"),
         emotion=EmotionResult(
             label=emotion_result.get("label", "unknown"),
             confidence=emotion_result.get("confidence", 0.0),
@@ -328,6 +337,7 @@ async def analyze_dog_image_multilingual(
         return MultilingualAnalysisResponse(
             dog_detected=False,
             analysis_status=vision_metadata.get("analysis_status", "no_dog_visible"),
+            species=vision_metadata.get("species", "other"),
             user_context=user_context,
             urgency_signals=vision_metadata.get("urgency_signals", []),
             unknown_factors=vision_metadata.get("unknown_factors", []),
@@ -351,6 +361,7 @@ async def analyze_dog_image_multilingual(
     return MultilingualAnalysisResponse(
         dog_detected=True,
         analysis_status=vision_metadata.get("analysis_status", "complete"),
+        species=vision_metadata.get("species", "dog"),
         emotion=EmotionResult(
             label=emotion_result.get("label", "unknown"),
             confidence=emotion_result.get("confidence", 0.0),

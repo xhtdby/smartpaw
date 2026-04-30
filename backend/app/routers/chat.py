@@ -135,6 +135,10 @@ _SCENARIO_RETRIEVAL_HINTS = {
     "poisoning": "poison chocolate xylitol medicine toxin do not give milk oil induce vomiting",
     "unsafe_medicine": "human medicine painkiller vomiting tablet poison do not give human medicines",
     "fracture": "limping fracture trauma keep still do not straighten limbs transport",
+    "cat_urinary_obstruction": "cat cannot urinate straining blocked bladder emergency vet",
+    "cow_bloat": "cow cattle bloat left side swollen belly breathing urgent livestock vet",
+    "snakebite": "snakebite keep animal still avoid tourniquet ice suction prompt vet",
+    "general_animal_care": "unknown species injured animal keep safe avoid feeding medication call vet rescue",
 }
 
 
@@ -171,13 +175,14 @@ DEFAULT_CONTACT_LINE = (
     "emergency veterinarian/rescue service. For unsafe human situations in India, call 112."
 )
 
-_PROMPT_EMERGENCY = """You are IndieAid responding to an urgent dog emergency. Use a locked-in, fixer register.
+_PROMPT_EMERGENCY = """You are IndieAid responding to an urgent animal emergency. Use a locked-in, fixer register.
 
 Rules:
 - If a helpline call is needed first, give the contact number FIRST, then 1-3 numbered steps.
 - Otherwise: first sentence must be an imperative action, then give 1-3 numbered immediate actions.
-- Safe first aid only: shade, water only if swallowing, direct pressure, saline rinse, careful transport
+- Safe first aid only: shade, water only if alert and swallowing, direct pressure, saline rinse, careful transport, keeping the animal still
 - NEVER recommend prescription drugs, injections, antibiotics, steroids, painkillers, kerosene, turpentine, engine oil, acid, or chili
+- Respect TRIAGE.species. Do not give dog-specific advice for cats, cows, or unknown species.
 - Action first, rationale second if needed, escalation third. No greeting, no preamble, no disclaimer opener.
 - No "watch for" section — this is urgent action time.
 - Under 350 tokens
@@ -190,7 +195,7 @@ TRIAGE:
 
 {language_instruction}"""
 
-_PROMPT_CARE = """You are IndieAid, a dog-care assistant helping with a mild symptom or care question.
+_PROMPT_CARE = """You are IndieAid, an animal-care assistant helping with a mild symptom or care question.
 
 This is NOT an emergency. Keep your response proportionate.
 
@@ -200,6 +205,7 @@ Guidance:
 - If you need 1-2 more details for better advice, ask those specific questions — not a long checklist
 - Safe first aid only: shade, water if alert, gentle observation, saline rinse, clean cloth
 - Never recommend prescription drugs, antibiotics, steroids, human medicines, or unproven remedies
+- Respect TRIAGE.species. Do not give dog-specific advice for cats, cows, or unknown species.
 - For weak/new puppies, prioritize warmth and tiny safe amounts only if alert; do not recommend milk as first aid, especially cow milk or force-feeding
 - Under 500 tokens
 
@@ -211,13 +217,14 @@ KNOWLEDGE BASE:
 
 {language_instruction}"""
 
-_PROMPT_CARE_HIGH = """You are IndieAid helping with a high-urgency dog care situation. Use a locked-in, fixer register, but do not exaggerate into a life-threatening emergency unless the triage says so.
+_PROMPT_CARE_HIGH = """You are IndieAid helping with a high-urgency animal care situation. Use a locked-in, fixer register, but do not exaggerate into a life-threatening emergency unless the triage says so.
 
 Guidance:
 - First sentence must be a direct action the user can take now.
 - Then clearly separate: immediate steps, call-vet/rescue threshold, and red flags.
 - Safe first aid only: shade, water if alert and swallowing, direct pressure, saline rinse, careful transport.
 - Never recommend prescription drugs, antibiotics, steroids, human medicines, painkillers, or unproven remedies.
+- Respect TRIAGE.species. Do not give dog-specific advice for cats, cows, or unknown species.
 - For weak/new puppies, prioritize warmth and tiny safe amounts only if alert; do not recommend milk as first aid, especially cow milk or force-feeding.
 - Under 500 tokens.
 
@@ -250,14 +257,14 @@ GENERAL FIRST-AID CONTEXT:
 
 {language_instruction}"""
 
-_PROMPT_WARM = """You are IndieAid, a warm and curious dog-care assistant.
+_PROMPT_WARM = """You are IndieAid, a warm and curious animal-care assistant.
 
 The user is greeting you, introducing their dog, or asking a general question with no urgent symptom.
 
 Respond in 2-4 friendly sentences:
 - Include one small genuine human acknowledgement when natural, such as appreciating that they checked or noticing the animal sounds sweet
-- Be genuinely warm and curious about their dog
-- You may ask about the dog's name, age, breed, or what they are curious about
+- Be genuinely warm and curious about their animal
+- You may ask about the animal's name, age, species/breed, or what they are curious about
 - You may invite care, feeding, grooming, training, or breed questions
 - Do NOT open with "Of course!" or "I'm here to help!"
 - Do NOT use a templated compliment list, sycophancy, or a repeated opener
@@ -405,6 +412,9 @@ def _build_triage_action_cards(
         "road_trauma",
         "poisoning",
         "rabies_exposure",
+        "cat_urinary_obstruction",
+        "cow_bloat",
+        "snakebite",
     }
     guide_by_scenario = {
         "severe_bleeding": "trauma",
@@ -420,6 +430,7 @@ def _build_triage_action_cards(
         "unsafe_medicine": "poison",
         "puppy_gi": "puppies",
         "vomiting_diarrhea": "puppies",
+        "snakebite": "poison",
         "fearful_aggressive": "approach",
         "fall_entrapment": "approach",
     }
@@ -802,9 +813,11 @@ def _fallback_for_triage(
             "3. If there is an emergency off-camera, describe it in chat and call local help."
         )
     if triage.urgency_tier in {"life_threatening", "urgent"}:
+        species = getattr(triage, "species", "dog")
+        animal = "animal" if species in {"cat", "cow", "other"} else "dog"
         return (
-            "1. Keep the dog still, calm, and away from traffic or crowds.\n"
-            "2. Check breathing, bleeding, responsiveness, and whether the dog can stand.\n"
+            f"1. Keep the {animal} still, calm, and away from traffic or crowds.\n"
+            f"2. Check breathing, bleeding, responsiveness, and whether the {animal} can stand.\n"
             "3. Contact local rescue or an emergency veterinarian now if any red flag is present."
         )
     return None
@@ -815,6 +828,8 @@ def _effective_context(request: ChatRequest) -> str | None:
     if request.analysis_context:
         ctx = request.analysis_context
         parts: list[str] = []
+        if ctx.species:
+            parts.append(f"Species: {ctx.species}")
         if ctx.emotion:
             parts.append(f"Emotion: {ctx.emotion.label}")
         if ctx.condition:
@@ -839,7 +854,7 @@ def _effective_context(request: ChatRequest) -> str | None:
 
 @router.post("/chat")
 async def chat(request: ChatRequest):
-    """Chat with IndieAid about dog first aid and care."""
+    """Chat with IndieAid about animal first aid and care."""
     settings = get_settings()
     analysis_ctx = _effective_context(request)
 
@@ -852,7 +867,7 @@ async def chat(request: ChatRequest):
     context, sources = _retrieve_relevant(retrieval_query)
     if analysis_ctx:
         context = (
-            "Previous analysis of the dog:\n"
+            "Previous analysis of the animal:\n"
             f"{_clip_text(analysis_ctx, 800)}\n\n---\n\n{context}"
         )
     medicine_entry = find_medicine_entry(request.message)
@@ -1029,6 +1044,89 @@ _FALLBACK_GENERIC = {
     ),
 }
 
+_SPECIES_SCENARIO_FALLBACKS: dict[str, dict[str, str]] = {
+    "cat_urinary_obstruction": {
+        "en": (
+            "This can be a true emergency for a cat.\n"
+            "1. Do not wait to see if it passes; arrange emergency veterinary care now.\n"
+            "2. Do not press the belly or give human urinary medicines.\n"
+            "3. Note the last time the cat passed urine, any crying, vomiting, or belly swelling."
+        ),
+        "hi": (
+            "बिल्ली में पेशाब न होना असली आपातकाल हो सकता है।\n"
+            "1. इंतज़ार न करें; अभी इमरजेंसी पशु-चिकित्सक से संपर्क करें।\n"
+            "2. पेट न दबाएं और इंसानों की urinary दवा न दें।\n"
+            "3. आखिरी बार पेशाब कब हुआ, रोना, उल्टी या पेट फूलना दिख रहा है या नहीं, नोट करें।"
+        ),
+        "mr": (
+            "मांजरीला लघवी न होणे खरा आपत्काल असू शकतो.\n"
+            "1. वाट पाहू नका; आत्ताच आपत्कालीन पशुवैद्यकीय मदत घ्या.\n"
+            "2. पोट दाबू नका आणि माणसांची urinary औषधे देऊ नका.\n"
+            "3. शेवटची लघवी कधी झाली, रडणे, उलटी किंवा पोट फुगणे दिसते का, नोंद करा."
+        ),
+    },
+    "cow_bloat": {
+        "en": (
+            "Treat cattle bloat as urgent and get livestock veterinary help now.\n"
+            "1. Keep the cow standing if possible and avoid forcing movement.\n"
+            "2. Do not puncture the belly or pour random oils/medicines unless a vet directs it.\n"
+            "3. Tell the vet when swelling started, whether breathing is hard, and what feed changed."
+        ),
+        "hi": (
+            "गाय/मवेशी में पेट फूलना गंभीर हो सकता है; अभी livestock vet से मदद लें।\n"
+            "1. हो सके तो जानवर को खड़ा और शांत रखें; जबरदस्ती न चलाएं।\n"
+            "2. पेट में छेद न करें और vet के बिना तेल/दवा न डालें।\n"
+            "3. सूजन कब शुरू हुई, सांस में दिक्कत है या नहीं, और चारा बदला था या नहीं, बताएं।"
+        ),
+        "mr": (
+            "गाय/जनावराला bloat असेल तर तातडीने livestock vet ची मदत घ्या.\n"
+            "1. शक्य असेल तर जनावर उभे आणि शांत ठेवा; जबरदस्ती चालवू नका.\n"
+            "2. पोटाला छिद्र करू नका आणि vet शिवाय तेल/औषध देऊ नका.\n"
+            "3. सूज कधी सुरू झाली, श्वास त्रास आहे का, आणि चारा बदलला का, हे सांगा."
+        ),
+    },
+    "snakebite": {
+        "en": (
+            "Keep the animal still and arrange prompt veterinary care.\n"
+            "1. Move away from the snake; do not try to catch it.\n"
+            "2. Do not cut, suck, ice, burn, shock, or tourniquet the bite.\n"
+            "3. Limit movement and note the bite location, time, swelling, and breathing."
+        ),
+        "hi": (
+            "जानवर को स्थिर रखें और तुरंत पशु-चिकित्सक से मदद लें।\n"
+            "1. सांप से दूर हो जाएं; उसे पकड़ने की कोशिश न करें।\n"
+            "2. काटना, चूसना, बर्फ, जलाना, shock या tourniquet न लगाएं।\n"
+            "3. हिलना कम कराएं और काटने की जगह, समय, सूजन और सांस नोट करें।"
+        ),
+        "mr": (
+            "जनावराला स्थिर ठेवा आणि तातडीने पशुवैद्यकीय मदत घ्या.\n"
+            "1. सापापासून दूर व्हा; पकडण्याचा प्रयत्न करू नका.\n"
+            "2. चिरणे, चोखणे, बर्फ, जाळणे, shock किंवा tourniquet करू नका.\n"
+            "3. हालचाल कमी ठेवा आणि चाव्याची जागा, वेळ, सूज व श्वास नोंद करा."
+        ),
+    },
+    "general_animal_care": {
+        "en": (
+            "I can help with safe basics, but I cannot give species-specific first aid for this animal.\n"
+            "1. Keep the animal away from traffic, crowds, heat, and handling stress.\n"
+            "2. Do not feed, medicate, or force water unless a vet/rescue expert says it is safe for that species.\n"
+            "3. Contact a veterinarian, wildlife rescuer, or local animal rescue with the species, injury, location, and photos."
+        ),
+        "hi": (
+            "मैं सुरक्षित बुनियादी मदद दे सकता हूं, लेकिन इस प्रजाति के लिए खास first aid नहीं बताऊंगा।\n"
+            "1. जानवर को ट्रैफिक, भीड़, गर्मी और ज़्यादा पकड़ने-छूने से दूर रखें।\n"
+            "2. vet/rescue expert के बिना खाना, दवा या जबरदस्ती पानी न दें।\n"
+            "3. प्रजाति, चोट, जगह और फोटो के साथ पशु-चिकित्सक, wildlife rescuer या स्थानीय rescue से संपर्क करें।"
+        ),
+        "mr": (
+            "मी सुरक्षित मूलभूत मदत सांगू शकतो, पण या प्रजातीसाठी खास first aid सांगणार नाही.\n"
+            "1. जनावराला वाहतूक, गर्दी, उष्णता आणि जास्त हाताळणीपासून दूर ठेवा.\n"
+            "2. vet/rescue expert शिवाय अन्न, औषध किंवा जबरदस्ती पाणी देऊ नका.\n"
+            "3. प्रजाती, जखम, जागा आणि फोटोसह पशुवैद्य, wildlife rescuer किंवा स्थानिक rescue शी संपर्क करा."
+        ),
+    },
+}
+
 
 def _mode_fallback(
     message: str,
@@ -1041,6 +1139,9 @@ def _mode_fallback(
     lang = language if language in ("en", "hi", "mr") else "en"
     mode = triage.mode
     scenario = triage.scenario_type
+
+    if scenario in _SPECIES_SCENARIO_FALLBACKS:
+        return _SPECIES_SCENARIO_FALLBACKS[scenario][lang]
 
     if scenario == "deceased_pet":
         return _DECEASED_FALLBACK[lang]

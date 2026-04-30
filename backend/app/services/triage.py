@@ -15,6 +15,7 @@ from app.services.groq_retry import groq_post_with_retry
 logger = logging.getLogger(__name__)
 
 URGENCY_TIERS = {"life_threatening", "urgent", "moderate", "low_risk", "unclear"}
+SPECIES_VALUES = {"dog", "cat", "cow", "other"}
 _VALID_MODES = frozenset({"warm", "care", "emergency", "repair"})
 _DEVANAGARI_WARM = frozenset(["नमस्ते", "नमस्कार", "हाय", "हेलो", "सुप्रभात", "शुभ संध्या"])
 
@@ -37,6 +38,10 @@ LOCAL_DECISION_SCENARIOS = {
     "feeding_weak_dog",
     "unsafe_medicine",
     "unsafe_home_remedy",
+    "cat_urinary_obstruction",
+    "cow_bloat",
+    "snakebite",
+    "general_animal_care",
 }
 
 CANONICAL_SCENARIOS = {
@@ -63,6 +68,10 @@ CANONICAL_SCENARIOS = {
     "routine_care",
     "unsafe_medicine",
     "unsafe_home_remedy",
+    "cat_urinary_obstruction",
+    "cow_bloat",
+    "snakebite",
+    "general_animal_care",
     "deceased_pet",
     "healthy_or_low_risk",
     "no_dog_visible",
@@ -98,6 +107,14 @@ SCENARIO_ALIASES = {
     "medicine": "unsafe_medicine",
     "medicine_question": "unsafe_medicine",
     "otc_medicine": "unsafe_medicine",
+    "blocked_cat": "cat_urinary_obstruction",
+    "cat_blockage": "cat_urinary_obstruction",
+    "urinary_blockage": "cat_urinary_obstruction",
+    "cattle_bloat": "cow_bloat",
+    "ruminal_bloat": "cow_bloat",
+    "ruminal_tympany": "cow_bloat",
+    "snake_bite": "snakebite",
+    "snake_bitten": "snakebite",
     "puppy_diarrhea": "puppy_gi",
     "puppy_diarrhoea": "puppy_gi",
     "puppy_vomiting": "puppy_gi",
@@ -117,9 +134,10 @@ class TriageResult(BaseModel):
     mode: str = "care"
     context_used: bool = False
     intent: str = "general"
+    species: str = "dog"
 
 
-TRIAGE_SYSTEM_PROMPT = """You classify urgent dog rescue / first-aid chat messages.
+TRIAGE_SYSTEM_PROMPT = """You classify urgent animal rescue / first-aid chat messages.
 
 Return ONLY valid JSON:
 {
@@ -130,21 +148,26 @@ Return ONLY valid JSON:
   "needs_helpline_first": true | false,
   "rationale": "one short line",
   "mode": "warm" | "care" | "emergency" | "repair",
-  "intent": "general" | "medicine_question" | "cruelty_witnessed"
+  "intent": "general" | "medicine_question" | "cruelty_witnessed",
+  "species": "dog" | "cat" | "cow" | "other"
 }
 
 Rules:
-- mode "warm": greetings, dog introductions, healthy-dog curiosity, breed questions, no symptom present.
+- mode "warm": greetings, animal introductions, healthy-animal curiosity, breed/species questions, no symptom present.
 - mode "care": any symptom, concern, or care question that is not an emergency.
 - mode "emergency": life_threatening urgency tier; requires immediate action.
 - mode "repair": user is correcting or redirecting the conversation, not reporting a new situation.
+- Classify species from the user's words/context. Use "dog" by default only when no other species is named.
 - Use intent "cruelty_witnessed" and scenario_type "animal_cruelty_witnessed" when the user is reporting abuse, poisoning, beating, illegal relocation, abandonment, or neglect by people against a stray/community animal.
 - Use intent "medicine_question" for asks about medicines, painkillers, OTC treatments, toxins, or unsafe human medicines.
+- For cats: suspected lily exposure is poisoning; inability to urinate/straining with no urine is cat_urinary_obstruction and life_threatening.
+- For cows/cattle/buffalo/calves: bloat/left-side belly distension is cow_bloat and life_threatening; snakebite is snakebite and urgent unless breathing/head-neck swelling makes it life_threatening.
+- For other species, avoid dog-specific first aid. Use general_animal_care unless the user gives enough safe universal emergency detail.
 - Mark life_threatening for entrapment in wells/pits/drains, drowning, choking, not breathing, collapse, repeated seizure, heavy bleeding, heatstroke collapse, major road trauma, suspected spinal injury, severe poisoning signs.
 - Mark needs_helpline_first true when the scene needs rescue equipment or urgent dispatch: well/pit/drain/pipe entrapment, drowning, major road accident, trapped under vehicle, roof/height rescue, aggressive dog endangering people.
 - If the message is vague ("acting weird", "not ok", "help") and no analysis context gives specifics, set info_sufficient false and ask for the few missing facts needed to choose safe first aid.
 - Do not make info_sufficient false just because the city, exact age, or depth is unknown when the immediate hazard is already clear.
-- Use the closest canonical scenario_type: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, tick_infestation, puppy_gi, eye_injury, fearful_aggressive, injured_transport, burn_injury, vomiting_diarrhea, lost_dog, feeding_weak_dog, routine_care, unsafe_medicine, unsafe_home_remedy, deceased_pet, healthy_or_low_risk, no_dog_visible, animal_cruelty_witnessed, warm_conversation, conversation_repair, symptom_negated, mild_behavior_change, unclear.
+- Use the closest canonical scenario_type: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, tick_infestation, puppy_gi, eye_injury, fearful_aggressive, injured_transport, burn_injury, vomiting_diarrhea, lost_dog, feeding_weak_dog, routine_care, unsafe_medicine, unsafe_home_remedy, cat_urinary_obstruction, cow_bloat, snakebite, general_animal_care, deceased_pet, healthy_or_low_risk, no_dog_visible, animal_cruelty_witnessed, warm_conversation, conversation_repair, symptom_negated, mild_behavior_change, unclear.
 - Classify correctly for English, Hindi, Marathi, and code-mixed messages. Output fields are language-neutral.
 """
 
@@ -176,6 +199,73 @@ def _normalize_string_list(value: object, limit: int = 5) -> list[str]:
             if cleaned:
                 items.append(cleaned)
     return items[:limit]
+
+
+def _normalize_species(raw_value: object, fallback: str = "dog") -> str:
+    species = re.sub(r"[^a-z0-9_]+", "_", str(raw_value or fallback).strip().lower()).strip("_")
+    if species in {"kitten", "feline"}:
+        return "cat"
+    if species in {"cattle", "calf", "buffalo", "bull", "heifer", "ruminant"}:
+        return "cow"
+    if species in {"dog", "cat", "cow", "other"}:
+        return species
+    return fallback if fallback in SPECIES_VALUES else "dog"
+
+
+def _detect_species(text: str) -> str:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    if not normalized:
+        return "dog"
+
+    cat_terms = [
+        "billi",
+        "cat",
+        "feline",
+        "kitten",
+        "kitty",
+        "tomcat",
+    ]
+    cow_terms = [
+        "bachda",
+        "bachhda",
+        "buffalo",
+        "bull",
+        "calf",
+        "cattle",
+        "cow",
+        "gaay",
+        "gai",
+        "heifer",
+        "ruminant",
+    ]
+    dog_terms = [
+        "dog",
+        "indie",
+        "kutta",
+        "kutra",
+        "pup",
+        "puppy",
+    ]
+    other_terms = [
+        "bird",
+        "goat",
+        "hamster",
+        "monkey",
+        "parrot",
+        "rabbit",
+        "squirrel",
+        "turtle",
+    ]
+    if any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in cat_terms):
+        return "cat"
+    if any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in cow_terms):
+        return "cow"
+    if any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in other_terms):
+        return "other"
+    if any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in dog_terms):
+        return "dog"
+    return "dog"
 
 
 def _canonicalize_scenario(raw_value: object, fallback: TriageResult) -> str:
@@ -232,6 +322,9 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         raw_intent = "medicine_question"
     if scenario_type == "animal_cruelty_witnessed":
         raw_intent = "cruelty_witnessed"
+    raw_species = _normalize_species(raw.get("species"), fallback.species)
+    if fallback.species != "dog" and raw_species == "dog":
+        raw_species = fallback.species
 
     # Safety overrides: deterministic gates cannot be downgraded by the LLM
     if fallback.urgency_tier == "life_threatening":
@@ -260,6 +353,7 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         mode=raw_mode,
         context_used=fallback.context_used,
         intent=raw_intent,
+        species=raw_species,
     )
 
 
@@ -711,6 +805,7 @@ def _heuristic_classify_internal(
     combined = _normalize_turn_text(combined)
     compact = re.sub(r"\s+", " ", combined).strip()
     screen_text = _strip_negated_emergency_terms(compact)
+    species = _detect_species(combined)
 
     if not compact:
         return TriageResult(
@@ -803,7 +898,7 @@ def _heuristic_classify_internal(
             urgency_tier="low_risk",
             info_sufficient=True,
             scenario_type="warm_conversation",
-            rationale="The user is starting a normal friendly dog-care conversation.",
+            rationale="The user is starting a normal friendly animal-care conversation.",
         )
 
     if _contains_any(compact, ["no dog", "dog is not visible", "no animal visible"]):
@@ -822,6 +917,86 @@ def _heuristic_classify_internal(
             missing_facts=["location", "evidence_available", "animal_in_immediate_danger"],
             rationale="The user is reporting possible cruelty by people, which needs documentation and reporting guidance.",
             intent="cruelty_witnessed",
+            species=species,
+        )
+
+    cat_urinary_terms = [
+        "blocked",
+        "can't pee",
+        "cannot pee",
+        "cannot urinate",
+        "no pee",
+        "not peeing",
+        "not urinating",
+        "straining to pee",
+        "straining to urinate",
+        "urinary blockage",
+    ]
+    if species == "cat" and _contains_any(screen_text, cat_urinary_terms):
+        return TriageResult(
+            urgency_tier="life_threatening",
+            info_sufficient=True,
+            missing_facts=["last_urinated", "pain_or_vocalizing", "belly_swollen"],
+            scenario_type="cat_urinary_obstruction",
+            needs_helpline_first=False,
+            rationale="A cat who cannot urinate may have a urinary obstruction, which is a true emergency.",
+            species="cat",
+        )
+
+    if species == "cat" and _contains_any(screen_text, ["lily", "lilies", "daylily", "pollen"]) and _contains_any(
+        screen_text,
+        ["ate", "chewed", "drank", "licked", "ingested", "swallowed", "pollen", "water"],
+    ):
+        return TriageResult(
+            urgency_tier="urgent",
+            info_sufficient=True,
+            missing_facts=["plant_part", "time_since_exposure", "symptoms"],
+            scenario_type="poisoning",
+            rationale="Lily exposure in cats can be a medical emergency.",
+            intent="medicine_question",
+            species="cat",
+        )
+
+    cow_bloat_terms = [
+        "bloat",
+        "bloated",
+        "distended",
+        "left side swollen",
+        "rumen swollen",
+        "swollen belly",
+        "tympany",
+    ]
+    if species == "cow" and _contains_any(screen_text, cow_bloat_terms):
+        return TriageResult(
+            urgency_tier="life_threatening",
+            info_sufficient=True,
+            missing_facts=["breathing_status", "can_stand", "time_since_feed_change"],
+            scenario_type="cow_bloat",
+            needs_helpline_first=True,
+            rationale="Bloat in cattle can become life-threatening and needs livestock veterinary help.",
+            species="cow",
+        )
+
+    if _contains_any(screen_text, ["snake bite", "snakebite", "bitten by snake", "cobra", "viper"]):
+        head_or_breathing = _contains_any(screen_text, ["breathing", "muzzle", "neck", "face", "head", "swelling"])
+        return TriageResult(
+            urgency_tier="life_threatening" if head_or_breathing else "urgent",
+            info_sufficient=True,
+            missing_facts=["bite_location", "breathing_status", "time_since_bite"],
+            scenario_type="snakebite",
+            needs_helpline_first=False,
+            rationale="Snakebite needs prompt veterinary attention and harmful first-aid myths should be avoided.",
+            species=species,
+        )
+
+    if species == "other" and _has_active_care_signal(screen_text):
+        return TriageResult(
+            urgency_tier="moderate",
+            info_sufficient=True,
+            missing_facts=["species", "breathing_status", "visible_injury"],
+            scenario_type="general_animal_care",
+            rationale="The species is outside the app's detailed kernels, so only conservative universal guidance is safe.",
+            species="other",
         )
 
     if _is_medicine_question(compact):
@@ -830,8 +1005,9 @@ def _heuristic_classify_internal(
             info_sufficient=True,
             missing_facts=["medicine_name", "amount", "time_given"],
             scenario_type="unsafe_medicine",
-            rationale="Human medicines and painkillers can be dangerous for dogs.",
+            rationale="Human medicines and painkillers can be dangerous for animals, and species-specific dosing is unsafe.",
             intent="medicine_question",
+            species=species,
         )
 
     if _contains_any(screen_text, ["kerosene", "engine oil", "turpentine", "acid", "chili", "turmeric"]) and _contains_any(
@@ -1120,6 +1296,10 @@ def heuristic_classify_situation(
     result = _heuristic_classify_internal(user_message, analysis_context, last_assistant_message)
     result.mode = _derive_mode(result.urgency_tier, result.scenario_type)
     result.context_used = bool(analysis_context and _is_context_dependent(user_message))
+    species_text = " ".join(part for part in [user_message, analysis_context or ""] if part)
+    detected_species = _detect_species(species_text)
+    if detected_species != "dog" or result.species == "dog":
+        result.species = detected_species
     return result
 
 

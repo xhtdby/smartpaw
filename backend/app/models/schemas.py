@@ -46,6 +46,7 @@ class MedicineSuggestion(BaseModel):
 class AnalysisResponse(BaseModel):
     dog_detected: bool
     analysis_status: str = "complete"  # "complete", "uncertain", "no_dog_visible", "unavailable"
+    species: str = "dog"
     emotion: Optional[EmotionResult] = None
     safety: Optional[SafetyLevel] = None
     condition: Optional[ConditionAssessment] = None
@@ -150,6 +151,7 @@ class AnalysisContext(BaseModel):
     source: str = "image_analysis"
     created_at: str  # ISO-8601 timestamp
     scenario_type: str = "unclear"
+    species: str = "dog"
     urgency_signals: list[str] = []
     unknown_factors: list[str] = []
     emotion: Optional[EmotionResult] = None
@@ -184,6 +186,7 @@ class LanguageResult(BaseModel):
 class MultilingualAnalysisResponse(BaseModel):
     dog_detected: bool
     analysis_status: str = "complete"  # "complete", "uncertain", "no_dog_visible", "unavailable"
+    species: str = "dog"
     emotion: Optional[EmotionResult] = None
     condition: Optional[ConditionAssessment] = None
     user_context: Optional[str] = None

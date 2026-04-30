@@ -1,4 +1,4 @@
-"""Combined dog vision analysis using a single Groq multimodal call."""
+"""Combined animal vision analysis using a single Groq multimodal call."""
 
 import base64
 import io
@@ -13,20 +13,21 @@ from app.services.groq_retry import groq_post_with_retry
 
 logger = logging.getLogger(__name__)
 
-VISION_PROMPT = """You are a veterinary AI assistant analyzing dogs for a rescue-support app.
+VISION_PROMPT = """You are a veterinary AI assistant analyzing animals for a rescue-support app.
 
 Analyze this image in ONE pass and respond ONLY with valid JSON in this exact shape:
 {
   "dog_detected": true,
+  "species": "dog",
   "dog_confidence": 0.95,
-  "dog_description": "brief description of what is visible",
+  "dog_description": "brief description of what animal is visible",
   "emotion": {
     "label": "happy",
     "confidence": 0.85,
     "description": "brief explanation of the dog's emotional state"
   },
   "condition": {
-    "breed_guess": "best guess of breed or mix, or 'Indian pariah / mixed breed' if unclear",
+    "breed_guess": "best guess of breed/species type, or 'Indian pariah / mixed breed' for unclear dogs",
     "estimated_age": "puppy / young adult / adult / senior",
     "physical_condition": "one paragraph describing overall physical condition",
     "visible_injuries": ["list of visible injuries, wounds, or physical problems"],
@@ -35,27 +36,29 @@ Analyze this image in ONE pass and respond ONLY with valid JSON in this exact sh
   },
   "urgency_signals": ["visible or context-provided emergency clues"],
   "unknown_factors": ["important facts that cannot be determined from image/context"],
-  "scenario_type": "short snake_case label such as fall_entrapment, road_trauma, heatstroke, skin_disease, healthy_or_low_risk, no_dog_visible, unclear"
+  "scenario_type": "short snake_case label such as fall_entrapment, road_trauma, heatstroke, skin_disease, cat_urinary_obstruction, cow_bloat, healthy_or_low_risk, no_dog_visible, unclear"
 }
 
 Rules:
-- First decide if a dog is actually visible.
-- If no dog is visible, set "dog_detected" to false and use:
+- First decide which species is visible. species must be exactly one of: dog, cat, cow, other.
+- Keep "dog_detected" true for dog, cat, and cow because the existing app field means a supported animal was detected.
+- If no supported animal is visible, set "dog_detected" to false, species to "other", and use:
   - "dog_confidence": a number between 0 and 1
   - "dog_description": what is visible instead
   - "emotion": {"label": "unknown", "confidence": 0.0, "description": "No dog visible"}
   - "condition": {
       "breed_guess": "Unable to determine (no dog visible)",
       "estimated_age": "Unknown",
-      "physical_condition": "No dog was visible in the image.",
+      "physical_condition": "No supported animal was visible in the image.",
       "visible_injuries": [],
       "health_concerns": [],
-      "body_language": "No dog visible"
+      "body_language": "No supported animal visible"
     }
   - "urgency_signals": []
   - "unknown_factors": ["dog_not_visible"]
   - "scenario_type": "no_dog_visible"
 - Emotion label must be exactly one of: happy, sad, angry, relaxed, fearful, unknown
+- For cats, avoid dog body-language assumptions. For cows/cattle/buffalo/calves, keep advice conservative and livestock-oriented.
 - Distinguish clearly between what is directly visible and what is only a likely possibility
 - Treat user-provided context as important scene information, but do not invent visual findings from it
 - Be cautious when identifying health issues and avoid overclaiming from limited visual evidence
@@ -81,6 +84,7 @@ def unavailable_result() -> dict:
     return {
         "dog_detected": False,
         "analysis_status": "unavailable",
+        "species": "other",
         "dog_confidence": 0.0,
         "dog_description": "Analysis unavailable",
         "emotion": {
@@ -134,6 +138,18 @@ def _normalize_confidence(value: object, default: float) -> float:
 
 def _normalize_result(payload: dict) -> dict:
     dog_detected = bool(payload.get("dog_detected"))
+    species = str(payload.get("species") or ("dog" if dog_detected else "other")).strip().lower()
+    species = {
+        "kitten": "cat",
+        "feline": "cat",
+        "cattle": "cow",
+        "calf": "cow",
+        "buffalo": "cow",
+        "bull": "cow",
+        "heifer": "cow",
+    }.get(species, species)
+    if species not in {"dog", "cat", "cow", "other"}:
+        species = "dog" if dog_detected else "other"
     emotion_payload = payload.get("emotion") if isinstance(payload.get("emotion"), dict) else {}
     condition_payload = payload.get("condition") if isinstance(payload.get("condition"), dict) else {}
 
@@ -165,10 +181,12 @@ def _normalize_result(payload: dict) -> dict:
             "health_concerns": [],
             "body_language": "No dog visible",
         }
+        species = "other"
 
     return {
         "dog_detected": dog_detected,
         "analysis_status": analysis_status,
+        "species": species,
         "dog_confidence": _normalize_confidence(payload.get("dog_confidence"), 0.0),
         "dog_description": str(payload.get("dog_description", "")).strip(),
         "emotion": {

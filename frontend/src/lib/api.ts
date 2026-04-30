@@ -169,6 +169,7 @@ export function getReportImageUrl(reportId: string): string {
 export interface AnalysisResult {
   dog_detected: boolean;
   analysis_status?: "complete" | "uncertain" | "no_dog_visible" | "unavailable" | string;
+  species?: "dog" | "cat" | "cow" | "other" | string;
   emotion?: { label: string; confidence: number };
   safety?: { level: string; reason: string };
   condition?: {
@@ -196,6 +197,7 @@ export interface AnalysisResult {
 export interface MultilingualAnalysisResult {
   dog_detected: boolean;
   analysis_status?: "complete" | "uncertain" | "no_dog_visible" | "unavailable" | string;
+  species?: "dog" | "cat" | "cow" | "other" | string;
   emotion?: { label: string; confidence: number };
   condition?: {
     breed_guess: string;
@@ -282,6 +284,7 @@ export interface AnalysisContext {
   source: "image_analysis";
   created_at: string; // ISO-8601
   scenario_type?: string;
+  species?: string;
   urgency_signals?: string[];
   unknown_factors?: string[];
   emotion?: { label: string; confidence: number };
@@ -329,5 +332,6 @@ export interface ChatResponse {
     mode: string;
     context_used: boolean;
     intent?: string;
+    species?: string;
   };
 }
