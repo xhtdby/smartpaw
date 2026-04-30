@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from app import database
+from app import main as app_main
 from app.main import app
 from app.routers import community
 from app.services.storage_guard import (
@@ -140,3 +141,25 @@ def test_report_endpoint_omits_image_when_storage_budget_is_full(tmp_path, monke
     payload = response.json()
     assert payload["image_filename"] is None
     assert payload["image_storage_warning"] == "image_omitted_storage_limit"
+
+
+def test_health_reports_railway_volume_writability(tmp_path, monkeypatch):
+    settings = _settings(tmp_path)
+    monkeypatch.setattr(app_main, "get_settings", lambda: settings)
+    monkeypatch.setenv("RAILWAY_ENVIRONMENT", "production")
+    monkeypatch.setenv("RAILWAY_VOLUME_MOUNT_PATH", settings.data_dir)
+
+    with TestClient(app) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["data_dir"] == settings.data_dir
+    assert payload["db_path"] == settings.db_path
+    assert payload["uploads_dir"] == settings.uploads_dir
+    assert payload["railway_volume_attached"] is True
+    assert payload["using_railway_volume"] is True
+    assert payload["data_dir_writable"] is True
+    assert payload["db_writable"] is True
+    assert payload["uploads_writable"] is True
+    assert payload["durability_ok"] is True

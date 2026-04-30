@@ -4,6 +4,7 @@ Grounded AI guidance for pets and community animals.
 """
 
 import logging
+import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -90,15 +91,33 @@ async def root():
 async def health():
     settings = get_settings()
     snapshot = storage_snapshot(settings)
+    data_dir = Path(snapshot["data_dir"])
     db_path = Path(snapshot["db_path"])
     uploads_dir = Path(snapshot["uploads_dir"])
+    volume_mount_path = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    railway_environment = os.environ.get("RAILWAY_ENVIRONMENT")
+    using_railway_volume = bool(
+        volume_mount_path and data_dir.resolve() == Path(volume_mount_path).resolve()
+    )
+    data_dir_writable = check_writable(data_dir)
+    db_writable = check_writable(db_path.parent)
+    uploads_writable = check_writable(uploads_dir)
+    durability_ok = data_dir_writable and db_writable and uploads_writable and (
+        not railway_environment or using_railway_volume
+    )
     return {
         "status": "ok",
+        "data_dir": str(data_dir),
         "db_path": str(db_path),
         "uploads_dir": str(uploads_dir),
+        "railway_volume_mount_path": volume_mount_path,
+        "railway_volume_attached": bool(volume_mount_path),
+        "using_railway_volume": using_railway_volume,
+        "durability_ok": durability_ok,
         "db_exists": db_path.exists(),
-        "db_writable": check_writable(db_path.parent),
-        "uploads_writable": check_writable(uploads_dir),
+        "data_dir_writable": data_dir_writable,
+        "db_writable": db_writable,
+        "uploads_writable": uploads_writable,
         "storage_budget_mb": settings.persistent_storage_budget_mb,
         "storage_soft_limit_mb": settings.persistent_storage_soft_limit_mb,
         "storage_used_mb": round(snapshot["used_bytes"] / (1024 * 1024), 2),
