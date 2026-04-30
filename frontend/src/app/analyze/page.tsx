@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult, type AnalysisContext, type MedicineInfo } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
+import { getNearbyHref, getSpeciesLabel } from "@/lib/species";
 import { createImageThreadFromAnalysis } from "@/lib/thread-storage";
 
 const SAFETY_COLORS: Record<string, string> = {
@@ -49,7 +50,7 @@ const unavailableAnalysisCopy = (language: string) => {
   if (language === "mr") {
     return "\u0938\u0927\u094d\u092f\u093e \u092b\u094b\u091f\u094b\u091a\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0924\u093e \u0906\u0932\u0947 \u0928\u093e\u0939\u0940 \u0915\u093e\u0930\u0923 \u0935\u093f\u091c\u0928 \u092e\u0949\u0921\u0947\u0932 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u093e\u0939\u0940\u0964 \u0915\u0941\u0924\u094d\u0930\u093e \u0927\u094b\u0915\u094d\u092f\u093e\u0924 \u0905\u0938\u0947\u0932 \u0924\u0930 \u091a\u0945\u091f\u092e\u0927\u094d\u092f\u0947 \u0915\u093e\u092f \u0926\u093f\u0938\u0924\u0947 \u0924\u0947 \u0932\u093f\u0939\u093e\u0964";
   }
-  return "I could not analyze this photo right now because the vision model is unavailable. If the dog may be in danger, open chat and describe what you can see.";
+  return "I could not analyze this photo right now because the vision model is unavailable. If the animal may be in danger, open chat and describe what you can see.";
 };
 
 function OtcSuggestionCallout({ suggestion }: { suggestion: MedicineInfo }) {
@@ -356,7 +357,7 @@ export default function AnalyzePage() {
         <div className="space-y-4">
           <img
             src={preview}
-            alt="Dog photo"
+            alt={result ? `${getSpeciesLabel(result.species)} photo` : "Animal photo"}
             className="w-full rounded-xl shadow-md max-h-80 object-cover"
           />
 
@@ -411,7 +412,7 @@ export default function AnalyzePage() {
       {/* Results */}
       {result && (
         <div className="mt-6 space-y-4">
-          {/* No dog detected */}
+          {/* No supported animal detected */}
           {!result.dog_detected && (
             <div className="bg-white rounded-xl p-6 shadow-sm text-center">
               <div className="text-4xl mb-3">🔍</div>
@@ -419,7 +420,7 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* Dog detected — full results */}
+          {/* Supported animal detected — full results */}
           {result.dog_detected && (
             <>
               {/* Safety Badge */}
@@ -577,7 +578,7 @@ export default function AnalyzePage() {
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <Link
-                  href="/nearby"
+                  href={getNearbyHref(result.species)}
                   className="bg-[var(--color-sage-500)] text-white rounded-xl p-3 text-center text-sm font-semibold"
                 >
                   🏥 {t("home.nearby")}

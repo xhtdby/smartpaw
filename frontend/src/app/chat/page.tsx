@@ -7,6 +7,15 @@ import { useSearchParams } from "next/navigation";
 import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard, type AnalysisContext, type MedicineInfo } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 import {
+  getFirstAidHref,
+  getLearnHref,
+  getNearbyHref,
+  getPhotoThreadLabel,
+  getSpeciesFromContext,
+  getSpeciesFromTriage,
+  getSpeciesLabel,
+} from "@/lib/species";
+import {
   GENERAL_THREAD_ID,
   clearAllThreadStorage,
   clearThread,
@@ -211,16 +220,16 @@ function MedicineCallout({ medicine }: { medicine: MedicineInfo }) {
 // ---------------------------------------------------------------------------
 function AnalysisBanner({
   onClear,
-  onNewDog,
+  onNewAnimal,
   label,
   clearLabel,
-  newDogLabel,
+  newAnimalLabel,
 }: {
   onClear: () => void;
-  onNewDog: () => void;
+  onNewAnimal: () => void;
   label: string;
   clearLabel: string;
-  newDogLabel: string;
+  newAnimalLabel: string;
 }) {
   return (
     <div className="bg-[var(--color-warm-50)] border border-[var(--color-warm-300)] rounded-xl px-4 py-2.5 flex items-center gap-3 mb-3">
@@ -233,10 +242,10 @@ function AnalysisBanner({
         {clearLabel}
       </button>
       <button
-        onClick={onNewDog}
+        onClick={onNewAnimal}
         className="text-xs text-[var(--color-warm-600)] hover:text-[var(--color-warm-800)] underline shrink-0"
       >
-        {newDogLabel}
+        {newAnimalLabel}
       </button>
     </div>
   );
@@ -245,13 +254,13 @@ function AnalysisBanner({
 // ---------------------------------------------------------------------------
 // Emergency banner — shown at top when last reply flagged is_emergency
 // ---------------------------------------------------------------------------
-function EmergencyBanner({ label }: { label: string }) {
+function EmergencyBanner({ label, href }: { label: string; href: string }) {
   return (
     <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3 mb-3">
       <span className="text-xl shrink-0">🚨</span>
       <div>
         <p className="text-sm font-semibold text-red-700">{label}</p>
-        <Link href="/nearby" className="text-xs text-red-600 underline mt-0.5 block">
+        <Link href={href} className="text-xs text-red-600 underline mt-0.5 block">
           Open Find Help →
         </Link>
       </div>
@@ -264,6 +273,7 @@ interface EnrichedMessage extends ChatMessage {
   action_cards?: ActionCard[];
   is_emergency?: boolean;
   medicine?: MedicineInfo | null;
+  triage?: ChatResponse["triage"];
 }
 
 const THREAD_COPY = {
@@ -307,7 +317,12 @@ function ThreadSwitcher({
       <div className="flex gap-2">
         {threads.map((thread) => {
           const active = thread.id === currentThreadId;
-          const label = thread.kind === "general" ? labels.general : labels.photo;
+          const label =
+            thread.kind === "general"
+              ? labels.general
+              : thread.species
+                ? getPhotoThreadLabel(thread.species)
+                : labels.photo;
           return (
             <button
               key={thread.id}
@@ -353,6 +368,11 @@ function ChatInner() {
   const [currentThread, setCurrentThread] = useState<ChatThread | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
+  const lastTriageSpecies = [...messages]
+    .reverse()
+    .map((message) => getSpeciesFromTriage(message.triage))
+    .find(Boolean);
+  const activeSpecies = getSpeciesFromContext(analysisContext) ?? lastTriageSpecies;
 
   useEffect(() => {
     if (initialized.current) return;
@@ -443,6 +463,7 @@ function ChatInner() {
         action_cards: data.action_cards,
         is_emergency: data.is_emergency,
         medicine: data.medicine,
+        triage: data.triage,
       };
       const withAssistant = [...withUser, assistantMsg];
       setMessages(withAssistant);
@@ -533,17 +554,21 @@ function ChatInner() {
         {/* Analysis context banner — shown when photo context is active */}
         {analysisContext && (
           <AnalysisBanner
-            label={t("chat.analysis_banner")}
+            label={
+              activeSpecies
+                ? `${t("chat.analysis_banner")} (${getSpeciesLabel(activeSpecies)})`
+                : t("chat.analysis_banner")
+            }
             clearLabel={t("chat.analysis_banner.clear")}
-            newDogLabel={t("chat.analysis_banner.new_dog")}
+            newAnimalLabel={t("chat.analysis_banner.new_dog")}
             onClear={clearAnalysisContext}
-            onNewDog={clearHistory}
+            onNewAnimal={clearHistory}
           />
         )}
 
         {/* Emergency banner — shown when last assistant message was emergency */}
         {lastEmergency && messages.length > 0 && (
-          <EmergencyBanner label={t("chat.emergency.banner")} />
+          <EmergencyBanner label={t("chat.emergency.banner")} href={getNearbyHref(activeSpecies)} />
         )}
 
         {messages.length === 0 && (
@@ -572,12 +597,17 @@ function ChatInner() {
 
             {/* Quick action links on welcome screen */}
             <div className="mt-6 flex flex-col gap-2">
-              <Link href="/nearby" className="flex items-center justify-center gap-2 bg-[var(--color-warm-50)] border border-[var(--color-warm-200)] text-[var(--color-warm-700)] text-sm font-medium rounded-xl py-2.5 hover:bg-[var(--color-warm-100)]">
+              <Link href={getNearbyHref(activeSpecies)} className="flex items-center justify-center gap-2 bg-[var(--color-warm-50)] border border-[var(--color-warm-200)] text-[var(--color-warm-700)] text-sm font-medium rounded-xl py-2.5 hover:bg-[var(--color-warm-100)]">
                 📍 {t("chat.card.find_help")}
               </Link>
-              <Link href="/learn" className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-xl py-2.5 hover:bg-amber-100">
+              <Link href={getLearnHref(activeSpecies)} className="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium rounded-xl py-2.5 hover:bg-amber-100">
                 📖 {t("chat.card.learn")}
               </Link>
+              {activeSpecies && (
+                <Link href={getFirstAidHref(activeSpecies)} className="flex items-center justify-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium rounded-xl py-2.5 hover:bg-emerald-100">
+                  First-aid for {getSpeciesLabel(activeSpecies).toLowerCase()}
+                </Link>
+              )}
             </div>
           </div>
         )}
