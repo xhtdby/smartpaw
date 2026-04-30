@@ -10,5 +10,6 @@
       "Bash(git push *)",
       "Bash(gh api *)"
     ]
-  }
+  }"effortLevel": "max",
+  "model": "claude-opus-4-6[1m]"
 }

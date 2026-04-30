@@ -101,6 +101,20 @@ class ShelterVet(BaseModel):
     notes: str = ""
 
 
+class MailingListSubscribe(BaseModel):
+    email: str
+    city: Optional[str] = None
+    interest_tags: list[str] = []
+
+
+class MailingListResponse(BaseModel):
+    email: str
+    city: Optional[str] = None
+    interest_tags: list[str] = []
+    created_at: str
+    updated_at: str
+
+
 class ChatMessage(BaseModel):
     role: str  # "user" or "assistant"
     content: str
@@ -128,6 +142,8 @@ class ChatRequest(BaseModel):
     message: str
     language: str = "en"
     history: list[ChatMessage] = []
+    thread_id: Optional[str] = None
+    image_id: Optional[str] = None
     context_from_analysis: Optional[str] = None  # legacy; kept for compatibility
     analysis_context: Optional[AnalysisContext] = None  # structured; wins when both present
 

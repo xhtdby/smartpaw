@@ -3,13 +3,23 @@
 import { useState, useRef, useEffect, Suspense, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard, type AnalysisContext } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
-
-const STORAGE_KEY = "indieaid-chat-history";
-const LEGACY_STORAGE_KEY = "smartpaw-chat-history";
-const ANALYSIS_KEY = "indieaid-analysis-context";
-const LEGACY_ANALYSIS_KEY = "smartpaw-analysis-context";
+import {
+  GENERAL_THREAD_ID,
+  clearAllThreadStorage,
+  clearThread,
+  getActiveThreadId,
+  getThread,
+  initializeThreadStore,
+  saveThread,
+  saveThreadContext,
+  setActiveThreadId,
+  type ChatThread,
+  type StoredChatMessage,
+  type ThreadIndexItem,
+} from "@/lib/thread-storage";
 
 // ---------------------------------------------------------------------------
 // Lightweight markdown renderer — covers bold, italic, headings, lists, hr
@@ -142,6 +152,17 @@ function ActionCards({ cards }: { cards: ActionCard[] }) {
             </Link>
           );
         }
+        if (card.type === "cruelty") {
+          return (
+            <Link
+              key={i}
+              href={card.href}
+              className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-medium rounded-full px-3 py-1.5 hover:bg-blue-100 transition-colors"
+            >
+              {card.label}
+            </Link>
+          );
+        }
         // find_help
         return (
           <Link
@@ -160,8 +181,6 @@ function ActionCards({ cards }: { cards: ActionCard[] }) {
 // ---------------------------------------------------------------------------
 // Analysis context banner — shown when photo analysis context is active
 // ---------------------------------------------------------------------------
-const STALE_MS = 30 * 60 * 1000; // 30 minutes
-
 function AnalysisBanner({
   onClear,
   onNewDog,
@@ -218,107 +237,230 @@ interface EnrichedMessage extends ChatMessage {
   is_emergency?: boolean;
 }
 
+const THREAD_COPY = {
+  en: {
+    general: "General",
+    photo: "Photo",
+    clearAll: "Clear all",
+    clearAllConfirm: "Clear every IndieAid chat thread and stored photo on this device?",
+    clearThread: "Clear thread",
+  },
+  hi: {
+    general: "सामान्य",
+    photo: "फोटो",
+    clearAll: "सब साफ़ करें",
+    clearAllConfirm: "इस डिवाइस पर सभी IndieAid चैट थ्रेड और सेव फोटो साफ़ करें?",
+    clearThread: "थ्रेड साफ़ करें",
+  },
+  mr: {
+    general: "सामान्य",
+    photo: "फोटो",
+    clearAll: "सर्व साफ करा",
+    clearAllConfirm: "या डिव्हाइसवरील सर्व IndieAid चॅट थ्रेड आणि सेव्ह केलेले फोटो साफ करायचे?",
+    clearThread: "थ्रेड साफ करा",
+  },
+} as const;
+
+function ThreadSwitcher({
+  threads,
+  currentThreadId,
+  onSelect,
+  labels,
+}: {
+  threads: ThreadIndexItem[];
+  currentThreadId: string;
+  onSelect: (threadId: string) => void;
+  labels: { general: string; photo: string };
+}) {
+  if (!threads.length) return null;
+  return (
+    <div className="px-4 py-2 bg-white border-b border-gray-100 overflow-x-auto">
+      <div className="flex gap-2">
+        {threads.map((thread) => {
+          const active = thread.id === currentThreadId;
+          const label = thread.kind === "general" ? labels.general : labels.photo;
+          return (
+            <button
+              key={thread.id}
+              onClick={() => onSelect(thread.id)}
+              className={`shrink-0 flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs transition-colors ${
+                active
+                  ? "bg-[var(--color-warm-500)] text-white border-[var(--color-warm-500)]"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-[var(--color-warm-300)]"
+              }`}
+            >
+              {thread.thumbnail_data_url ? (
+                <img
+                  src={thread.thumbnail_data_url}
+                  alt=""
+                  className="h-6 w-6 rounded-full object-cover"
+                />
+              ) : (
+                <span className="h-6 w-6 rounded-full bg-[var(--color-warm-100)] text-[var(--color-warm-700)] flex items-center justify-center">
+                  {thread.kind === "general" ? "G" : "P"}
+                </span>
+              )}
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ChatInner() {
   const { language, t } = useLanguage();
+  const searchParams = useSearchParams();
+  const copy = THREAD_COPY[language as keyof typeof THREAD_COPY] || THREAD_COPY.en;
   const [messages, setMessages] = useState<EnrichedMessage[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisContext, setAnalysisContext] = useState<AnalysisContext | string | undefined>();
   const [lastEmergency, setLastEmergency] = useState(false);
+  const [threads, setThreads] = useState<ThreadIndexItem[]>([]);
+  const [currentThreadId, setCurrentThreadId] = useState(GENERAL_THREAD_ID);
+  const [currentThread, setCurrentThread] = useState<ChatThread | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (saved) setMessages(JSON.parse(saved));
-    } catch { /* ignore */ }
-    const raw = localStorage.getItem(ANALYSIS_KEY) || localStorage.getItem(LEGACY_ANALYSIS_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as AnalysisContext;
-        // Discard context older than 30 minutes
-        if (parsed.created_at && Date.now() - new Date(parsed.created_at).getTime() > STALE_MS) {
-          localStorage.removeItem(ANALYSIS_KEY);
-          localStorage.removeItem(LEGACY_ANALYSIS_KEY);
-        } else {
-          setAnalysisContext(parsed);
-        }
-      } catch {
-        // Legacy plain-text context
-        setAnalysisContext(raw);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-50)));
-      localStorage.removeItem(LEGACY_STORAGE_KEY);
-    }
-  }, [messages]);
+    const loadInitialThread = async () => {
+      const index = await initializeThreadStore();
+      const queryThreadId = searchParams.get("thread");
+      const preferredThreadId =
+        queryThreadId && index.some((item) => item.id === queryThreadId)
+          ? queryThreadId
+          : getActiveThreadId();
+      const threadId = index.some((item) => item.id === preferredThreadId)
+        ? preferredThreadId
+        : GENERAL_THREAD_ID;
+      const thread = await getThread(threadId);
+      if (!thread) return;
+      setThreads(index);
+      setCurrentThreadId(thread.id);
+      setCurrentThread(thread);
+      setActiveThreadId(thread.id);
+      setMessages(thread.messages);
+      setAnalysisContext(thread.analysis_context);
+      setLastEmergency(thread.messages.at(-1)?.is_emergency ?? false);
+    };
+    void loadInitialThread();
+  }, [searchParams]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  const selectThread = async (threadId: string) => {
+    const thread = await getThread(threadId);
+    if (!thread) return;
+    setCurrentThreadId(thread.id);
+    setCurrentThread(thread);
+    setActiveThreadId(thread.id);
+    setMessages(thread.messages);
+    setAnalysisContext(thread.analysis_context);
+    setLastEmergency(thread.messages.at(-1)?.is_emergency ?? false);
+    setSources([]);
+  };
+
+  const persistThread = async (
+    nextMessages: StoredChatMessage[],
+    nextAnalysisContext: AnalysisContext | string | undefined = analysisContext
+  ) => {
+    const base = currentThread ?? {
+      id: currentThreadId,
+      kind: currentThreadId === GENERAL_THREAD_ID ? "general" as const : "image" as const,
+      created_at: new Date().toISOString(),
+      last_used_at: new Date().toISOString(),
+      messages: [],
+    };
+    const nextThread: ChatThread = {
+      ...base,
+      messages: nextMessages,
+      analysis_context: nextAnalysisContext,
+    };
+    setCurrentThread(nextThread);
+    setThreads(await saveThread(nextThread));
+  };
 
   const send = async () => {
     const text = input.trim();
     if (!text || loading) return;
 
     const userMsg: EnrichedMessage = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
+    const outgoingHistory = messages.map(({ role, content }) => ({ role, content }));
+    const withUser = [...messages, userMsg];
+    setMessages(withUser);
     setInput("");
     setLoading(true);
+    await persistThread(withUser);
 
     try {
-      const data: ChatResponse = await sendChatMessage(text, language, messages, analysisContext);
+      const data: ChatResponse = await sendChatMessage(
+        text,
+        language,
+        outgoingHistory,
+        analysisContext,
+        currentThreadId,
+        currentThread?.image_id
+      );
       const assistantMsg: EnrichedMessage = {
         role: "assistant",
         content: data.response,
         action_cards: data.action_cards,
         is_emergency: data.is_emergency,
       };
-      setMessages((prev) => [...prev, assistantMsg]);
+      const withAssistant = [...withUser, assistantMsg];
+      setMessages(withAssistant);
       if (data.sources?.length) setSources(data.sources);
       setLastEmergency(data.is_emergency ?? false);
-      if (analysisContext) {
-        setAnalysisContext(undefined);
-        localStorage.removeItem(ANALYSIS_KEY);
-        localStorage.removeItem(LEGACY_ANALYSIS_KEY);
-      }
+      await persistThread(withAssistant);
     } catch {
-      if (analysisContext) {
-        setAnalysisContext(undefined);
-        localStorage.removeItem(ANALYSIS_KEY);
-        localStorage.removeItem(LEGACY_ANALYSIS_KEY);
-      }
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: t("chat.error.network") },
-      ]);
+      const failedMessages = [...withUser, { role: "assistant" as const, content: t("chat.error.network") }];
+      setMessages(failedMessages);
+      await persistThread(failedMessages);
     } finally {
       setLoading(false);
     }
   };
 
-  const clearAnalysisContext = () => {
+  const clearAnalysisContext = async () => {
     setAnalysisContext(undefined);
-    localStorage.removeItem(ANALYSIS_KEY);
-    localStorage.removeItem(LEGACY_ANALYSIS_KEY);
+    if (currentThread) {
+      const index = await saveThreadContext(currentThread, undefined);
+      setThreads(index);
+      setCurrentThread({ ...currentThread, analysis_context: undefined });
+    }
   };
 
-  const clearHistory = () => {
+  const clearHistory = async () => {
     setMessages([]);
     setSources([]);
     setLastEmergency(false);
-    clearAnalysisContext();
+    setAnalysisContext(undefined);
     setInput("");
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    setThreads(await clearThread(currentThreadId));
+    const thread = await getThread(currentThreadId);
+    setCurrentThread(thread ?? null);
+  };
+
+  const clearAll = async () => {
+    if (!window.confirm(copy.clearAllConfirm)) return;
+    const index = await clearAllThreadStorage();
+    const thread = await getThread(GENERAL_THREAD_ID);
+    setThreads(index);
+    setCurrentThreadId(GENERAL_THREAD_ID);
+    setCurrentThread(thread ?? null);
+    setActiveThreadId(GENERAL_THREAD_ID);
+    setMessages([]);
+    setSources([]);
+    setLastEmergency(false);
+    setAnalysisContext(undefined);
+    setInput("");
   };
 
   return (
@@ -334,14 +476,26 @@ function ChatInner() {
           <p className="text-xs text-gray-400">{t("chat.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2">
-          {messages.length > 0 && (
-            <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500" title={t("chat.action.clear")} aria-label={t("chat.action.clear")}>
-              🗑️
+          {(messages.length > 0 || analysisContext) && (
+            <button onClick={clearHistory} className="text-xs text-gray-400 hover:text-red-500" title={copy.clearThread} aria-label={copy.clearThread}>
+              🗑
+            </button>
+          )}
+          {threads.length > 1 && (
+            <button onClick={clearAll} className="text-xs text-gray-400 hover:text-red-500" title={copy.clearAll} aria-label={copy.clearAll}>
+              {copy.clearAll}
             </button>
           )}
           <LanguageSelector compact />
         </div>
       </div>
+
+      <ThreadSwitcher
+        threads={threads}
+        currentThreadId={currentThreadId}
+        onSelect={(threadId) => void selectThread(threadId)}
+        labels={{ general: copy.general, photo: copy.photo }}
+      />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

@@ -15,6 +15,21 @@
     "notes": "Useful for escalation, policy, and official contact. Not a field ambulance dispatch line."
   },
   {
+    "id": "awbi-cruelty-complaint",
+    "name": "AWBI Cruelty Complaint Portal",
+    "type": "official",
+    "scope": "national",
+    "service_area": "India",
+    "address": "Online complaint portal",
+    "phone": null,
+    "hours": "Online",
+    "emergency_24hr": false,
+    "website": "https://awbi.gov.in/cruelty-complaint",
+    "email": null,
+    "summary": "Official online channel for filing animal-cruelty complaints covering dogs, cats, cattle, and other animals.",
+    "notes": "Use with location, date/time, safe photos/video, and witness details. For active violence or human danger, call 112 first. Source checked 2026-04-30."
+  },
+  {
     "id": "awbi-grievance",
     "name": "AWBI Grievance / Complaint",
     "type": "official",

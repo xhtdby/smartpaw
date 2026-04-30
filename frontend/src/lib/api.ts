@@ -117,13 +117,34 @@ export async function updateReportStatus(
   return res.json();
 }
 
+export async function subscribeToMailingList(payload: {
+  email: string;
+  city?: string;
+  interest_tags: string[];
+}): Promise<MailingListSubscription> {
+  const res = await fetchWithRetry(`${API_BASE}/api/mailing-list/subscribe`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "subscribe_failed" }));
+    throw new Error(err.detail || "subscribe_failed");
+  }
+  return res.json();
+}
+
 export async function sendChatMessage(
   message: string,
   language: string = "en",
   history: ChatMessage[] = [],
-  analysisContext?: AnalysisContext | string
+  analysisContext?: AnalysisContext | string,
+  threadId?: string,
+  imageId?: string
 ): Promise<ChatResponse> {
   const body: Record<string, unknown> = { message, language, history };
+  if (threadId) body.thread_id = threadId;
+  if (imageId) body.image_id = imageId;
   if (analysisContext) {
     if (typeof analysisContext === "string") {
       body.context_from_analysis = analysisContext;
@@ -241,6 +262,14 @@ export interface Report {
   resolved_note?: string;
 }
 
+export interface MailingListSubscription {
+  email: string;
+  city?: string | null;
+  interest_tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
@@ -263,7 +292,7 @@ export interface AnalysisContext {
 }
 
 export interface ActionCard {
-  type: "emergency" | "learn" | "find_help";
+  type: "emergency" | "learn" | "find_help" | "cruelty";
   label: string;
   href: string;
   guide_id?: string;
@@ -283,5 +312,6 @@ export interface ChatResponse {
     rationale: string;
     mode: string;
     context_used: boolean;
+    intent?: string;
   };
 }

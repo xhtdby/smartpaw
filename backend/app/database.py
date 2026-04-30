@@ -5,6 +5,7 @@ Uses aiosqlite for async compatibility with FastAPI.
 """
 
 import aiosqlite
+import json
 import logging
 from pathlib import Path
 
@@ -63,6 +64,15 @@ async def init_db():
         await db.execute("""
             CREATE INDEX IF NOT EXISTS idx_reports_status
             ON reports (status)
+        """)
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS mailing_list (
+                email TEXT PRIMARY KEY,
+                city TEXT,
+                interest_tags TEXT NOT NULL DEFAULT '[]',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
         """)
         await db.commit()
         logger.info(f"Database initialized at {db_path}")
@@ -164,3 +174,36 @@ async def get_report_by_id(report_id: str) -> dict | None:
         row = await db.execute("SELECT * FROM reports WHERE id = ?", (report_id,))
         result = await row.fetchone()
         return dict(result) if result else None
+
+
+async def subscribe_mailing_list(
+    email: str,
+    city: str | None,
+    interest_tags: list[str],
+    timestamp: str,
+) -> dict:
+    """Create or update a drive coordination mailing-list subscription."""
+    normalized_email = email.strip().lower()
+    tags_json = json.dumps(interest_tags, ensure_ascii=False)
+    db_path = _get_db_path()
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        await db.execute(
+            """
+            INSERT INTO mailing_list (email, city, interest_tags, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(email) DO UPDATE SET
+                city = excluded.city,
+                interest_tags = excluded.interest_tags,
+                updated_at = excluded.updated_at
+            """,
+            (normalized_email, city, tags_json, timestamp, timestamp),
+        )
+        await db.commit()
+        row = await db.execute("SELECT * FROM mailing_list WHERE email = ?", (normalized_email,))
+        result = await row.fetchone()
+        if not result:
+            raise RuntimeError("mailing_list_subscription_missing_after_insert")
+        data = dict(result)
+        data["interest_tags"] = json.loads(data.get("interest_tags") or "[]")
+        return data

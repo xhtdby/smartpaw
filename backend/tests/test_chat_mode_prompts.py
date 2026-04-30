@@ -64,6 +64,20 @@ def test_care_prompt_includes_knowledge_base():
     assert "TRIAGE" in system
 
 
+def test_high_urgency_care_uses_lock_in_prompt():
+    triage = _t("care", "maggot_wound", "urgent")
+    system = _build_system_prompt(triage, "Respond in English.", "some KB text", "")
+    assert "locked-in" in system
+    assert "First sentence must be a direct action" in system
+
+
+def test_warm_prompt_invites_human_acknowledgement():
+    triage = _t("warm", "warm_conversation")
+    system = _build_system_prompt(triage, "Respond in English.", "", "")
+    assert "human acknowledgement" in system
+    assert "templated compliment" in system
+
+
 def test_care_prompt_has_no_contact():
     triage = _t("care", "vomiting_diarrhea", "moderate")
     system = _build_system_prompt(triage, "Respond in English.", "", "")

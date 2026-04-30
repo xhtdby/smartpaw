@@ -262,6 +262,23 @@ def test_deceased_pet_cards_stay_quiet():
     assert is_emergency is False
 
 
+def test_cruelty_report_routes_to_cruelty_surface_not_emergency_cards():
+    triage = heuristic_classify_situation("someone is beating a stray dog near my building")
+    assert triage.scenario_type == "animal_cruelty_witnessed"
+    assert triage.intent == "cruelty_witnessed"
+
+    cards, is_emergency = _build_triage_action_cards(
+        "someone is beating a stray dog near my building",
+        "Document safely.",
+        "en",
+        triage,
+    )
+
+    assert is_emergency is False
+    assert [card["type"] for card in cards] == ["cruelty", "find_help"]
+    assert cards[0]["href"] == "/cruelty"
+
+
 def test_chat_endpoint_deceased_pet_bypasses_emergency_flow():
     client = TestClient(app)
     response = client.post(

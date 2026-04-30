@@ -142,14 +142,15 @@ DEFAULT_CONTACT_LINE = (
     "emergency veterinarian/rescue service. For unsafe human situations in India, call 112."
 )
 
-_PROMPT_EMERGENCY = """You are IndieAid responding to an urgent dog emergency. Be concise and action-first.
+_PROMPT_EMERGENCY = """You are IndieAid responding to an urgent dog emergency. Use a locked-in, fixer register.
 
 Rules:
-- If a helpline call is needed first, give the contact number FIRST, then 1-3 numbered steps
-- Otherwise: give 1-3 numbered immediate actions — no greeting, no preamble, no disclaimer opener
+- If a helpline call is needed first, give the contact number FIRST, then 1-3 numbered steps.
+- Otherwise: first sentence must be an imperative action, then give 1-3 numbered immediate actions.
 - Safe first aid only: shade, water only if swallowing, direct pressure, saline rinse, careful transport
 - NEVER recommend prescription drugs, injections, antibiotics, steroids, painkillers, kerosene, turpentine, engine oil, acid, or chili
-- No "watch for" section — this is urgent action time
+- Action first, rationale second if needed, escalation third. No greeting, no preamble, no disclaimer opener.
+- No "watch for" section — this is urgent action time.
 - Under 350 tokens
 
 CONTACT:
@@ -180,15 +181,34 @@ KNOWLEDGE BASE:
 
 {language_instruction}"""
 
+_PROMPT_CARE_HIGH = """You are IndieAid helping with a high-urgency dog care situation. Use a locked-in, fixer register, but do not exaggerate into a life-threatening emergency unless the triage says so.
+
+Guidance:
+- First sentence must be a direct action the user can take now.
+- Then clearly separate: immediate steps, call-vet/rescue threshold, and red flags.
+- Safe first aid only: shade, water if alert and swallowing, direct pressure, saline rinse, careful transport.
+- Never recommend prescription drugs, antibiotics, steroids, human medicines, painkillers, or unproven remedies.
+- Under 500 tokens.
+
+TRIAGE:
+{triage}
+
+KNOWLEDGE BASE:
+{context}
+
+{language_instruction}"""
+
 _PROMPT_WARM = """You are IndieAid, a warm and curious dog-care assistant.
 
 The user is greeting you, introducing their dog, or asking a general question with no urgent symptom.
 
 Respond in 2-4 friendly sentences:
+- Include one small genuine human acknowledgement when natural, such as appreciating that they checked or noticing the animal sounds sweet
 - Be genuinely warm and curious about their dog
 - You may ask about the dog's name, age, breed, or what they are curious about
 - You may invite care, feeding, grooming, training, or breed questions
 - Do NOT open with "Of course!" or "I'm here to help!"
+- Do NOT use a templated compliment list, sycophancy, or a repeated opener
 - Do NOT add disclaimers, checklists, or warnings unless the user describes a symptom
 
 {language_instruction}"""
@@ -248,6 +268,12 @@ _EMERGENCY_LABEL: dict[str, str] = {
     "mr": "आपत्कालीन — आत्ता कॉल करा",
 }
 
+_CRUELTY_LABEL: dict[str, str] = {
+    "en": "Cruelty reporting steps",
+    "hi": "क्रूरता रिपोर्ट करने के कदम",
+    "mr": "क्रूरतेची नोंद करण्याची पावले",
+}
+
 
 def _build_triage_action_cards(
     query: str,
@@ -261,6 +287,12 @@ def _build_triage_action_cards(
 
     lang = language if language in ("en", "hi", "mr") else "en"
     scenario = triage.scenario_type
+
+    if scenario == "animal_cruelty_witnessed" or getattr(triage, "intent", "") == "cruelty_witnessed":
+        return [
+            {"type": "cruelty", "label": _CRUELTY_LABEL[lang], "href": "/cruelty"},
+            {"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"},
+        ], False
 
     quiet_scenarios = {
         "conversation_repair",
@@ -390,15 +422,15 @@ def _triage_dict(triage: TriageResult) -> dict[str, Any]:
 
 _WARM_FALLBACK: dict[str, str] = {
     "en": (
-        "Hi! I'm here. Tell me about your dog — name, age, indie mix or known breed, "
+        "Hi! Good of you to check in. Tell me about your dog — name, age, indie mix or known breed, "
         "or whatever you're curious about."
     ),
     "hi": (
-        "नमस्ते! बताइए — कुत्ते का नाम, उम्र, नस्ल क्या है, "
+        "नमस्ते! अच्छा लगा कि आपने ध्यान से पूछा। बताइए — कुत्ते का नाम, उम्र, नस्ल क्या है, "
         "या आप किस बारे में जानना चाहते हैं?"
     ),
     "mr": (
-        "नमस्कार! सांगा — कुत्र्याचे नाव, वय, जात काय आहे, "
+        "नमस्कार! तुम्ही काळजीपूर्वक विचारत आहात हे छान आहे। सांगा — कुत्र्याचे नाव, वय, जात काय आहे, "
         "किंवा तुम्हाला कशाबद्दल जाणायचे आहे?"
     ),
 }
@@ -463,6 +495,12 @@ def _build_system_prompt(
         return _PROMPT_WARM.format(language_instruction=lang_instruction)
     if mode == "repair":
         return _PROMPT_REPAIR.format(language_instruction=lang_instruction)
+    if mode == "care" and triage.urgency_tier == "urgent":
+        return _PROMPT_CARE_HIGH.format(
+            language_instruction=lang_instruction,
+            triage=triage_json,
+            context=context,
+        )
     return _PROMPT_CARE.format(
         language_instruction=lang_instruction,
         triage=triage_json,
@@ -501,6 +539,13 @@ def _fallback_for_triage(
             "eating, drinking, walking normally, breathing comfortably, and responding to you. "
             "Call a vet or rescue sooner if this is new and worsening, lasts more than a day, "
             "or comes with vomiting, diarrhea, pain, collapse, or refusal to eat."
+        )
+    if scenario == "animal_cruelty_witnessed":
+        return (
+            "This is a cruelty/reporting situation, not only a medical triage case.\n"
+            "1. Do not confront the person if it may put you or the animal at risk.\n"
+            "2. Record time, exact location, photos/video from a safe distance, and any vehicle or witness details.\n"
+            "3. Use the Cruelty page for official reporting steps, and call local rescue/vet help if the animal is injured right now."
         )
 
     if scenario == "fall_entrapment":

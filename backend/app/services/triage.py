@@ -33,6 +33,7 @@ LOCAL_DECISION_SCENARIOS = {
     "mild_behavior_change",
     "no_dog_visible",
     "deceased_pet",
+    "animal_cruelty_witnessed",
 }
 
 
@@ -45,6 +46,7 @@ class TriageResult(BaseModel):
     rationale: str = ""
     mode: str = "care"
     context_used: bool = False
+    intent: str = "general"
 
 
 TRIAGE_SYSTEM_PROMPT = """You classify urgent dog rescue / first-aid chat messages.
@@ -57,7 +59,8 @@ Return ONLY valid JSON:
   "scenario_type": "short_snake_case",
   "needs_helpline_first": true | false,
   "rationale": "one short line",
-  "mode": "warm" | "care" | "emergency" | "repair"
+  "mode": "warm" | "care" | "emergency" | "repair",
+  "intent": "general" | "medicine_question" | "cruelty_witnessed"
 }
 
 Rules:
@@ -65,6 +68,8 @@ Rules:
 - mode "care": any symptom, concern, or care question that is not an emergency.
 - mode "emergency": life_threatening urgency tier; requires immediate action.
 - mode "repair": user is correcting or redirecting the conversation, not reporting a new situation.
+- Use intent "cruelty_witnessed" and scenario_type "animal_cruelty_witnessed" when the user is reporting abuse, poisoning, beating, illegal relocation, abandonment, or neglect by people against a stray/community animal.
+- Use intent "medicine_question" for asks about medicines, painkillers, OTC treatments, toxins, or unsafe human medicines.
 - Mark life_threatening for entrapment in wells/pits/drains, drowning, choking, not breathing, collapse, repeated seizure, heavy bleeding, heatstroke collapse, major road trauma, suspected spinal injury, severe poisoning signs.
 - Mark needs_helpline_first true when the scene needs rescue equipment or urgent dispatch: well/pit/drain/pipe entrapment, drowning, major road accident, trapped under vehicle, roof/height rescue, aggressive dog endangering people.
 - If the message is vague ("acting weird", "not ok", "help") and no analysis context gives specifics, set info_sufficient false and ask for the few missing facts needed to choose safe first aid.
@@ -120,6 +125,12 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
     raw_mode = str(raw.get("mode", "")).strip().lower()
     if raw_mode not in _VALID_MODES:
         raw_mode = fallback.mode
+    raw_intent = re.sub(
+        r"[^a-z0-9_]+",
+        "_",
+        str(raw.get("intent", fallback.intent)).strip().lower(),
+    ).strip("_") or fallback.intent
+
     # Safety overrides: deterministic gates cannot be downgraded by the LLM
     if fallback.urgency_tier == "life_threatening":
         raw_mode = "emergency"
@@ -135,6 +146,7 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         rationale=str(raw.get("rationale", fallback.rationale)).strip()[:220],
         mode=raw_mode,
         context_used=fallback.context_used,
+        intent=raw_intent,
     )
 
 
@@ -306,6 +318,54 @@ def _is_warm_conversation(text: str) -> bool:
     return _contains_any(normalized, warm_patterns)
 
 
+def _is_cruelty_witnessed(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    if _contains_any(normalized, ["hit by car", "hit by bike", "road accident", "vehicle hit", "car hit"]):
+        return False
+
+    cruelty_patterns = [
+        "animal cruelty",
+        "cruelty",
+        "abuse",
+        "abusing",
+        "beating stray",
+        "beating a stray",
+        "kicking stray",
+        "someone hit a dog",
+        "someone hit a cat",
+        "someone poisoned",
+        "poisoning stray",
+        "throwing stones",
+        "illegal relocation",
+        "relocating dogs",
+        "abandoned puppies",
+        "neglecting animal",
+        "tied without food",
+        "kept without water",
+    ]
+    if _contains_any(normalized, cruelty_patterns):
+        return True
+
+    devanagari_patterns = [
+        "क्रूरता",
+        "जानवर को मार",
+        "कुत्ते को मार",
+        "बिल्ली को मार",
+        "जहर दिया",
+        "ज़हर दिया",
+        "पत्थर मार",
+        "बिना खाना",
+        "बिना पानी",
+        "प्राण्यांवर क्रूरता",
+        "कुत्र्याला मार",
+        "मांजरीला मार",
+        "विष दिल",
+        "दगड मार",
+    ]
+    return _contains_any(text, devanagari_patterns)
+
+
 def _heuristic_classify_internal(
     user_message: str,
     analysis_context: str | None = None,
@@ -420,6 +480,16 @@ def _heuristic_classify_internal(
             rationale="The user says there is no visible dog to assess.",
         )
 
+    if _is_cruelty_witnessed(user_compact):
+        return TriageResult(
+            urgency_tier="moderate",
+            info_sufficient=True,
+            scenario_type="animal_cruelty_witnessed",
+            missing_facts=["location", "evidence_available", "animal_in_immediate_danger"],
+            rationale="The user is reporting possible cruelty by people, which needs documentation and reporting guidance.",
+            intent="cruelty_witnessed",
+        )
+
     if _contains_any(
         compact,
         ["paracetamol", "acetaminophen", "ibuprofen", "aspirin", "painkiller", "pain killer", "human medicine"],
@@ -430,6 +500,7 @@ def _heuristic_classify_internal(
             missing_facts=["medicine_name", "amount", "time_given"],
             scenario_type="unsafe_medicine",
             rationale="Human medicines and painkillers can be dangerous for dogs.",
+            intent="medicine_question",
         )
 
     if _contains_any(screen_text, ["kerosene", "engine oil", "turpentine", "acid", "chili", "turmeric"]) and _contains_any(

@@ -1,4 +1,4 @@
-Progress: Stages 0–6 complete (mode routing, mode-specific prompts, analysis-to-chat banner handoff, analysis quality + fallbacks). Active work begins at Stage 7 (App Feel & Information Architecture). New stages 7A–7H integrate the next batch of asks (per-image chat threads, tone polish, first-aid kit, cruelty section for all strays, learn quizzes, multi-species, medicine guidance, drives mailing list, login + IP-keyed anonymous persistence) before original Stages 8 (Report Durability) and 9 (E2E Verification).
+Progress: Stages 0-6 complete. Current implementation pass completed Stage 7 IA, Stage 7A client-side per-image threads, Stage 7B tone/action-card routing, Stage 7G drives mailing-list storage, and partial Stage 7C first-aid/cruelty surfaces. Remaining major work: quiz depth, medicine KB-backed chat/image surfacing, multi-species kernels, login/IP persistence, Railway durability, and full E2E verification.
 
 # IndieAid Revival Plan
 

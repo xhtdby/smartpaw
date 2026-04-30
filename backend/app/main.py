@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import init_db
-from app.routers import analyze, community, chat
+from app.routers import analyze, community, chat, community_drives
 
 logging.basicConfig(
     level=logging.INFO,
@@ -72,6 +72,7 @@ app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")
 
 app.include_router(analyze.router)
 app.include_router(community.router)
+app.include_router(community_drives.router)
 app.include_router(chat.router)
 
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult, type AnalysisContext } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
+import { createImageThreadFromAnalysis } from "@/lib/thread-storage";
 
 const SAFETY_COLORS: Record<string, string> = {
   safe: "bg-green-100 text-green-800 border-green-300",
@@ -58,6 +59,7 @@ export default function AnalyzePage() {
   const [preview, setPreview] = useState<string>("");
   const [userContext, setUserContext] = useState("");
   const [mlResult, setMlResult] = useState<MultilingualAnalysisResult | null>(null);
+  const [chatThreadId, setChatThreadId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -123,6 +125,7 @@ export default function AnalyzePage() {
     setImage(file);
     setPreview(URL.createObjectURL(file));
     setMlResult(null);
+    setChatThreadId("");
     setError("");
   };
 
@@ -195,8 +198,17 @@ export default function AnalyzePage() {
             : undefined,
           user_context: data.user_context ?? undefined,
         };
-        localStorage.setItem("indieaid-analysis-context", JSON.stringify(analysisCtx));
-        localStorage.removeItem("smartpaw-analysis-context");
+        try {
+          const threadId = await createImageThreadFromAnalysis(
+            image,
+            analysisCtx,
+            data.analysis_status || "complete"
+          );
+          setChatThreadId(threadId);
+        } catch {
+          localStorage.setItem("indieaid-analysis-context", JSON.stringify(analysisCtx));
+          localStorage.removeItem("smartpaw-analysis-context");
+        }
       }
     } catch (err) {
       const code = err instanceof Error ? err.message : "";
@@ -211,7 +223,7 @@ export default function AnalyzePage() {
     }
   };
 
-  const goToChat = () => router.push("/chat?from=analysis");
+  const goToChat = () => router.push(chatThreadId ? `/chat?thread=${chatThreadId}` : "/chat?from=analysis");
 
   const reset = () => {
     if (preview) URL.revokeObjectURL(preview);
@@ -219,6 +231,7 @@ export default function AnalyzePage() {
     setImage(null);
     setUserContext("");
     setMlResult(null);
+    setChatThreadId("");
     setError("");
   };
 
