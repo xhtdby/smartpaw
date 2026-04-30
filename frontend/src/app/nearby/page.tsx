@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { SpeciesScopeSelect } from "@/components/SpeciesScopeSelect";
 import { fetchNearby, type ShelterVet } from "@/lib/api";
 import { LanguageSelector, useLanguage } from "@/lib/language";
+import { getSpeciesSearchQuery, normalizeSpeciesFilter, type SpeciesFilter } from "@/lib/species";
 
 type PageLanguage = "en" | "hi" | "mr";
 type ResourceType = "all" | "rescue" | "official" | "advice";
-type SpeciesFilter = "all" | "dog" | "cat" | "cow" | "other";
 
 const COPY: Record<
   PageLanguage,
@@ -241,6 +242,10 @@ function buildMapLink(resource: ShelterVet): string | null {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(resource.address)}`;
 }
 
+function buildSearchLink(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 export default function NearbyPage() {
   const { language } = useLanguage();
   const copy = COPY[(language as PageLanguage) || "en"];
@@ -252,10 +257,17 @@ export default function NearbyPage() {
 
   useEffect(() => {
     const species = new URLSearchParams(window.location.search).get("species");
-    if (species === "dog" || species === "cat" || species === "cow" || species === "other") {
-      setFilterSpecies(species);
-    }
+    setFilterSpecies(normalizeSpeciesFilter(species));
   }, []);
+
+  const updateSpeciesFilter = (species: SpeciesFilter) => {
+    setFilterSpecies(species);
+    const params = new URLSearchParams(window.location.search);
+    if (species === "all") params.delete("species");
+    else params.set("species", species);
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -287,6 +299,23 @@ export default function NearbyPage() {
       .filter((group) => group.items.length > 0);
   }, [copy.sections, resources]);
 
+  const speciesOptions = useMemo(
+    () =>
+      (Object.keys(copy.speciesFilters) as SpeciesFilter[]).map((species) => ({
+        value: species,
+        label: copy.speciesFilters[species],
+      })),
+    [copy.speciesFilters]
+  );
+
+  const quickLinks = useMemo(() => {
+    const speciesSearch = {
+      label: filterSpecies === "all" ? copy.quickLinks[0].label : `${copy.speciesFilters[filterSpecies]} help near me`,
+      href: filterSpecies === "all" ? copy.quickLinks[0].href : buildSearchLink(getSpeciesSearchQuery(filterSpecies)),
+    };
+    return [speciesSearch, ...copy.quickLinks.slice(1)];
+  }, [copy.quickLinks, copy.speciesFilters, filterSpecies]);
+
   return (
     <main className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -312,7 +341,7 @@ export default function NearbyPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5">
-        {copy.quickLinks.map((link) => (
+        {quickLinks.map((link) => (
           <a
             key={link.label}
             href={link.href}
@@ -323,6 +352,15 @@ export default function NearbyPage() {
             {link.label}
           </a>
         ))}
+      </div>
+
+      <div className="mb-5 rounded-xl border border-gray-100 bg-white p-3">
+        <SpeciesScopeSelect
+          value={filterSpecies}
+          onChange={updateSpeciesFilter}
+          options={speciesOptions}
+          label="Animal"
+        />
       </div>
 
       <div className="flex gap-2 mb-5 overflow-x-auto">
@@ -337,22 +375,6 @@ export default function NearbyPage() {
             }`}
           >
             {copy.filters[type]}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex gap-2 mb-5 overflow-x-auto">
-        {(Object.keys(copy.speciesFilters) as SpeciesFilter[]).map((species) => (
-          <button
-            key={species}
-            onClick={() => setFilterSpecies(species)}
-            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
-              filterSpecies === species
-                ? "bg-[var(--color-sage-500)] text-white"
-                : "bg-white border border-gray-200 text-gray-600"
-            }`}
-          >
-            {copy.speciesFilters[species]}
           </button>
         ))}
       </div>
