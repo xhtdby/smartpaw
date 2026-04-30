@@ -1,13 +1,23 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Quiz } from "@/components/Quiz";
+import { SpeciesScopeSelect } from "@/components/SpeciesScopeSelect";
 import { LanguageSelector, useLanguage } from "@/lib/language";
+import {
+  SPECIES_FILTER_OPTIONS,
+  getNearbyHref,
+  getSpeciesLabel,
+  normalizeSpeciesFilter,
+  type SpeciesFilter,
+} from "@/lib/species";
 
 type PageLanguage = "en" | "hi" | "mr";
 
 type Topic = {
   id: string;
+  species: SpeciesFilter[];
   title: Record<PageLanguage, string>;
   immediate: Record<PageLanguage, string>;
   otc: Record<PageLanguage, string>;
@@ -48,6 +58,7 @@ const COPY = {
 const TOPICS: Topic[] = [
   {
     id: "bleeding",
+    species: ["all"],
     title: { en: "Bleeding", hi: "खून बहना", mr: "रक्तस्त्राव" },
     immediate: {
       en: "Press a clean cloth or gauze firmly on the wound and keep pressure during transport.",
@@ -72,6 +83,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "choking",
+    species: ["all"],
     title: { en: "Choking", hi: "दम घुटना", mr: "घसा अडकणे" },
     immediate: {
       en: "If air is moving, keep calm and let the animal cough; remove only a visible front-mouth object.",
@@ -96,6 +108,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "heatstroke",
+    species: ["all"],
     title: { en: "Heatstroke", hi: "हीटस्ट्रोक", mr: "उष्माघात" },
     immediate: {
       en: "Move to shade, cool belly/groin/paws/neck with room-temperature water, and arrange urgent care.",
@@ -120,6 +133,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "poisoning",
+    species: ["all"],
     title: { en: "Poisoning", hi: "ज़हर", mr: "विषबाधा" },
     immediate: {
       en: "Move the animal away from the substance, keep the packet/container, and call vet/poison help.",
@@ -144,6 +158,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "road-trauma",
+    species: ["all"],
     title: { en: "Road trauma", hi: "सड़क दुर्घटना", mr: "रस्ता अपघात" },
     immediate: {
       en: "Keep still, move from traffic only if safe, and transport on a board/blanket without twisting.",
@@ -168,6 +183,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "skin-ticks",
+    species: ["all"],
     title: { en: "Skin and ticks", hi: "त्वचा और ticks", mr: "त्वचा आणि ticks" },
     immediate: {
       en: "Keep flies away, prevent licking, remove ticks straight out with tweezers if safe.",
@@ -191,7 +207,83 @@ const TOPICS: Topic[] = [
     },
   },
   {
+    id: "cat-urinary",
+    species: ["cat"],
+    title: { en: "Cat urinary emergency", hi: "Cat urinary emergency", mr: "Cat urinary emergency" },
+    immediate: {
+      en: "If a cat strains to urinate with little/no urine, cries, hides, vomits, or collapses, treat it as urgent.",
+      hi: "If a cat strains to urinate with little/no urine, cries, hides, vomits, or collapses, treat it as urgent.",
+      mr: "If a cat strains to urinate with little/no urine, cries, hides, vomits, or collapses, treat it as urgent.",
+    },
+    otc: {
+      en: "No home medicine. Keep the cat contained, warm, quiet, and transport to a veterinarian.",
+      hi: "No home medicine. Keep the cat contained, warm, quiet, and transport to a veterinarian.",
+      mr: "No home medicine. Keep the cat contained, warm, quiet, and transport to a veterinarian.",
+    },
+    redFlags: {
+      en: "no urine, repeated litter-box trips, painful crying, bloated/painful belly, vomiting, weakness, or male cat.",
+      hi: "no urine, repeated litter-box trips, painful crying, bloated/painful belly, vomiting, weakness, or male cat.",
+      mr: "no urine, repeated litter-box trips, painful crying, bloated/painful belly, vomiting, weakness, or male cat.",
+    },
+    remember: {
+      en: "A blocked cat can die without prompt veterinary care.",
+      hi: "A blocked cat can die without prompt veterinary care.",
+      mr: "A blocked cat can die without prompt veterinary care.",
+    },
+  },
+  {
+    id: "cat-lily",
+    species: ["cat"],
+    title: { en: "Cat lily exposure", hi: "Cat lily exposure", mr: "Cat lily exposure" },
+    immediate: {
+      en: "Remove access to the plant, keep any plant pieces/label, and call a vet or poison-support line immediately.",
+      hi: "Remove access to the plant, keep any plant pieces/label, and call a vet or poison-support line immediately.",
+      mr: "Remove access to the plant, keep any plant pieces/label, and call a vet or poison-support line immediately.",
+    },
+    otc: {
+      en: "No home antidote. Do not wait for vomiting or kidney signs before calling.",
+      hi: "No home antidote. Do not wait for vomiting or kidney signs before calling.",
+      mr: "No home antidote. Do not wait for vomiting or kidney signs before calling.",
+    },
+    redFlags: {
+      en: "possible true lily/daylily exposure, pollen on fur, chewed petals/leaves, vase-water drinking, vomiting, drooling, or lethargy.",
+      hi: "possible true lily/daylily exposure, pollen on fur, chewed petals/leaves, vase-water drinking, vomiting, drooling, or lethargy.",
+      mr: "possible true lily/daylily exposure, pollen on fur, chewed petals/leaves, vase-water drinking, vomiting, drooling, or lethargy.",
+    },
+    remember: {
+      en: "For cats, even small lily exposure can become a kidney emergency.",
+      hi: "For cats, even small lily exposure can become a kidney emergency.",
+      mr: "For cats, even small lily exposure can become a kidney emergency.",
+    },
+  },
+  {
+    id: "cow-bloat",
+    species: ["cow"],
+    title: { en: "Cow bloat", hi: "Cow bloat", mr: "Cow bloat" },
+    immediate: {
+      en: "If safe, keep the cow calm and standing or sternal, remove rich feed, and call livestock veterinary help.",
+      hi: "If safe, keep the cow calm and standing or sternal, remove rich feed, and call livestock veterinary help.",
+      mr: "If safe, keep the cow calm and standing or sternal, remove rich feed, and call livestock veterinary help.",
+    },
+    otc: {
+      en: "No invasive home treatment. Avoid puncturing the rumen or forcing oils unless trained and directed.",
+      hi: "No invasive home treatment. Avoid puncturing the rumen or forcing oils unless trained and directed.",
+      mr: "No invasive home treatment. Avoid puncturing the rumen or forcing oils unless trained and directed.",
+    },
+    redFlags: {
+      en: "left-sided abdominal swelling, repeated retching, distress, collapse, trouble breathing, or inability to stand.",
+      hi: "left-sided abdominal swelling, repeated retching, distress, collapse, trouble breathing, or inability to stand.",
+      mr: "left-sided abdominal swelling, repeated retching, distress, collapse, trouble breathing, or inability to stand.",
+    },
+    remember: {
+      en: "Bloat can deteriorate fast; call livestock help early.",
+      hi: "Bloat can deteriorate fast; call livestock help early.",
+      mr: "Bloat can deteriorate fast; call livestock help early.",
+    },
+  },
+  {
     id: "puppies",
+    species: ["dog"],
     title: { en: "Puppies", hi: "पिल्ले", mr: "पिल्ले" },
     immediate: {
       en: "Keep warm, dry, quiet, and with the mother if she is safe and present.",
@@ -216,6 +308,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "deceased-aftercare",
+    species: ["all"],
     title: { en: "After death", hi: "मृत्यु के बाद", mr: "मृत्यूनंतर" },
     immediate: {
       en: "If you are certain the animal has died, move the body only if safe and use gloves/cloth.",
@@ -240,6 +333,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "wound-cleaning",
+    species: ["all"],
     title: { en: "Wound cleaning", hi: "घाव साफ करना", mr: "जखम साफ करणे" },
     immediate: {
       en: "After bleeding is controlled, gently rinse dirt with clean water or saline; cover loosely.",
@@ -264,6 +358,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "fracture",
+    species: ["all"],
     title: { en: "Fracture support", hi: "Fracture support", mr: "Fracture support" },
     immediate: {
       en: "Do not straighten the limb. Support the whole body and limit movement.",
@@ -288,6 +383,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "dehydration",
+    species: ["all"],
     title: { en: "Dehydration / ORS", hi: "Dehydration / ORS", mr: "Dehydration / ORS" },
     immediate: {
       en: "Offer tiny frequent sips only if alert and not vomiting repeatedly.",
@@ -312,6 +408,7 @@ const TOPICS: Topic[] = [
   },
   {
     id: "otc-medicine",
+    species: ["all"],
     title: { en: "OTC medicine basics", hi: "OTC दवा की मूल बातें", mr: "OTC औषधांची मूलभूत माहिती" },
     immediate: {
       en: "Use simple first-aid items; do not give human painkillers, antibiotics, steroids, or leftovers.",
@@ -353,12 +450,49 @@ const SOURCES = [
     label: "ASPCA Poison Control",
     href: "https://www.aspca.org/pet-care/aspca-poison-control",
   },
+  {
+    label: "FDA: Lilies and cats",
+    href: "https://www.fda.gov/animal-veterinary/animal-health-literacy/lovely-lilies-and-curious-cats-dangerous-combination",
+  },
+  {
+    label: "Cornell: Feline lower urinary tract disease",
+    href: "https://www.vet.cornell.edu/departments-centers-and-institutes/cornell-feline-health-center/health-information/feline-health-topics/feline-lower-urinary-tract-disease",
+  },
+  {
+    label: "Merck Veterinary Manual: Bloat in ruminants",
+    href: "https://www.merckvetmanual.com/digestive-system/diseases-of-the-ruminant-forestomach/bloat-in-ruminants",
+  },
 ];
 
 export default function FirstAidKitPage() {
   const { language } = useLanguage();
   const pageLanguage = (language as PageLanguage) || "en";
   const copy = COPY[pageLanguage];
+  const [speciesFilter, setSpeciesFilter] = useState<SpeciesFilter>("all");
+
+  useEffect(() => {
+    setSpeciesFilter(normalizeSpeciesFilter(new URLSearchParams(window.location.search).get("species")));
+  }, []);
+
+  const updateSpeciesFilter = (species: SpeciesFilter) => {
+    setSpeciesFilter(species);
+    const params = new URLSearchParams(window.location.search);
+    if (species === "all") params.delete("species");
+    else params.set("species", species);
+    const query = params.toString();
+    window.history.replaceState(null, "", query ? `?${query}` : window.location.pathname);
+  };
+
+  const visibleTopics = useMemo(
+    () =>
+      TOPICS.filter(
+        (topic) =>
+          speciesFilter === "all" ||
+          topic.species.includes("all") ||
+          topic.species.includes(speciesFilter)
+      ),
+    [speciesFilter]
+  );
 
   return (
     <main className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
@@ -373,10 +507,37 @@ export default function FirstAidKitPage() {
         <LanguageSelector compact />
       </div>
 
+      <section className="bg-white border border-gray-100 rounded-xl p-4 mb-5">
+        <SpeciesScopeSelect
+          value={speciesFilter}
+          onChange={updateSpeciesFilter}
+          options={SPECIES_FILTER_OPTIONS}
+          label="Animal"
+        />
+        <Link
+          href={getNearbyHref(speciesFilter)}
+          className="mt-3 inline-flex rounded-lg border border-[var(--color-warm-200)] bg-[var(--color-warm-50)] px-3 py-2 text-sm font-medium text-[var(--color-warm-700)]"
+        >
+          Find species-relevant help
+        </Link>
+      </section>
+
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {TOPICS.map((topic) => (
+        {visibleTopics.map((topic) => (
           <article key={topic.id} id={topic.id} className="bg-white border border-gray-100 rounded-xl p-4 scroll-mt-20">
-            <h2 className="font-semibold text-gray-900 mb-3">{topic.title[pageLanguage]}</h2>
+            <div className="mb-3">
+              <h2 className="font-semibold text-gray-900">{topic.title[pageLanguage]}</h2>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {topic.species.map((species) => (
+                  <span
+                    key={species}
+                    className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600"
+                  >
+                    {species === "all" ? "All animals" : getSpeciesLabel(species)}
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="space-y-3 text-sm">
               <div>
                 <h3 className="font-medium text-[var(--color-warm-700)]">{copy.immediate}</h3>

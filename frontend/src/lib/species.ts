@@ -73,6 +73,7 @@ export function getSpeciesFromTriage(triage?: unknown): SupportedSpecies | undef
 }
 
 export function getSpeciesSearchQuery(value?: string | null): string {
+  if (!value || value === "all") return "emergency veterinarian near me";
   const species = normalizeSpecies(value);
   if (species === "cow") return "livestock veterinary hospital near me";
   if (species === "cat") return "24 hour cat veterinary hospital near me";
