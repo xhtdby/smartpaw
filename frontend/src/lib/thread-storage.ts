@@ -1,4 +1,5 @@
 import type { ActionCard, AnalysisContext, ChatMessage, MedicineInfo } from "@/lib/api";
+import { getPhotoThreadLabel, getSpeciesFromContext, type SupportedSpecies } from "@/lib/species";
 
 export type ThreadKind = "general" | "image";
 
@@ -31,6 +32,7 @@ export interface ThreadIndexItem {
   id: string;
   kind: ThreadKind;
   image_id?: string;
+  species?: SupportedSpecies;
   created_at: string;
   last_used_at: string;
   title: string;
@@ -148,7 +150,7 @@ function threadTitle(thread: ChatThread): string {
   if (firstUserMessage) {
     return firstUserMessage.length > 32 ? `${firstUserMessage.slice(0, 31)}...` : firstUserMessage;
   }
-  return "Photo thread";
+  return getPhotoThreadLabel(getSpeciesFromContext(thread.analysis_context));
 }
 
 function updateIndexForThread(
@@ -161,6 +163,7 @@ function updateIndexForThread(
     id: thread.id,
     kind: thread.kind,
     image_id: thread.image_id,
+    species: getSpeciesFromContext(thread.analysis_context) ?? existing?.species,
     created_at: thread.created_at,
     last_used_at: thread.last_used_at,
     title: threadTitle(thread),
