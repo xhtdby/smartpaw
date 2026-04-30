@@ -353,6 +353,13 @@ def _query_has_exposure_cue(query: str) -> bool:
     return any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in exposure_terms)
 
 
+def _nearby_href(triage: TriageResult) -> str:
+    species = getattr(triage, "species", "dog")
+    if species in {"cat", "cow", "other"}:
+        return f"/nearby?species={species}"
+    return "/nearby"
+
+
 def _build_triage_action_cards(
     query: str,
     response: str,
@@ -369,7 +376,7 @@ def _build_triage_action_cards(
     if scenario == "animal_cruelty_witnessed" or getattr(triage, "intent", "") == "cruelty_witnessed":
         return [
             {"type": "cruelty", "label": _CRUELTY_LABEL[lang], "href": "/cruelty"},
-            {"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"},
+            {"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": _nearby_href(triage)},
         ], False
 
     quiet_scenarios = {
@@ -392,7 +399,7 @@ def _build_triage_action_cards(
         )
         cards: list[dict[str, Any]] = []
         if is_emergency:
-            cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
+            cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": _nearby_href(triage)})
         cards.append({
             "type": "learn",
             "label": _GUIDE_LABELS["poison"][lang],
@@ -400,7 +407,7 @@ def _build_triage_action_cards(
             "guide_id": "poison",
         })
         if is_emergency or triage.urgency_tier == "urgent":
-            cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
+            cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": _nearby_href(triage)})
         return cards, is_emergency
 
     emergency_scenarios = {
@@ -441,7 +448,7 @@ def _build_triage_action_cards(
     cards: list[dict[str, Any]] = []
 
     if is_emergency:
-        cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
+        cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": _nearby_href(triage)})
 
     guide_id = guide_by_scenario.get(scenario)
     if guide_id:
@@ -457,7 +464,7 @@ def _build_triage_action_cards(
         and scenario not in {"routine_care", "feeding_weak_dog", "lost_dog"}
     )
     if needs_find_help:
-        cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
+        cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": _nearby_href(triage)})
 
     return cards, is_emergency
 

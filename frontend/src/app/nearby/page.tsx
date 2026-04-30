@@ -7,6 +7,7 @@ import { LanguageSelector, useLanguage } from "@/lib/language";
 
 type PageLanguage = "en" | "hi" | "mr";
 type ResourceType = "all" | "rescue" | "official" | "advice";
+type SpeciesFilter = "all" | "dog" | "cat" | "cow" | "other";
 
 const COPY: Record<
   PageLanguage,
@@ -19,6 +20,7 @@ const COPY: Record<
     aiBody: string;
     quickLinks: Array<{ label: string; href: string }>;
     filters: Record<ResourceType, string>;
+    speciesFilters: Record<SpeciesFilter, string>;
     sections: Record<Exclude<ResourceType, "all">, string>;
     typeLabels: Record<Exclude<ResourceType, "all">, string>;
     scopeLabels: Record<string, string>;
@@ -63,6 +65,13 @@ const COPY: Record<
       rescue: "Hands-on Rescue",
       official: "Official",
       advice: "Advice / Poison",
+    },
+    speciesFilters: {
+      all: "All animals",
+      dog: "Dogs",
+      cat: "Cats",
+      cow: "Cows",
+      other: "Other",
     },
     sections: {
       rescue: "Hands-on Rescue",
@@ -120,6 +129,13 @@ const COPY: Record<
       official: "आधिकारिक",
       advice: "सलाह / ज़हर",
     },
+    speciesFilters: {
+      all: "सभी जानवर",
+      dog: "कुत्ते",
+      cat: "बिल्लियां",
+      cow: "गाय/मवेशी",
+      other: "अन्य",
+    },
     sections: {
       rescue: "मैदानी रेस्क्यू सहायता",
       official: "आधिकारिक शिकायत और निर्देशिकाएँ",
@@ -176,6 +192,13 @@ const COPY: Record<
       official: "अधिकृत",
       advice: "सल्ला / विष",
     },
+    speciesFilters: {
+      all: "सर्व प्राणी",
+      dog: "कुत्रे",
+      cat: "मांजरी",
+      cow: "गाय/जनावरे",
+      other: "इतर",
+    },
     sections: {
       rescue: "प्रत्यक्ष रेस्क्यू मदत",
       official: "अधिकृत तक्रार आणि निर्देशिका",
@@ -225,13 +248,24 @@ export default function NearbyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterType, setFilterType] = useState<ResourceType>("all");
+  const [filterSpecies, setFilterSpecies] = useState<SpeciesFilter>("all");
+
+  useEffect(() => {
+    const species = new URLSearchParams(window.location.search).get("species");
+    if (species === "dog" || species === "cat" || species === "cow" || species === "other") {
+      setFilterSpecies(species);
+    }
+  }, []);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError("");
       try {
-        const data = await fetchNearby(filterType === "all" ? undefined : filterType);
+        const data = await fetchNearby(
+          filterType === "all" ? undefined : filterType,
+          filterSpecies === "all" ? undefined : filterSpecies
+        );
         setResources(data);
       } catch {
         setError(copy.error);
@@ -240,7 +274,7 @@ export default function NearbyPage() {
       }
     };
     load();
-  }, [filterType, copy.error]);
+  }, [filterType, filterSpecies, copy.error]);
 
   const groupedResources = useMemo(() => {
     const order: Array<Exclude<ResourceType, "all">> = ["rescue", "official", "advice"];
@@ -307,6 +341,22 @@ export default function NearbyPage() {
         ))}
       </div>
 
+      <div className="flex gap-2 mb-5 overflow-x-auto">
+        {(Object.keys(copy.speciesFilters) as SpeciesFilter[]).map((species) => (
+          <button
+            key={species}
+            onClick={() => setFilterSpecies(species)}
+            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
+              filterSpecies === species
+                ? "bg-[var(--color-sage-500)] text-white"
+                : "bg-white border border-gray-200 text-gray-600"
+            }`}
+          >
+            {copy.speciesFilters[species]}
+          </button>
+        ))}
+      </div>
+
       {loading && <p className="text-sm text-gray-500 py-8">{copy.loading}</p>}
 
       {error && (
@@ -349,6 +399,14 @@ export default function NearbyPage() {
                           {copy.emergency24}
                         </span>
                       )}
+                      {resource.species?.map((species) => (
+                        <span
+                          key={species}
+                          className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700"
+                        >
+                          {copy.speciesFilters[species as SpeciesFilter] || species}
+                        </span>
+                      ))}
                     </div>
 
                     <h3 className="font-semibold text-gray-900">{resource.name}</h3>

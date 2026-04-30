@@ -33,6 +33,7 @@ router = APIRouter(prefix="/api", tags=["community"])
 
 _resources: list[dict] = []
 _RESOURCES_FILE = Path(__file__).parent.parent.parent / "data" / "help_resources.json"
+_SUPPORTED_SPECIES = {"dog", "cat", "cow", "other"}
 
 
 def _load_resources():
@@ -53,6 +54,25 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
     )
     return radius * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+def _resource_species(resource: dict) -> list[str]:
+    raw_species = resource.get("species")
+    if not isinstance(raw_species, list):
+        return ["dog", "cat", "cow", "other"]
+    species = [str(item).strip().lower() for item in raw_species if str(item).strip()]
+    if "all" in species:
+        return ["dog", "cat", "cow", "other"]
+    return [item for item in species if item in _SUPPORTED_SPECIES] or ["dog", "cat", "cow", "other"]
+
+
+def _matches_species(resource: dict, species: str | None) -> bool:
+    if not species:
+        return True
+    normalized = species.strip().lower()
+    if normalized not in _SUPPORTED_SPECIES:
+        raise HTTPException(status_code=400, detail="invalid_species")
+    return normalized in _resource_species(resource)
 
 
 def _get_uploads_dir() -> Path:
@@ -164,6 +184,7 @@ async def find_nearby(
     longitude: Optional[float] = Query(default=None, ge=-180, le=180),
     radius_km: float = Query(default=10.0, ge=0.1, le=50.0),
     type: Optional[str] = Query(default=None, description="Filter: rescue, official, advice"),
+    species: Optional[str] = Query(default=None, description="Filter: dog, cat, cow, other"),
 ):
     """Return verified help resources.
 
@@ -177,6 +198,8 @@ async def find_nearby(
     for resource in _resources:
         if type and resource.get("type") != type:
             continue
+        if not _matches_species(resource, species):
+            continue
 
         lat = resource.get("latitude")
         lon = resource.get("longitude")
@@ -187,12 +210,15 @@ async def find_nearby(
                 continue
             distance_km = round(dist, 2)
 
-        results.append({**resource, "distance_km": distance_km})
+        results.append({**resource, "species": _resource_species(resource), "distance_km": distance_km})
 
     type_order = {"rescue": 0, "official": 1, "advice": 2}
     scope_order = {"regional": 0, "national": 1, "global": 2}
     results.sort(
         key=lambda item: (
+            0
+            if species and species.strip().lower() in item.get("species", []) and len(item.get("species", [])) < 4
+            else 1,
             type_order.get(str(item.get("type")), 99),
             scope_order.get(str(item.get("scope")), 99),
             str(item.get("name", "")).lower(),

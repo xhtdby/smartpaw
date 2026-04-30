@@ -7,6 +7,8 @@ from PIL import Image
 from app.main import app
 from app.routers import analyze as analyze_router
 from app.routers import chat as chat_router
+from app.routers import community as community_router
+from app.routers.chat import _build_triage_action_cards
 from app.services.triage import heuristic_classify_situation
 
 
@@ -44,6 +46,22 @@ def test_cow_bloat_is_life_threatening_livestock_triage():
     assert triage.needs_helpline_first is True
 
 
+def test_cow_emergency_cards_deep_link_to_livestock_resources():
+    triage = heuristic_classify_situation("cow has a bloated left side and is breathing hard")
+
+    cards, is_emergency = _build_triage_action_cards(
+        "cow has a bloated left side and is breathing hard",
+        "Get livestock help.",
+        "en",
+        triage,
+    )
+
+    assert is_emergency is True
+    help_links = [card["href"] for card in cards if card["type"] in {"emergency", "find_help"}]
+    assert help_links
+    assert all(href == "/nearby?species=cow" for href in help_links)
+
+
 def test_snakebite_preserves_detected_species():
     triage = heuristic_classify_situation("calf bitten by snake on the leg")
 
@@ -76,6 +94,29 @@ def test_chat_endpoint_returns_species_aware_emergency_fallback(monkeypatch):
     assert payload["is_emergency"] is True
     assert "emergency veterinary care" in payload["response"].lower()
     assert "dog" not in payload["response"].lower()
+
+
+def test_nearby_species_filter_prioritizes_livestock_resources():
+    community_router._resources.clear()
+    client = TestClient(app)
+    response = client.get("/api/nearby?species=cow")
+
+    assert response.status_code == 200
+    payload = response.json()
+    ids = [item["id"] for item in payload]
+    assert "emri-1962-livestock" in ids
+    assert "kisan-call-centre-livestock" in ids
+    assert "friendicoes-delhi" not in ids
+    assert payload[0]["id"] in {"emri-1962-livestock", "kisan-call-centre-livestock", "maharashtra-animal-husbandry", "resq-pune"}
+    assert all("cow" in item["species"] for item in payload)
+
+
+def test_nearby_species_filter_rejects_unknown_species():
+    client = TestClient(app)
+    response = client.get("/api/nearby?species=horse")
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "invalid_species"
 
 
 def test_multilingual_analysis_preserves_non_dog_species(monkeypatch):

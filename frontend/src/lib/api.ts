@@ -66,9 +66,10 @@ export async function analyzeImageMultilingual(
   return res.json();
 }
 
-export async function fetchNearby(type?: string): Promise<ShelterVet[]> {
+export async function fetchNearby(type?: string, species?: string): Promise<ShelterVet[]> {
   const params = new URLSearchParams();
   if (type) params.set("type", type);
+  if (species) params.set("species", species);
 
   const res = await fetchWithRetry(`${API_BASE}/api/nearby?${params}`);
   if (!res.ok) throw new Error("Failed to fetch nearby shelters");
@@ -237,6 +238,7 @@ export interface ShelterVet {
   id: string;
   name: string;
   type: string;
+  species?: string[];
   address: string;
   phone?: string | null;
   latitude?: number | null;

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 
 
@@ -100,12 +100,14 @@ class NearbyQuery(BaseModel):
     longitude: Optional[float] = None
     radius_km: float = 5.0
     type: Optional[str] = None  # "rescue", "official", "advice"
+    species: Optional[str] = None  # "dog", "cat", "cow", "other"
 
 
 class ShelterVet(BaseModel):
     id: str
     name: str
     type: str
+    species: list[str] = Field(default_factory=lambda: ["dog", "cat", "cow", "other"])
     address: str
     phone: Optional[str] = None
     latitude: Optional[float] = None
