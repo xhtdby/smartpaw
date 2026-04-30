@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import get_settings
 from app.database import init_db
 from app.routers import analyze, community, chat, community_drives
+from app.services.storage_guard import check_writable, storage_snapshot
 
 logging.basicConfig(
     level=logging.INFO,
@@ -87,4 +88,20 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    settings = get_settings()
+    snapshot = storage_snapshot(settings)
+    db_path = Path(snapshot["db_path"])
+    uploads_dir = Path(snapshot["uploads_dir"])
+    return {
+        "status": "ok",
+        "db_path": str(db_path),
+        "uploads_dir": str(uploads_dir),
+        "db_exists": db_path.exists(),
+        "db_writable": check_writable(db_path.parent),
+        "uploads_writable": check_writable(uploads_dir),
+        "storage_budget_mb": settings.persistent_storage_budget_mb,
+        "storage_soft_limit_mb": settings.persistent_storage_soft_limit_mb,
+        "storage_used_mb": round(snapshot["used_bytes"] / (1024 * 1024), 2),
+        "storage_remaining_soft_mb": round(snapshot["remaining_soft_bytes"] / (1024 * 1024), 2),
+        "disk_free_mb": round(snapshot["disk_free_bytes"] / (1024 * 1024), 2),
+    }

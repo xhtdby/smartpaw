@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 
 from app.config import get_settings
+from app.services.storage_guard import decode_markdown_text_lossless, encode_markdown_text_lossless
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,13 @@ def _get_db_path() -> str:
         _db_path = get_settings().db_path
         _migrate_legacy_db_path(_db_path)
     return _db_path
+
+
+def _decode_report_fields(report: dict) -> dict:
+    decoded = dict(report)
+    decoded["description"] = decode_markdown_text_lossless(decoded.get("description"))
+    decoded["resolved_note"] = decode_markdown_text_lossless(decoded.get("resolved_note"))
+    return decoded
 
 
 async def init_db():
@@ -81,13 +89,17 @@ async def init_db():
 async def insert_report(report: dict) -> dict:
     """Insert a new report and return it."""
     db_path = _get_db_path()
+    stored_report = {
+        **report,
+        "description": encode_markdown_text_lossless(report.get("description")),
+    }
     async with aiosqlite.connect(db_path) as db:
         await db.execute(
             """INSERT INTO reports (id, latitude, longitude, description, urgency,
                image_filename, created_at, status)
                VALUES (:id, :latitude, :longitude, :description, :urgency,
                :image_filename, :created_at, :status)""",
-            report,
+            stored_report,
         )
         await db.commit()
     return report
@@ -141,7 +153,7 @@ async def get_reports_nearby(
             )
             dist = 6371.0 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
             if dist <= radius_km:
-                results.append(r)
+                results.append(_decode_report_fields(r))
 
         return results
 
@@ -154,16 +166,17 @@ async def update_report_status(report_id: str, status: str, note: str = "") -> d
     async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
         resolved_at = datetime.now(timezone.utc).isoformat() if status in ("resolved", "closed") else None
+        encoded_note = encode_markdown_text_lossless(note)
         await db.execute(
             """UPDATE reports SET status = ?, resolved_at = ?, resolved_note = ?
                WHERE id = ?""",
-            (status, resolved_at, note, report_id),
+            (status, resolved_at, encoded_note, report_id),
         )
         await db.commit()
 
         row = await db.execute("SELECT * FROM reports WHERE id = ?", (report_id,))
         result = await row.fetchone()
-        return dict(result) if result else None
+        return _decode_report_fields(dict(result)) if result else None
 
 
 async def get_report_by_id(report_id: str) -> dict | None:
@@ -173,7 +186,7 @@ async def get_report_by_id(report_id: str) -> dict | None:
         db.row_factory = aiosqlite.Row
         row = await db.execute("SELECT * FROM reports WHERE id = ?", (report_id,))
         result = await row.fetchone()
-        return dict(result) if result else None
+        return _decode_report_fields(dict(result)) if result else None
 
 
 async def subscribe_mailing_list(

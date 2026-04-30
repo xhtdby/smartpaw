@@ -64,6 +64,7 @@ class ReportResponse(BaseModel):
     urgency: str
     image_url: Optional[str] = None
     image_filename: Optional[str] = None
+    image_storage_warning: Optional[str] = None
     created_at: str
     status: str
     resolved_at: Optional[str] = None

@@ -44,7 +44,12 @@ const THREAD_INDEX_KEY = "indieaid-thread-index";
 const ACTIVE_THREAD_KEY = "indieaid-active-thread-id";
 const MIGRATION_KEY = "indieaid-thread-migration-v1";
 const GENERAL_THREAD_ID = "general";
-const MAX_IMAGE_THREADS = 20;
+const MAX_IMAGE_THREADS = 12;
+const MAX_MESSAGES_PER_THREAD = 60;
+const STORED_IMAGE_MAX_EDGE = 960;
+const STORED_IMAGE_TARGET_BYTES = 240 * 1024;
+const STORED_THUMBNAIL_MAX_EDGE = 128;
+const STORED_THUMBNAIL_TARGET_BYTES = 24 * 1024;
 
 const LEGACY_CHAT_KEYS = ["indieaid-chat-history", "smartpaw-chat-history"];
 const LEGACY_ANALYSIS_KEYS = ["indieaid-analysis-context", "smartpaw-analysis-context"];
@@ -259,7 +264,7 @@ export async function saveThread(thread: ChatThread): Promise<ThreadIndexItem[]>
   if (!isBrowser()) return [];
   const trimmed: ChatThread = {
     ...thread,
-    messages: thread.messages.slice(-100),
+    messages: thread.messages.slice(-MAX_MESSAGES_PER_THREAD),
     last_used_at: nowIso(),
   };
   await idbSet(THREAD_STORE, trimmed.id, trimmed);
@@ -312,18 +317,39 @@ async function loadImage(blob: Blob): Promise<HTMLImageElement> {
   });
 }
 
-async function resizeToJpeg(blob: Blob, maxEdge: number, quality: number): Promise<Blob> {
+async function resizeToJpeg(
+  blob: Blob,
+  maxEdge: number,
+  quality: number,
+  targetBytes: number
+): Promise<Blob> {
   const image = await loadImage(blob);
-  const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  if (!context) throw new Error("Canvas is not available");
-  context.drawImage(image, 0, 0, width, height);
-  return canvasToBlob(canvas, quality);
+  const edgeCandidates = Array.from(new Set([maxEdge, 840, 720, 640, 480].filter((edge) => edge > 0)));
+  const qualityCandidates = Array.from(
+    new Set([quality, 0.62, 0.56, 0.5, 0.45].filter((value) => value > 0 && value <= 1))
+  );
+  let smallest: Blob | undefined;
+
+  for (const edge of edgeCandidates) {
+    const scale = Math.min(1, edge / Math.max(image.naturalWidth, image.naturalHeight));
+    const width = Math.max(1, Math.round(image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas is not available");
+    context.drawImage(image, 0, 0, width, height);
+
+    for (const nextQuality of qualityCandidates) {
+      const encoded = await canvasToBlob(canvas, nextQuality);
+      if (!smallest || encoded.size < smallest.size) smallest = encoded;
+      if (encoded.size <= targetBytes) return encoded;
+    }
+  }
+
+  if (!smallest) throw new Error("Could not encode image");
+  return smallest;
 }
 
 async function blobToDataUrl(blob: Blob): Promise<string> {
@@ -364,8 +390,8 @@ export async function createImageThreadFromAnalysis(
   const imageId = makeId("image");
   const threadId = makeId("thread");
   const [blob, thumbnailBlob] = await Promise.all([
-    resizeToJpeg(file, 1280, 0.8),
-    resizeToJpeg(file, 160, 0.72),
+    resizeToJpeg(file, STORED_IMAGE_MAX_EDGE, 0.68, STORED_IMAGE_TARGET_BYTES),
+    resizeToJpeg(file, STORED_THUMBNAIL_MAX_EDGE, 0.6, STORED_THUMBNAIL_TARGET_BYTES),
   ]);
   const thumbnailDataUrl = await blobToDataUrl(thumbnailBlob);
 

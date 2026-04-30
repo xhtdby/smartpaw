@@ -1,11 +1,16 @@
-from pydantic_settings import BaseSettings
-from pydantic import field_validator
 from functools import lru_cache
+import os
 from pathlib import Path
+
+from pydantic import field_validator
+from pydantic_settings import BaseSettings
 
 
 def _default_persistent_root() -> Path:
     """Prefer Railway mounted volume when available."""
+    railway_mount = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    if railway_mount:
+        return Path(railway_mount)
     railway_data = Path("/app/data")
     if railway_data.exists() and railway_data.is_dir():
         return railway_data
@@ -35,6 +40,21 @@ class Settings(BaseSettings):
 
     # Max image size (bytes) — 10 MB
     max_image_size: int = 10 * 1024 * 1024
+
+    # Persistent volume budget. Railway hobby volumes may be as low as 500 MB.
+    persistent_storage_budget_mb: int = 500
+    persistent_storage_soft_limit_mb: int = 450
+    persistent_storage_min_free_mb: int = 25
+
+    # Stored report images are recompressed aggressively before hitting disk.
+    stored_report_image_max_edge: int = 960
+    stored_report_image_quality: int = 68
+    stored_report_image_target_kb: int = 220
+    stored_report_image_hard_max_kb: int = 450
+
+    # Reject unbounded text rather than silently filling the SQLite volume.
+    report_description_max_chars: int = 4000
+    report_resolved_note_max_chars: int = 2000
 
     # Persist data under Railway volume when available
     data_dir: str = str(_default_persistent_root())

@@ -21,6 +21,12 @@ from fastapi.responses import FileResponse
 from app.config import get_settings
 from app.database import get_report_by_id, get_reports_nearby, insert_report, update_report_status
 from app.models.schemas import ReportResponse, ReportStatusUpdate, ShelterVet
+from app.services.storage_guard import (
+    StorageBudgetExceeded,
+    StoredImageError,
+    assert_storage_capacity,
+    compress_image_for_storage,
+)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["community"])
@@ -70,17 +76,27 @@ async def create_report(
     if urgency not in ("low", "medium", "high", "critical"):
         raise HTTPException(status_code=400, detail="invalid_urgency")
 
+    settings = get_settings()
+    if len(description) > settings.report_description_max_chars:
+        raise HTTPException(status_code=400, detail="description_too_long")
+
     image_filename = None
+    image_storage_warning = None
     if image and image.content_type and image.content_type.startswith("image/"):
-        ext = image.filename.rsplit(".", 1)[-1] if image.filename and "." in image.filename else "jpg"
-        if ext.lower() not in ("jpg", "jpeg", "png", "webp"):
-            ext = "jpg"
-        image_filename = f"{uuid.uuid4().hex}.{ext}"
         image_bytes = await image.read()
-        if len(image_bytes) > 10 * 1024 * 1024:
+        if len(image_bytes) > settings.max_image_size:
             raise HTTPException(status_code=400, detail="image_too_large")
-        filepath = _get_uploads_dir() / image_filename
-        filepath.write_bytes(image_bytes)
+        try:
+            compressed = compress_image_for_storage(image_bytes, settings=settings)
+            assert_storage_capacity(len(compressed), settings=settings)
+            image_filename = f"{uuid.uuid4().hex}.jpg"
+            filepath = _get_uploads_dir() / image_filename
+            filepath.write_bytes(compressed)
+        except StoredImageError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except StorageBudgetExceeded:
+            logger.warning("Report image omitted because persistent storage budget is near full")
+            image_storage_warning = "image_omitted_storage_limit"
 
     report_id = str(uuid.uuid4())
     entry = {
@@ -90,6 +106,7 @@ async def create_report(
         "description": description,
         "urgency": urgency,
         "image_filename": image_filename,
+        "image_storage_warning": image_storage_warning,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "status": "open",
     }
@@ -118,6 +135,8 @@ async def update_status(report_id: str, update: ReportStatusUpdate):
     valid_statuses = ("open", "in_progress", "resolved", "closed")
     if update.status not in valid_statuses:
         raise HTTPException(status_code=400, detail=f"Status must be one of: {', '.join(valid_statuses)}")
+    if len(update.note) > get_settings().report_resolved_note_max_chars:
+        raise HTTPException(status_code=400, detail="note_too_long")
 
     result = await update_report_status(report_id, update.status, update.note)
     if not result:
