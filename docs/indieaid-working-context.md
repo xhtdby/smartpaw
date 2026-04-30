@@ -102,3 +102,5 @@ Deployment checks:
 - 2026-04-28: Stage 2 found the old `quick` and `detailed` image fixture suites reused four external image URLs across 165 labels, including emergency scenarios. They are quarantined and should not be used as visual truth.
 - 2026-04-28: Example chat showed "dead / she's dead / not an emergency, she's just dead" bouncing back into emergency or active-triage questions. Added `deceased_pet` as a stable non-emergency care scenario with quiet cards and aftercare/grief wording.
 - 2026-04-28: Stage 6 added `analysis_status` (`complete`, `uncertain`, `no_dog_visible`, `unavailable`) so model outages no longer masquerade as "no dog visible"; local fallback families now distinguish healthy, mild, urgent, no-dog, and unavailable paths.
+
+- 2026-04-30: Railway persistent volume is now mounted at `/app/data`; backend defaults now auto-prefer `/app/data` for SQLite and uploads when present, with `.env` overrides still supported.

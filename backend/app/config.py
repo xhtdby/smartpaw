@@ -4,6 +4,14 @@ from functools import lru_cache
 from pathlib import Path
 
 
+def _default_persistent_root() -> Path:
+    """Prefer Railway mounted volume when available."""
+    railway_data = Path("/app/data")
+    if railway_data.exists() and railway_data.is_dir():
+        return railway_data
+    return Path(__file__).parent.parent / "data"
+
+
 class Settings(BaseSettings):
     app_name: str = "IndieAid"
     debug: bool = False
@@ -28,11 +36,14 @@ class Settings(BaseSettings):
     # Max image size (bytes) — 10 MB
     max_image_size: int = 10 * 1024 * 1024
 
+    # Persist data under Railway volume when available
+    data_dir: str = str(_default_persistent_root())
+
     # SQLite database path
-    db_path: str = str(Path(__file__).parent.parent / "data" / "indieaid.db")
+    db_path: str = str(_default_persistent_root() / "indieaid.db")
 
     # Upload directory for report images
-    uploads_dir: str = str(Path(__file__).parent.parent / "uploads")
+    uploads_dir: str = str(_default_persistent_root() / "uploads")
 
     # Allowed CORS origins
     cors_origins: list[str] = [
