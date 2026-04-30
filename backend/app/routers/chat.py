@@ -4,7 +4,6 @@ POST /api/chat — conversational first aid after image analysis or direct query
 Uses a curated first aid knowledge base for retrieval-augmented generation.
 """
 
-import asyncio
 import json
 import logging
 import math
@@ -120,6 +119,29 @@ def _retrieve_relevant(query: str, top_k: int = 2, max_chars: int = 600) -> tupl
     return "\n\n---\n\n".join(context_parts), sources
 
 
+_SCENARIO_RETRIEVAL_HINTS = {
+    "feeding_weak_dog": (
+        "weak puppy abandoned litter mother cold cow milk starvation malnutrition "
+        "offer water small amounts do not feed cold puppy"
+    ),
+    "puppy_gi": "puppy vomiting diarrhea weak warm small water no human medicine",
+    "poisoning": "poison chocolate xylitol medicine toxin do not give milk oil induce vomiting",
+    "unsafe_medicine": "human medicine painkiller vomiting tablet poison do not give human medicines",
+    "fracture": "limping fracture trauma keep still do not straighten limbs transport",
+}
+
+
+def _retrieval_query_for_triage(message: str, analysis_ctx: str | None, triage: TriageResult) -> str:
+    parts = [message]
+    if analysis_ctx:
+        parts.append(analysis_ctx)
+    parts.append(f"Scenario: {triage.scenario_type}. Urgency: {triage.urgency_tier}.")
+    hint = _SCENARIO_RETRIEVAL_HINTS.get(triage.scenario_type)
+    if hint:
+        parts.append(hint)
+    return "\n".join(parts)
+
+
 # ---------------------------------------------------------------------------
 # Emergency contacts for major Indian cities. Only the matching city is injected.
 # ---------------------------------------------------------------------------
@@ -171,6 +193,7 @@ Guidance:
 - If you need 1-2 more details for better advice, ask those specific questions — not a long checklist
 - Safe first aid only: shade, water if alert, gentle observation, saline rinse, clean cloth
 - Never recommend prescription drugs, antibiotics, steroids, human medicines, or unproven remedies
+- For weak/new puppies, prioritize warmth and tiny safe amounts only if alert; do not recommend milk as first aid, especially cow milk or force-feeding
 - Under 500 tokens
 
 TRIAGE:
@@ -188,6 +211,7 @@ Guidance:
 - Then clearly separate: immediate steps, call-vet/rescue threshold, and red flags.
 - Safe first aid only: shade, water if alert and swallowing, direct pressure, saline rinse, careful transport.
 - Never recommend prescription drugs, antibiotics, steroids, human medicines, painkillers, or unproven remedies.
+- For weak/new puppies, prioritize warmth and tiny safe amounts only if alert; do not recommend milk as first aid, especially cow milk or force-feeding.
 - Under 500 tokens.
 
 TRIAGE:
@@ -275,13 +299,32 @@ _CRUELTY_LABEL: dict[str, str] = {
 }
 
 
+def _query_has_exposure_cue(query: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", query.lower())
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    exposure_terms = [
+        "ate",
+        "chewed",
+        "drank",
+        "eaten",
+        "fed",
+        "gave",
+        "given",
+        "got into",
+        "ingested",
+        "licked",
+        "swallowed",
+    ]
+    return any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in exposure_terms)
+
+
 def _build_triage_action_cards(
     query: str,
     response: str,
     language: str,
     triage: TriageResult,
 ) -> tuple[list[dict[str, Any]], bool]:
-    del query, response
+    del response
     if not triage.info_sufficient:
         return [], False
 
@@ -305,6 +348,25 @@ def _build_triage_action_cards(
     }
     if scenario in quiet_scenarios:
         return [], False
+
+    if getattr(triage, "intent", "") == "medicine_question":
+        is_emergency = triage.urgency_tier == "life_threatening" or (
+            scenario == "poisoning"
+            and triage.urgency_tier == "urgent"
+            and _query_has_exposure_cue(query)
+        )
+        cards: list[dict[str, Any]] = []
+        if is_emergency:
+            cards.append({"type": "emergency", "label": _EMERGENCY_LABEL[lang], "href": "/nearby"})
+        cards.append({
+            "type": "learn",
+            "label": _GUIDE_LABELS["poison"][lang],
+            "href": "/learn#poison",
+            "guide_id": "poison",
+        })
+        if is_emergency or triage.urgency_tier == "urgent":
+            cards.append({"type": "find_help", "label": _FIND_HELP_LABEL[lang], "href": "/nearby"})
+        return cards, is_emergency
 
     emergency_scenarios = {
         "fall_entrapment",
@@ -334,7 +396,9 @@ def _build_triage_action_cards(
         "fall_entrapment": "approach",
     }
 
-    is_emergency = scenario in emergency_scenarios and triage.urgency_tier in {"life_threatening", "urgent"}
+    is_emergency = triage.urgency_tier == "life_threatening" or (
+        scenario in emergency_scenarios and triage.urgency_tier == "urgent"
+    )
     cards: list[dict[str, Any]] = []
 
     if is_emergency:
@@ -687,7 +751,7 @@ def _fallback_for_triage(
         return (
             "1. Offer clean water first, in a shallow bowl, and watch if the dog can swallow normally.\n"
             "2. Give a small amount of bland food; do not give a large meal to a very thin or weak dog.\n"
-            "3. Avoid spicy food, bones, sweets, milk-heavy meals, and human medicines."
+            "3. Do not give cow milk, spicy food, bones, sweets, large meals, or human medicines."
         )
     if scenario == "routine_care":
         return (
@@ -743,16 +807,12 @@ async def chat(request: ChatRequest):
     settings = get_settings()
     analysis_ctx = _effective_context(request)
 
-    triage_task = asyncio.create_task(
-        classify_situation(
-            request.message,
-            analysis_ctx,
-        )
+    triage = await classify_situation(
+        request.message,
+        analysis_ctx,
     )
 
-    retrieval_query = request.message
-    if analysis_ctx:
-        retrieval_query = f"{request.message}\n{analysis_ctx}"
+    retrieval_query = _retrieval_query_for_triage(request.message, analysis_ctx, triage)
     context, sources = _retrieve_relevant(retrieval_query)
     if analysis_ctx:
         context = (
@@ -760,7 +820,6 @@ async def chat(request: ChatRequest):
             f"{_clip_text(analysis_ctx, 800)}\n\n---\n\n{context}"
         )
 
-    triage = await triage_task
     contact_context = " ".join(
         [request.message, analysis_ctx or ""]
         + [msg.content for msg in request.history[-6:] if getattr(msg, "role", "") == "user"]

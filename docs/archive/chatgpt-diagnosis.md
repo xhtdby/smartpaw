@@ -1,3 +1,9 @@
+> [!CAUTION]
+> **ARCHIVED — April 2026.** This document describes IndieAid's pre-Stage-0 architecture failures.
+> **All 6 systemic issues identified here have been fixed** in Stages 0–6 (see `PLAN.md` and commit history).
+> This file is kept for historical reference only. Do not use it to guide current implementation decisions.
+> Current architecture context is in `docs/indieaid-working-context.md`.
+
 # IndieAid — Combined, Self-Audited Architecture Diagnostic
 
 ## Executive diagnosis

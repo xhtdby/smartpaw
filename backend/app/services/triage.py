@@ -34,7 +34,77 @@ LOCAL_DECISION_SCENARIOS = {
     "no_dog_visible",
     "deceased_pet",
     "animal_cruelty_witnessed",
+    "feeding_weak_dog",
+    "unsafe_medicine",
+    "unsafe_home_remedy",
 }
+
+CANONICAL_SCENARIOS = {
+    "fall_entrapment",
+    "choking_airway",
+    "seizure_collapse",
+    "severe_bleeding",
+    "heatstroke",
+    "road_trauma",
+    "poisoning",
+    "rabies_exposure",
+    "fracture",
+    "maggot_wound",
+    "skin_disease",
+    "tick_infestation",
+    "puppy_gi",
+    "eye_injury",
+    "fearful_aggressive",
+    "injured_transport",
+    "burn_injury",
+    "vomiting_diarrhea",
+    "lost_dog",
+    "feeding_weak_dog",
+    "routine_care",
+    "unsafe_medicine",
+    "unsafe_home_remedy",
+    "deceased_pet",
+    "healthy_or_low_risk",
+    "no_dog_visible",
+    "animal_cruelty_witnessed",
+    "conversation_repair",
+    "warm_conversation",
+    "symptom_negated",
+    "mild_behavior_change",
+    "unclear",
+}
+
+SCENARIO_ALIASES = {
+    "abuse": "animal_cruelty_witnessed",
+    "animal_abuse": "animal_cruelty_witnessed",
+    "animal_cruelty": "animal_cruelty_witnessed",
+    "bleeding": "severe_bleeding",
+    "diarrhea": "vomiting_diarrhea",
+    "diarrhoea": "vomiting_diarrhea",
+    "feeding": "feeding_weak_dog",
+    "feeding_question": "feeding_weak_dog",
+    "gastroenteritis": "vomiting_diarrhea",
+    "gastrointestinal": "vomiting_diarrhea",
+    "gastrointestinal_issue": "vomiting_diarrhea",
+    "general_health": "healthy_or_low_risk",
+    "gi": "vomiting_diarrhea",
+    "gi_issue": "vomiting_diarrhea",
+    "healthy": "healthy_or_low_risk",
+    "healthy_low_risk": "healthy_or_low_risk",
+    "human_medicine": "unsafe_medicine",
+    "leg_injury": "fracture",
+    "limb_injury": "fracture",
+    "limping": "fracture",
+    "medicine": "unsafe_medicine",
+    "medicine_question": "unsafe_medicine",
+    "otc_medicine": "unsafe_medicine",
+    "puppy_diarrhea": "puppy_gi",
+    "puppy_diarrhoea": "puppy_gi",
+    "puppy_vomiting": "puppy_gi",
+    "weak_puppy": "feeding_weak_dog",
+}
+
+VALID_INTENTS = {"general", "medicine_question", "cruelty_witnessed"}
 
 
 class TriageResult(BaseModel):
@@ -74,7 +144,7 @@ Rules:
 - Mark needs_helpline_first true when the scene needs rescue equipment or urgent dispatch: well/pit/drain/pipe entrapment, drowning, major road accident, trapped under vehicle, roof/height rescue, aggressive dog endangering people.
 - If the message is vague ("acting weird", "not ok", "help") and no analysis context gives specifics, set info_sufficient false and ask for the few missing facts needed to choose safe first aid.
 - Do not make info_sufficient false just because the city, exact age, or depth is unknown when the immediate hazard is already clear.
-- scenario_type examples: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, puppy_gi, eye_injury, fearful_aggressive, deceased_pet, healthy_or_low_risk, no_dog_visible, unclear.
+- Use the closest canonical scenario_type: fall_entrapment, choking_airway, poisoning, heatstroke, road_trauma, fracture, severe_bleeding, seizure_collapse, maggot_wound, skin_disease, tick_infestation, puppy_gi, eye_injury, fearful_aggressive, injured_transport, burn_injury, vomiting_diarrhea, lost_dog, feeding_weak_dog, routine_care, unsafe_medicine, unsafe_home_remedy, deceased_pet, healthy_or_low_risk, no_dog_visible, animal_cruelty_witnessed, warm_conversation, conversation_repair, symptom_negated, mild_behavior_change, unclear.
 - Classify correctly for English, Hindi, Marathi, and code-mixed messages. Output fields are language-neutral.
 """
 
@@ -108,6 +178,34 @@ def _normalize_string_list(value: object, limit: int = 5) -> list[str]:
     return items[:limit]
 
 
+def _canonicalize_scenario(raw_value: object, fallback: TriageResult) -> str:
+    scenario_type = re.sub(
+        r"[^a-z0-9_]+",
+        "_",
+        str(raw_value or fallback.scenario_type).strip().lower(),
+    ).strip("_") or fallback.scenario_type
+    scenario_type = SCENARIO_ALIASES.get(scenario_type, scenario_type)
+
+    if fallback.scenario_type == "warm_conversation" and scenario_type in {
+        "healthy_or_low_risk",
+        "routine_care",
+        "unclear",
+    }:
+        return "warm_conversation"
+    if fallback.scenario_type == "conversation_repair" and scenario_type in {
+        "healthy_or_low_risk",
+        "routine_care",
+        "unclear",
+    }:
+        return "conversation_repair"
+
+    if scenario_type in CANONICAL_SCENARIOS:
+        return scenario_type
+    if fallback.scenario_type in CANONICAL_SCENARIOS:
+        return fallback.scenario_type
+    return "unclear"
+
+
 def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
     if not isinstance(raw, dict):
         return fallback
@@ -116,11 +214,7 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
     if urgency_tier not in URGENCY_TIERS:
         urgency_tier = fallback.urgency_tier
 
-    scenario_type = re.sub(
-        r"[^a-z0-9_]+",
-        "_",
-        str(raw.get("scenario_type", fallback.scenario_type)).strip().lower(),
-    ).strip("_") or fallback.scenario_type
+    scenario_type = _canonicalize_scenario(raw.get("scenario_type"), fallback)
 
     raw_mode = str(raw.get("mode", "")).strip().lower()
     if raw_mode not in _VALID_MODES:
@@ -130,12 +224,31 @@ def _normalize_result(raw: dict | None, fallback: TriageResult) -> TriageResult:
         "_",
         str(raw.get("intent", fallback.intent)).strip().lower(),
     ).strip("_") or fallback.intent
+    if raw_intent not in VALID_INTENTS:
+        raw_intent = fallback.intent
+    if raw_intent == "general" and fallback.intent != "general":
+        raw_intent = fallback.intent
+    if scenario_type == "unsafe_medicine":
+        raw_intent = "medicine_question"
+    if scenario_type == "animal_cruelty_witnessed":
+        raw_intent = "cruelty_witnessed"
 
     # Safety overrides: deterministic gates cannot be downgraded by the LLM
     if fallback.urgency_tier == "life_threatening":
+        urgency_tier = "life_threatening"
         raw_mode = "emergency"
     if fallback.scenario_type == "conversation_repair":
+        scenario_type = "conversation_repair"
         raw_mode = "repair"
+    if fallback.scenario_type == "warm_conversation":
+        scenario_type = "warm_conversation"
+        raw_mode = "warm"
+    if urgency_tier == "life_threatening":
+        raw_mode = "emergency"
+    if scenario_type == "conversation_repair":
+        raw_mode = "repair"
+    if scenario_type == "warm_conversation":
+        raw_mode = "warm"
 
     return TriageResult(
         urgency_tier=urgency_tier,
@@ -223,10 +336,65 @@ def _strip_negated_emergency_terms(text: str) -> str:
     return re.sub(r"\s+", " ", stripped).strip()
 
 
+ACTIVE_CARE_TERMS = [
+    "accident",
+    "bleed",
+    "blood",
+    "broken",
+    "can't breathe",
+    "can't stand",
+    "can't walk",
+    "cannot breathe",
+    "cannot stand",
+    "cannot walk",
+    "choking",
+    "chocolate",
+    "collapse",
+    "collapsed",
+    "diarrhea",
+    "diarrhoea",
+    "dying",
+    "feed",
+    "fracture",
+    "hit by",
+    "hungry",
+    "injured",
+    "kamjor",
+    "kamzor",
+    "khilana",
+    "khilao",
+    "khilau",
+    "limp",
+    "maggot",
+    "medicine",
+    "not drinking",
+    "not eating",
+    "pain",
+    "poison",
+    "pup",
+    "puppy",
+    "seizure",
+    "sick",
+    "tablet",
+    "tick",
+    "unwell",
+    "vomit",
+    "weak",
+    "wound",
+    "xylitol",
+]
+
+
+def _has_active_care_signal(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return _contains_any(normalized, ACTIVE_CARE_TERMS)
+
+
 def _is_repair_or_meta_intent(text: str) -> bool:
     normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
     normalized = re.sub(r"\s+", " ", normalized).strip()
-    repair_patterns = [
+    hard_repair_patterns = [
         "stop repeating",
         "you are repeating",
         "you're repeating",
@@ -236,15 +404,23 @@ def _is_repair_or_meta_intent(text: str) -> bool:
         "you got it wrong",
         "not what i asked",
         "not that",
-        "new topic",
-        "different dog",
-        "forget that",
-        "reset",
         "you misunderstood",
         "not an emergency",
         "not emergency",
     ]
-    if _contains_any(text, repair_patterns) or _contains_any(normalized, repair_patterns):
+    redirect_patterns = [
+        "new topic",
+        "different dog",
+        "different puppy",
+        "different animal",
+        "forget that",
+        "reset",
+    ]
+    if _contains_any(text, hard_repair_patterns) or _contains_any(normalized, hard_repair_patterns):
+        return True
+    if (
+        _contains_any(text, redirect_patterns) or _contains_any(normalized, redirect_patterns)
+    ) and not _has_active_care_signal(normalized):
         return True
     hindi_marathi_repair = [
         "यह गलत है",
@@ -256,6 +432,26 @@ def _is_repair_or_meta_intent(text: str) -> bool:
         "मैंने यह नहीं पूछा",
     ]
     return _contains_any(text, hindi_marathi_repair)
+
+
+def _is_emotional_check_in(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    emotional_patterns = [
+        "i am anxious",
+        "i am just anxious",
+        "i get anxious",
+        "i get really worried",
+        "i just worry",
+        "i worry a lot",
+        "i'm anxious",
+        "sorry for asking",
+        "sorry i ask",
+        "sorry to ask",
+        "thanks for answering",
+        "thank you for answering",
+    ]
+    return _contains_any(normalized, emotional_patterns) and not _has_active_care_signal(normalized)
 
 
 def _is_deceased_pet_context(text: str) -> bool:
@@ -366,6 +562,115 @@ def _is_cruelty_witnessed(text: str) -> bool:
     return _contains_any(text, devanagari_patterns)
 
 
+MEDICINE_TERMS = [
+    "acetaminophen",
+    "anti vomiting",
+    "anti-vomiting",
+    "aspirin",
+    "combiflam",
+    "crocin",
+    "human medicine",
+    "ibuprofen",
+    "nausea medicine",
+    "pain killer",
+    "painkiller",
+    "paracetamol",
+    "vomiting tablet",
+]
+GENERIC_MEDICINE_TERMS = ["dose", "medicine", "tablet"]
+MEDICINE_ASK_TERMS = ["can i", "dose", "give", "gave", "given", "how much", "should i"]
+TOXIN_TERMS = ["chocolate", "grapes", "pesticide", "poison", "rat poison", "xylitol"]
+EXPOSURE_TERMS = [
+    "ate",
+    "chewed",
+    "drank",
+    "eaten",
+    "fed",
+    "gave",
+    "given",
+    "got into",
+    "ingested",
+    "licked",
+    "swallowed",
+]
+HYPOTHETICAL_ASK_TERMS = [
+    "can i",
+    "could i",
+    "feed",
+    "give",
+    "is it safe",
+    "safe to",
+    "should i",
+    "what if",
+]
+PUPPY_TERMS = ["pup", "puppy", "puppies"]
+WEAK_OR_FOUND_TERMS = [
+    "bahut kamzor",
+    "found",
+    "kamjor",
+    "kamzor",
+    "malnourished",
+    "mili",
+    "nayi",
+    "new puppy",
+    "orphan",
+    "skinny",
+    "starving",
+    "thin",
+    "very weak",
+    "weak",
+]
+FEEDING_TERMS = [
+    "doodh",
+    "duudh",
+    "eat",
+    "feed",
+    "food",
+    "formula",
+    "hungry",
+    "kya khil",
+    "khilana",
+    "khilao",
+    "khilau",
+    "milk",
+]
+
+
+def _is_medicine_question(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s'-]+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return _contains_any(normalized, MEDICINE_TERMS) or (
+        _contains_any(normalized, GENERIC_MEDICINE_TERMS)
+        and _contains_any(normalized, MEDICINE_ASK_TERMS)
+    )
+
+
+def _has_toxin_exposure_cue(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return any(re.search(rf"\b{re.escape(term)}\b", normalized) for term in EXPOSURE_TERMS)
+
+
+def _is_hypothetical_toxin_question(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return (
+        _contains_any(normalized, TOXIN_TERMS)
+        and not _has_toxin_exposure_cue(normalized)
+        and _contains_any(normalized, HYPOTHETICAL_ASK_TERMS)
+    )
+
+
+def _is_weak_puppy_feeding_question(text: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\s']+", " ", _normalize_turn_text(text))
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    return (
+        _contains_any(normalized, PUPPY_TERMS)
+        and _contains_any(normalized, WEAK_OR_FOUND_TERMS)
+        and _contains_any(normalized, FEEDING_TERMS)
+    )
+
+
 def _heuristic_classify_internal(
     user_message: str,
     analysis_context: str | None = None,
@@ -399,6 +704,14 @@ def _heuristic_classify_internal(
             info_sufficient=True,
             scenario_type="deceased_pet",
             rationale="The user is talking about a dog who has already died, not an active emergency.",
+        )
+
+    if _is_emotional_check_in(user_compact):
+        return TriageResult(
+            urgency_tier="low_risk",
+            info_sufficient=True,
+            scenario_type="warm_conversation",
+            rationale="The user is expressing worry or apology without a new symptom.",
         )
 
     if _is_repair_or_meta_intent(user_compact):
@@ -490,12 +803,9 @@ def _heuristic_classify_internal(
             intent="cruelty_witnessed",
         )
 
-    if _contains_any(
-        compact,
-        ["paracetamol", "acetaminophen", "ibuprofen", "aspirin", "painkiller", "pain killer", "human medicine"],
-    ):
+    if _is_medicine_question(compact):
         return TriageResult(
-            urgency_tier="urgent" if _contains_any(compact, ["gave", "given", "ate", "swallowed"]) else "moderate",
+            urgency_tier="urgent" if _has_toxin_exposure_cue(compact) else "moderate",
             info_sufficient=True,
             missing_facts=["medicine_name", "amount", "time_given"],
             scenario_type="unsafe_medicine",
@@ -591,7 +901,16 @@ def _heuristic_classify_internal(
             rationale="Road trauma can involve fractures, spinal injury, or internal injury.",
         )
 
-    if _contains_any(screen_text, ["poison", "xylitol", "rat poison", "pesticide", "organophosphate", "chocolate"]):
+    if _contains_any(screen_text, TOXIN_TERMS + ["organophosphate"]):
+        if _is_hypothetical_toxin_question(screen_text):
+            return TriageResult(
+                urgency_tier="moderate",
+                info_sufficient=True,
+                missing_facts=["substance", "possible_exposure"],
+                scenario_type="poisoning",
+                rationale="The user is asking about a toxin hypothetically, not reporting ingestion.",
+                intent="medicine_question",
+            )
         return TriageResult(
             urgency_tier="urgent",
             info_sufficient=True,
@@ -664,6 +983,15 @@ def _heuristic_classify_internal(
             rationale="Eye injuries can worsen quickly without examination.",
         )
 
+    if _is_weak_puppy_feeding_question(screen_text):
+        return TriageResult(
+            urgency_tier="moderate",
+            info_sufficient=True,
+            missing_facts=["can_swallow", "body_warmth", "mother_seen"],
+            scenario_type="feeding_weak_dog",
+            rationale="A weak or newly found puppy needs cautious warming and feeding guidance.",
+        )
+
     if _contains_any(screen_text, ["puppy", "puppies"]) and _contains_any(screen_text, ["diarrhea", "diarrhoea", "vomit", "bloody"]):
         return TriageResult(
             urgency_tier="urgent",
@@ -705,9 +1033,11 @@ def _heuristic_classify_internal(
             rationale="This is a welfare/logistics case unless injury or danger is present.",
         )
 
-    if _contains_any(screen_text, ["feed", "food", "eat", "weak street dog", "hungry"]):
+    if _contains_any(screen_text, FEEDING_TERMS + ["weak street dog"]):
         return TriageResult(
-            urgency_tier="low_risk" if not _contains_any(screen_text, ["collapse", "cannot stand", "very weak"]) else "moderate",
+            urgency_tier="low_risk"
+            if not _contains_any(screen_text, ["collapse", "cannot stand", "very weak", "bahut kamzor"])
+            else "moderate",
             info_sufficient=True,
             missing_facts=["can_swallow", "vomiting_or_diarrhea"],
             scenario_type="feeding_weak_dog",
