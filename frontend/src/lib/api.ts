@@ -256,6 +256,7 @@ export interface Report {
   urgency: string;
   image_url?: string;
   image_filename?: string;
+  image_storage_warning?: string | null;
   created_at: string;
   status: string;
   resolved_at?: string;
@@ -298,11 +299,24 @@ export interface ActionCard {
   guide_id?: string;
 }
 
+export interface MedicineInfo {
+  id: string;
+  status: string;
+  home_use_ok: boolean;
+  requires_vet: boolean;
+  guidance: string;
+  friendly_next_step: string;
+  safer_alternatives: string[];
+  red_flags: string[];
+  sources: { title: string; url: string }[];
+}
+
 export interface ChatResponse {
   response: string;
   sources: string[];
   action_cards?: ActionCard[];
   is_emergency?: boolean;
+  medicine?: MedicineInfo | null;
   triage?: {
     urgency_tier: string;
     info_sufficient: boolean;

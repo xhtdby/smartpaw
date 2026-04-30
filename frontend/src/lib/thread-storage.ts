@@ -1,10 +1,11 @@
-import type { ActionCard, AnalysisContext, ChatMessage } from "@/lib/api";
+import type { ActionCard, AnalysisContext, ChatMessage, MedicineInfo } from "@/lib/api";
 
 export type ThreadKind = "general" | "image";
 
 export interface StoredChatMessage extends ChatMessage {
   action_cards?: ActionCard[];
   is_emergency?: boolean;
+  medicine?: MedicineInfo | null;
 }
 
 export interface ChatThread {

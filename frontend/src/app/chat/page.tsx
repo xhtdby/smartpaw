@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, Suspense, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard, type AnalysisContext } from "@/lib/api";
+import { sendChatMessage, type ChatMessage, type ChatResponse, type ActionCard, type AnalysisContext, type MedicineInfo } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 import {
   GENERAL_THREAD_ID,
@@ -179,6 +179,34 @@ function ActionCards({ cards }: { cards: ActionCard[] }) {
 }
 
 // ---------------------------------------------------------------------------
+// Medicine safety callout — shown only for matched sourced KB entries
+// ---------------------------------------------------------------------------
+function MedicineCallout({ medicine }: { medicine: MedicineInfo }) {
+  const { t } = useLanguage();
+  const source = medicine.sources.find((item) => item.url.startsWith("http"));
+
+  return (
+    <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+      <p className="font-semibold">{t("chat.medicine.title")}</p>
+      <p className="mt-1 leading-relaxed">{medicine.guidance}</p>
+      {medicine.friendly_next_step && (
+        <p className="mt-1 leading-relaxed">{medicine.friendly_next_step}</p>
+      )}
+      {source && (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 inline-block text-emerald-700 underline"
+        >
+          {t("chat.medicine.source")}: {source.title}
+        </a>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Analysis context banner — shown when photo analysis context is active
 // ---------------------------------------------------------------------------
 function AnalysisBanner({
@@ -235,6 +263,7 @@ function EmergencyBanner({ label }: { label: string }) {
 interface EnrichedMessage extends ChatMessage {
   action_cards?: ActionCard[];
   is_emergency?: boolean;
+  medicine?: MedicineInfo | null;
 }
 
 const THREAD_COPY = {
@@ -413,6 +442,7 @@ function ChatInner() {
         content: data.response,
         action_cards: data.action_cards,
         is_emergency: data.is_emergency,
+        medicine: data.medicine,
       };
       const withAssistant = [...withUser, assistantMsg];
       setMessages(withAssistant);
@@ -568,6 +598,9 @@ function ChatInner() {
               </div>
               {msg.role === "assistant" && msg.action_cards && msg.action_cards.length > 0 && (
                 <ActionCards cards={msg.action_cards} />
+              )}
+              {msg.role === "assistant" && msg.medicine && (
+                <MedicineCallout medicine={msg.medicine} />
               )}
             </div>
           </div>

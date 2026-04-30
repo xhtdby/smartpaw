@@ -567,19 +567,40 @@ MEDICINE_TERMS = [
     "anti vomiting",
     "anti-vomiting",
     "aspirin",
+    "betadine",
     "combiflam",
     "crocin",
+    "electrolyte",
     "human medicine",
     "ibuprofen",
+    "iodine",
     "nausea medicine",
+    "oral rehydration",
+    "ors",
     "pain killer",
     "painkiller",
     "paracetamol",
+    "pedialyte",
+    "povidone",
+    "saline",
     "vomiting tablet",
+    "wound wash",
 ]
 GENERIC_MEDICINE_TERMS = ["dose", "medicine", "tablet"]
 MEDICINE_ASK_TERMS = ["can i", "dose", "give", "gave", "given", "how much", "should i"]
-TOXIN_TERMS = ["chocolate", "grapes", "pesticide", "poison", "rat poison", "xylitol"]
+TOXIN_TERMS = [
+    "chocolate",
+    "garlic",
+    "grape",
+    "grapes",
+    "onion",
+    "pesticide",
+    "poison",
+    "raisin",
+    "raisins",
+    "rat poison",
+    "xylitol",
+]
 EXPOSURE_TERMS = [
     "ate",
     "chewed",

@@ -17,6 +17,13 @@ from fastapi import APIRouter
 
 from app.config import get_settings
 from app.models.schemas import ChatRequest
+from app.services.medicine_kb import (
+    find_medicine_entry,
+    format_medicine_fallback,
+    medicine_context,
+    medicine_public_payload,
+    medicine_sources,
+)
 from app.services.triage import TriageResult, classify_situation
 
 logger = logging.getLogger(__name__)
@@ -218,6 +225,27 @@ TRIAGE:
 {triage}
 
 KNOWLEDGE BASE:
+{context}
+
+{language_instruction}"""
+
+_PROMPT_MEDICINE = """You are IndieAid answering a medicine, toxin, or OTC first-aid question. Be warm, practical, and strict about safety.
+
+Rules:
+- Use the MEDICINE KB below as the authority. Do not invent doses, dose ranges, antidotes, or drug substitutions.
+- If the KB says unsafe/toxin/vet_only: clearly say not to give it, then give the safe next step and what details to collect.
+- If the KB says home_use_ok: give only the practical home guidance in the KB, then name red flags that need a vet/rescue.
+- If there is no exact KB match: do not guess; say a vet must confirm before giving medicine.
+- Never scold the user. Assume they are trying to help.
+- Under 450 tokens.
+
+TRIAGE:
+{triage}
+
+MEDICINE KB:
+{medicine_context}
+
+GENERAL FIRST-AID CONTEXT:
 {context}
 
 {language_instruction}"""
@@ -546,9 +574,17 @@ def _build_system_prompt(
     lang_instruction: str,
     context: str,
     contact: str,
+    medicine_kb_context: str | None = None,
 ) -> str:
     mode = triage.mode
     triage_json = json.dumps(_triage_dict(triage), ensure_ascii=False)
+    if getattr(triage, "intent", "") == "medicine_question":
+        return _PROMPT_MEDICINE.format(
+            language_instruction=lang_instruction,
+            triage=triage_json,
+            context=context,
+            medicine_context=medicine_kb_context or medicine_context(None),
+        )
     if mode == "emergency":
         return _PROMPT_EMERGENCY.format(
             language_instruction=lang_instruction,
@@ -819,6 +855,24 @@ async def chat(request: ChatRequest):
             "Previous analysis of the dog:\n"
             f"{_clip_text(analysis_ctx, 800)}\n\n---\n\n{context}"
         )
+    medicine_entry = find_medicine_entry(request.message)
+    use_medicine_entry = medicine_entry is not None and (
+        triage.intent == "medicine_question"
+        or triage.scenario_type in {
+            "poisoning",
+            "unsafe_medicine",
+            "unsafe_home_remedy",
+            "feeding_weak_dog",
+        }
+    )
+    if not use_medicine_entry:
+        medicine_entry = None
+    medicine_payload = medicine_public_payload(medicine_entry)
+    if medicine_entry:
+        context = f"Matched medicine KB:\n{medicine_context(medicine_entry)}\n\n---\n\n{context}"
+        for source in medicine_sources(medicine_entry):
+            if source not in sources:
+                sources.append(source)
 
     contact_context = " ".join(
         [request.message, analysis_ctx or ""]
@@ -834,6 +888,7 @@ async def chat(request: ChatRequest):
             "action_cards": cards,
             "is_emergency": is_emergency,
             "triage": _triage_dict(triage),
+            "medicine": medicine_payload,
         }
 
     if not triage.info_sufficient:
@@ -845,10 +900,15 @@ async def chat(request: ChatRequest):
             "action_cards": cards,
             "is_emergency": is_emergency,
             "triage": _triage_dict(triage),
+            "medicine": medicine_payload,
         }
 
     if not settings.groq_api_key:
-        fallback = _mode_fallback(request.message, context, request.language, triage, contact_context)
+        fallback = (
+            format_medicine_fallback(medicine_entry)
+            if medicine_entry
+            else _mode_fallback(request.message, context, request.language, triage, contact_context)
+        )
         cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
@@ -856,11 +916,12 @@ async def chat(request: ChatRequest):
             "action_cards": cards,
             "is_emergency": is_emergency,
             "triage": _triage_dict(triage),
+            "medicine": medicine_payload,
         }
 
     lang_instruction = LANGUAGE_INSTRUCTIONS.get(request.language, LANGUAGE_INSTRUCTIONS["en"])
     contact = _matching_emergency_contact(contact_context)
-    system = _build_system_prompt(triage, lang_instruction, context, contact)
+    system = _build_system_prompt(triage, lang_instruction, context, contact, medicine_context(medicine_entry))
 
     reminder = LANGUAGE_REMINDERS.get(request.language, "")
     messages = [{"role": "system", "content": system}]
@@ -896,10 +957,15 @@ async def chat(request: ChatRequest):
                 "action_cards": cards,
                 "is_emergency": is_emergency,
                 "triage": _triage_dict(triage),
+                "medicine": medicine_payload,
             }
     except Exception as exc:
         logger.error("Chat failed: %s", exc)
-        fallback = _mode_fallback(request.message, context, request.language, triage, contact_context)
+        fallback = (
+            format_medicine_fallback(medicine_entry)
+            if medicine_entry
+            else _mode_fallback(request.message, context, request.language, triage, contact_context)
+        )
         cards, is_emergency = _build_triage_action_cards(request.message, fallback, request.language, triage)
         return {
             "response": fallback,
@@ -907,6 +973,7 @@ async def chat(request: ChatRequest):
             "action_cards": cards,
             "is_emergency": is_emergency,
             "triage": _triage_dict(triage),
+            "medicine": medicine_payload,
         }
 
 

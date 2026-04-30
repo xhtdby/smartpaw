@@ -1,0 +1,308 @@
+[
+  {
+    "id": "paracetamol",
+    "names": ["paracetamol", "acetaminophen", "crocin", "dolo", "tylenol"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "unsafe",
+    "typical_use": "Human fever and pain relief",
+    "common_misuse": "Given to dogs or cats for fever, pain, or injury",
+    "guidance": "Do not give paracetamol/acetaminophen to a dog or cat unless a veterinarian specifically prescribed it for this animal.",
+    "friendly_next_step": "Keep the animal quiet and note the tablet strength, amount, and time. Call a veterinarian or poison service with those details if any was swallowed.",
+    "safer_alternatives": ["shade and rest", "cool compress for overheating", "vet-prescribed pain relief"],
+    "red_flags": ["known ingestion", "vomiting", "weakness", "pale or blue gums", "fast breathing", "collapse"],
+    "sources": [
+      {
+        "title": "Merck Veterinary Manual - Toxicoses From Human Analgesics",
+        "url": "https://www.merckvetmanual.com/toxicology/toxicities-from-human-drugs/toxicities-from-over-the-counter-drugs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "acetaminophen_and_nsaid_toxicosis"
+      },
+      {
+        "title": "FDA - Potentially Dangerous Items for Your Pet",
+        "url": "https://www.fda.gov/animal-veterinary/animal-health-literacy/potentially-dangerous-items-your-pet",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "human_medicine_and_acetaminophen_warning"
+      }
+    ]
+  },
+  {
+    "id": "ibuprofen",
+    "names": ["ibuprofen", "brufen", "advil", "motrin", "nurofen"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "unsafe",
+    "typical_use": "Human pain, fever, and inflammation relief",
+    "common_misuse": "Given to pets after injury or limping",
+    "guidance": "Do not give ibuprofen or other human NSAIDs to dogs or cats unless a veterinarian directed it.",
+    "friendly_next_step": "If it was swallowed, keep the packet and note the strength, amount, and time before calling a veterinarian.",
+    "safer_alternatives": ["rest and restricted movement", "cold compress for minor swelling", "vet-prescribed anti-inflammatory medicine"],
+    "red_flags": ["known ingestion", "vomiting", "black stool", "belly pain", "not eating", "weakness"],
+    "sources": [
+      {
+        "title": "Merck Veterinary Manual - Toxicoses From Human Analgesics",
+        "url": "https://www.merckvetmanual.com/toxicology/toxicities-from-human-drugs/toxicities-from-over-the-counter-drugs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "nsaid_toxicosis"
+      },
+      {
+        "title": "FDA - Potentially Dangerous Items for Your Pet",
+        "url": "https://www.fda.gov/animal-veterinary/animal-health-literacy/potentially-dangerous-items-your-pet",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "human_nsaid_warning"
+      }
+    ]
+  },
+  {
+    "id": "aspirin",
+    "names": ["aspirin", "disprin", "ecosprin", "salicylate"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "conditional_vet_only",
+    "typical_use": "Human pain relief and anti-platelet medicine",
+    "common_misuse": "Given at home for limping or pain",
+    "guidance": "Do not start aspirin at home for a pet. It can interact with other medicines and can cause serious side effects without veterinary dosing and screening.",
+    "friendly_next_step": "For pain or limping, restrict movement and arrange veterinary assessment rather than giving a tablet.",
+    "safer_alternatives": ["restrict movement", "supportive transport", "vet-prescribed pain relief"],
+    "red_flags": ["known ingestion", "vomiting", "black stool", "bleeding", "weakness"],
+    "sources": [
+      {
+        "title": "Merck Veterinary Manual - Toxicoses From Human Analgesics",
+        "url": "https://www.merckvetmanual.com/toxicology/toxicities-from-human-drugs/toxicities-from-over-the-counter-drugs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "salicylate_and_nsaid_risk"
+      }
+    ]
+  },
+  {
+    "id": "povidone_iodine",
+    "names": ["povidone iodine", "povidone-iodine", "betadine", "iodine solution"],
+    "species_safe": ["dog", "cat"],
+    "species_unsafe": [],
+    "home_use_ok": true,
+    "requires_vet": false,
+    "dose_guidance": "general_range_with_caveats",
+    "status": "home_first_aid",
+    "typical_use": "Skin antiseptic and minor wound cleaning",
+    "common_misuse": "Used too strong, poured into deep wounds, or used instead of veterinary wound care",
+    "guidance": "For a small surface wound, diluted povidone-iodine can be used as a gentle rinse after flushing dirt away. Do not pour it into deep punctures, eyes, burns, or large wounds.",
+    "friendly_next_step": "Dilute until it looks like weak tea, rinse gently, cover loosely if needed, and get help for deep, painful, dirty, or bleeding wounds.",
+    "safer_alternatives": ["sterile saline", "clean water flush", "clean cloth cover for transport"],
+    "red_flags": ["deep wound", "heavy bleeding", "maggots", "foul smell", "eye wound", "burn", "severe pain"],
+    "sources": [
+      {
+        "title": "VCA Animal Hospitals - Povidone Iodine Topical",
+        "url": "https://vcahospitals.com/know-your-pet/povidone-iodine-topical",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "povidone_iodine_topical_first_aid_use"
+      },
+      {
+        "title": "VCA Animal Hospitals - Care of Open Wounds in Dogs",
+        "url": "https://vcahospitals.com/know-your-pet/care-of-open-wounds-in-dogs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "dilute_cleansing_solution_context"
+      }
+    ]
+  },
+  {
+    "id": "saline_wound_flush",
+    "names": ["saline", "sterile saline", "normal saline", "saline solution", "wound wash"],
+    "species_safe": ["dog", "cat"],
+    "species_unsafe": [],
+    "home_use_ok": true,
+    "requires_vet": false,
+    "dose_guidance": "not_applicable",
+    "status": "home_first_aid",
+    "typical_use": "Gentle wound or eye-area flushing",
+    "common_misuse": "Used as the only care for deep, infected, or bleeding wounds",
+    "guidance": "Sterile saline is reasonable for gently flushing dirt from a minor surface wound or around the eye. Do not force fluid into deep wounds.",
+    "friendly_next_step": "Flush gently, prevent licking, and arrange veterinary help if the wound is deep, painful, dirty, or not improving.",
+    "safer_alternatives": ["clean running water for surface dirt", "clean cloth cover for transport"],
+    "red_flags": ["deep wound", "heavy bleeding", "eye swelling", "embedded object", "pus", "maggots"],
+    "sources": [
+      {
+        "title": "VCA Animal Hospitals - Care of Open Wounds in Dogs",
+        "url": "https://vcahospitals.com/know-your-pet/care-of-open-wounds-in-dogs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "saline_wound_flush_context"
+      }
+    ]
+  },
+  {
+    "id": "oral_electrolyte_solution",
+    "names": ["ors", "oral rehydration", "electrolyte", "pedialyte", "pet electrolyte"],
+    "species_safe": ["dog"],
+    "species_unsafe": [],
+    "home_use_ok": true,
+    "requires_vet": false,
+    "dose_guidance": "vet_only",
+    "status": "conditional_home_first_aid",
+    "typical_use": "Mild fluid support after brief vomiting or diarrhea",
+    "common_misuse": "Forced into vomiting, collapsed, very weak, or unconscious animals",
+    "guidance": "Plain water is safest first. A pet electrolyte or unflavored oral electrolyte solution may be considered only for an alert dog who can swallow and is not vomiting repeatedly.",
+    "friendly_next_step": "Offer tiny amounts slowly. If the dog is weak, repeatedly vomiting, bloody, bloated, or a puppy, call a veterinarian or rescue instead of trying to rehydrate at home.",
+    "safer_alternatives": ["small sips of clean water", "ice chips for an alert dog", "vet fluids for dehydration"],
+    "red_flags": ["repeated vomiting", "bloody diarrhea", "collapse", "puppy", "cannot swallow", "sunken eyes", "sticky gums"],
+    "sources": [
+      {
+        "title": "PetMD - Can You Give a Dog Pedialyte?",
+        "url": "https://www.petmd.com/dog/care/pedialyte-dogs-it-safe",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "conditional_electrolyte_use_and_vet_threshold"
+      }
+    ]
+  },
+  {
+    "id": "chocolate",
+    "names": ["chocolate", "cocoa", "dark chocolate", "baking chocolate"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "toxin",
+    "typical_use": "Human food",
+    "common_misuse": "Treating chocolate as a harmless snack for dogs",
+    "guidance": "Do not feed chocolate to dogs or cats. If any was eaten, keep the wrapper and note the amount and time.",
+    "friendly_next_step": "For a hypothetical question, the safe answer is no chocolate. For known ingestion, call a veterinarian or poison service with the type, amount, and time.",
+    "safer_alternatives": ["plain dog-safe treats", "small amount of regular dog food", "fresh water"],
+    "red_flags": ["known ingestion", "vomiting", "restlessness", "tremors", "fast heartbeat", "seizure"],
+    "sources": [
+      {
+        "title": "FDA - Potentially Dangerous Items for Your Pet",
+        "url": "https://www.fda.gov/animal-veterinary/animal-health-literacy/potentially-dangerous-items-your-pet",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "chocolate_danger"
+      }
+    ]
+  },
+  {
+    "id": "grapes_raisins",
+    "names": ["grape", "grapes", "raisin", "raisins", "kishmish"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "toxin",
+    "typical_use": "Human food",
+    "common_misuse": "Used as a small snack",
+    "guidance": "Do not feed grapes or raisins to dogs or cats. They can be dangerous even when the animal looks normal at first.",
+    "friendly_next_step": "If any were eaten, note the amount and time and call a veterinarian or poison service promptly.",
+    "safer_alternatives": ["species-appropriate treats", "regular food", "fresh water"],
+    "red_flags": ["known ingestion", "vomiting", "diarrhea", "not eating", "weakness", "reduced urination"],
+    "sources": [
+      {
+        "title": "FDA - Potentially Dangerous Items for Your Pet",
+        "url": "https://www.fda.gov/animal-veterinary/animal-health-literacy/potentially-dangerous-items-your-pet",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "grapes_and_raisins_danger"
+      }
+    ]
+  },
+  {
+    "id": "xylitol",
+    "names": ["xylitol", "sugar free gum", "sugar-free gum", "sugar free candy", "sugar-free candy"],
+    "species_safe": [],
+    "species_unsafe": ["dog"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "toxin",
+    "typical_use": "Sweetener in sugar-free gum, candy, cough syrup, mouthwash, toothpaste, and some foods",
+    "common_misuse": "Dog chews sugar-free gum or receives human toothpaste/food",
+    "guidance": "Keep xylitol away from dogs. If a dog may have eaten it, treat it as urgent.",
+    "friendly_next_step": "Save the packet, note the time and amount, and call a veterinarian or poison service now.",
+    "safer_alternatives": ["pet toothpaste only", "dog-safe treats", "regular food"],
+    "red_flags": ["known ingestion", "vomiting", "weakness", "tremors", "seizure", "collapse"],
+    "sources": [
+      {
+        "title": "FDA - Paws Off Xylitol; It's Dangerous for Dogs",
+        "url": "https://www.fda.gov/consumers/consumer-updates/paws-xylitol-its-dangerous-dogs",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "xylitol_dog_toxicity"
+      }
+    ]
+  },
+  {
+    "id": "onion_garlic",
+    "names": ["onion", "onions", "garlic", "leek", "chives"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "vet_only",
+    "status": "toxin",
+    "typical_use": "Human food seasoning",
+    "common_misuse": "Feeding leftovers cooked with onion or garlic",
+    "guidance": "Avoid onion, garlic, leeks, and chives for dogs and cats, including cooked leftovers.",
+    "friendly_next_step": "If a meaningful amount was eaten, note the food, amount, and time and call a veterinarian.",
+    "safer_alternatives": ["plain cooked rice in tiny amounts if appropriate", "regular pet food", "fresh water"],
+    "red_flags": ["known ingestion", "vomiting", "weakness", "pale gums", "fast breathing", "dark urine"],
+    "sources": [
+      {
+        "title": "FDA - Potentially Dangerous Items for Your Pet",
+        "url": "https://www.fda.gov/animal-veterinary/animal-health-literacy/potentially-dangerous-items-your-pet",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "onion_family_danger"
+      }
+    ]
+  },
+  {
+    "id": "weak_puppy_milk",
+    "names": ["milk", "cow milk", "doodh", "puppy milk", "milk for puppy"],
+    "species_safe": [],
+    "species_unsafe": ["dog"],
+    "home_use_ok": false,
+    "requires_vet": false,
+    "dose_guidance": "not_applicable",
+    "status": "unsafe_first_aid",
+    "typical_use": "Human food or emergency feeding idea",
+    "common_misuse": "Giving cow milk or force-feeding a cold, weak, or newly found puppy",
+    "guidance": "Do not use cow milk as first aid for a cold or weak puppy, and do not force-feed.",
+    "friendly_next_step": "Warm the puppy first, keep the airway clear, and seek an experienced rescuer or veterinarian if the puppy is cold, limp, crying constantly, injured, or not suckling.",
+    "safer_alternatives": ["warmth before feeding", "experienced bottle-feeding help", "veterinary or rescue support"],
+    "red_flags": ["cold body", "limp", "constant crying", "blue gums", "no suckle reflex", "injury", "fly strike"],
+    "sources": [
+      {
+        "title": "VCA Animal Hospitals - Caring for Orphaned Puppies",
+        "url": "https://vcahospitals.com/know-your-pet/puppy-orphaned",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "orphaned_puppies_cow_milk_inadequate_and_warmth_priority"
+      }
+    ]
+  },
+  {
+    "id": "kerosene_turpentine",
+    "names": ["kerosene", "turpentine", "engine oil", "diesel", "petrol"],
+    "species_safe": [],
+    "species_unsafe": ["dog", "cat"],
+    "home_use_ok": false,
+    "requires_vet": true,
+    "dose_guidance": "not_applicable",
+    "status": "unsafe_home_remedy",
+    "typical_use": "Fuel, solvent, or harsh home remedy",
+    "common_misuse": "Applied to wounds, maggots, ticks, or skin disease",
+    "guidance": "Do not put kerosene, turpentine, petrol, diesel, or engine oil on wounds, maggots, ticks, or skin.",
+    "friendly_next_step": "Prevent licking, gently rinse with clean water or saline if safe, cover loosely, and arrange vet/rescue help for open or painful wounds.",
+    "safer_alternatives": ["saline rinse", "clean cloth cover", "veterinary wound care"],
+    "red_flags": ["chemical already applied", "open wound", "maggots", "burning skin", "vomiting", "drooling", "weakness"],
+    "sources": [
+      {
+        "title": "Merck Veterinary Manual - Initial Wound Management in Small Animals",
+        "url": "https://www.merckvetmanual.com/emergency-medicine-and-critical-care/wound-management-in-small-animals/initial-wound-management-in-small-animals",
+        "accessed_on": "2026-04-30",
+        "claim_scope": "wound_management_requires_appropriate_antisepsis"
+      }
+    ]
+  }
+]
