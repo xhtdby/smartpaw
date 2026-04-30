@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Quiz } from "@/components/Quiz";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 
 type PageLanguage = "en" | "hi" | "mr";
@@ -459,6 +460,7 @@ export default function LearnPage() {
                 </li>
               ))}
             </ul>
+            <Quiz topicId={guide.id} language={pageLanguage} />
           </div>
         ))}
       </section>

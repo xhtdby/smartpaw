@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Quiz } from "@/components/Quiz";
 import { LanguageSelector, useLanguage } from "@/lib/language";
 
 type PageLanguage = "en" | "hi" | "mr";
@@ -394,6 +395,7 @@ export default function FirstAidKitPage() {
                 {topic.remember[pageLanguage]}
               </div>
             </div>
+            <Quiz topicId={topic.id} language={pageLanguage} />
           </article>
         ))}
       </section>

@@ -1,0 +1,254 @@
+{
+  "approach": [
+    {
+      "source_entry_id": "learn:approach",
+      "q": {
+        "en": "A scared street dog is growling but not trapped. What is the safest first move?",
+        "hi": "एक डरा हुआ स्ट्रीट डॉग गुर्रा रहा है, लेकिन फंसा नहीं है। सबसे सुरक्षित पहला कदम क्या है?",
+        "mr": "घाबरलेला रस्त्यावरील कुत्रा गुरगुरतो आहे, पण अडकलेला नाही. सर्वात सुरक्षित पहिली कृती कोणती?"
+      },
+      "options": {
+        "en": ["Walk straight toward the head", "Pause, turn sideways, and give space", "Grab the collar quickly", "Shout so the dog backs away"],
+        "hi": ["सीधे सिर की ओर जाएं", "रुकें, साइड में मुड़ें और जगह दें", "जल्दी से कॉलर पकड़ें", "जोर से चिल्लाएं ताकि वह पीछे हटे"],
+        "mr": ["थेट डोक्याकडे जा", "थांबा, बाजूने वळा आणि जागा द्या", "कॉलर पटकन पकडा", "तो मागे जावा म्हणून ओरडा"]
+      },
+      "correct_index": 1,
+      "explanation": {
+        "en": "That is the calmer choice. Space and sideways body language reduce pressure and lower bite risk.",
+        "hi": "यही शांत और सुरक्षित विकल्प है। जगह देना और साइड से खड़े होना दबाव और काटने का जोखिम कम करता है।",
+        "mr": "हा शांत आणि सुरक्षित पर्याय आहे. जागा देणे आणि बाजूने उभे राहणे दबाव व चावण्याचा धोका कमी करते."
+      }
+    }
+  ],
+  "trauma": [
+    {
+      "source_entry_id": "learn:trauma",
+      "q": {
+        "en": "A dog was hit by a vehicle and may have a fracture. What should you avoid?",
+        "hi": "कुत्ता गाड़ी से टकराया है और फ्रैक्चर हो सकता है। आपको क्या नहीं करना चाहिए?",
+        "mr": "कुत्र्याला वाहनाने धडक दिली आहे आणि फ्रॅक्चर असू शकते. काय टाळावे?"
+      },
+      "options": {
+        "en": ["Limit movement", "Use a blanket or board for transport", "Straighten the painful limb", "Call rescue or a vet"],
+        "hi": ["हलचल कम करना", "ले जाने के लिए कंबल या बोर्ड इस्तेमाल करना", "दर्द वाले पैर को सीधा करना", "रेस्क्यू या vet को कॉल करना"],
+        "mr": ["हालचाल कमी करणे", "नेण्यासाठी चादर किंवा बोर्ड वापरणे", "दुखणारा पाय सरळ करणे", "रेस्क्यू किंवा vet ला कॉल करणे"]
+      },
+      "correct_index": 2,
+      "explanation": {
+        "en": "That is an easy mistake. Do not straighten a suspected fracture; support the body and minimize movement.",
+        "hi": "यह गलती आसानी से हो सकती है। शक वाले फ्रैक्चर को सीधा न करें; शरीर को सहारा दें और हलचल कम रखें।",
+        "mr": "ही चूक सहज होते. संशयित फ्रॅक्चर सरळ करू नका; शरीराला आधार द्या आणि हालचाल कमी ठेवा."
+      }
+    }
+  ],
+  "heat": [
+    {
+      "source_entry_id": "learn:heat",
+      "q": {
+        "en": "For suspected heatstroke, which cooling step is safest to start?",
+        "hi": "हीटस्ट्रोक का शक हो तो कौन सा cooling कदम शुरू करना सबसे सुरक्षित है?",
+        "mr": "उष्माघाताचा संशय असेल तर सुरुवातीला कोणती cooling कृती सुरक्षित आहे?"
+      },
+      "options": {
+        "en": ["Ice bath immediately", "Room-temperature water on belly, paws, neck", "Cover with a thick blanket", "Force a full bowl of water"],
+        "hi": ["तुरंत बर्फ वाला स्नान", "पेट, पंजों और गर्दन पर सामान्य तापमान का पानी", "मोटा कंबल ढकना", "पूरा कटोरा पानी जबरदस्ती देना"],
+        "mr": ["ताबडतोब बर्फाचे स्नान", "पोट, पंजे आणि मानेवर सामान्य तापमानाचे पाणी", "जाड चादर झाकणे", "पूर्ण वाटी पाणी जबरदस्ती देणे"]
+      },
+      "correct_index": 1,
+      "explanation": {
+        "en": "Start cooling gently and arrange urgent care. Ice-cold shock and forced water can make things worse.",
+        "hi": "हल्के तरीके से ठंडा करना शुरू करें और तुरंत care arrange करें। बर्फ जैसा झटका और जबरदस्ती पानी नुकसान कर सकते हैं।",
+        "mr": "हळूवार थंड करायला सुरुवात करा आणि तातडीची care arrange करा. बर्फाचा धक्का आणि जबरदस्ती पाणी नुकसान करू शकतात."
+      }
+    }
+  ],
+  "poison": [
+    {
+      "source_entry_id": "learn:poison",
+      "q": {
+        "en": "A cat chewed lily leaves. What is the safest advice?",
+        "hi": "बिल्ली ने lily के पत्ते चबा लिए। सबसे सुरक्षित सलाह क्या है?",
+        "mr": "मांजरीने lily ची पाने चावली. सर्वात सुरक्षित सल्ला कोणता?"
+      },
+      "options": {
+        "en": ["Wait and watch until vomiting starts", "Give milk", "Call a vet or poison service urgently", "Make the cat vomit at home"],
+        "hi": ["उल्टी शुरू होने तक इंतज़ार करें", "दूध दें", "तुरंत vet या poison service को कॉल करें", "घर पर उल्टी करवाएं"],
+        "mr": ["उलटी सुरू होईपर्यंत थांबा", "दूध द्या", "तातडीने vet किंवा poison service ला कॉल करा", "घरी उलटी करवून घ्या"]
+      },
+      "correct_index": 2,
+      "explanation": {
+        "en": "Lilies can be dangerous for cats. Do not wait or try home antidotes; get urgent veterinary guidance.",
+        "hi": "Lilies बिल्लियों के लिए खतरनाक हो सकती हैं। इंतज़ार या घरेलू antidote न करें; तुरंत veterinary guidance लें।",
+        "mr": "Lilies मांजरींसाठी धोकादायक असू शकतात. थांबू नका किंवा घरगुती antidote करू नका; तातडीने veterinary guidance घ्या."
+      }
+    }
+  ],
+  "skin": [
+    {
+      "source_entry_id": "learn:skin",
+      "q": {
+        "en": "What should never be poured on wounds or diseased skin?",
+        "hi": "घाव या खराब त्वचा पर क्या कभी नहीं डालना चाहिए?",
+        "mr": "जखमेवर किंवा आजारी त्वचेवर काय कधीही टाकू नये?"
+      },
+      "options": {
+        "en": ["Clean saline", "Clean gauze", "Kerosene or engine oil", "Vet-labeled tick product used as directed"],
+        "hi": ["साफ saline", "साफ gauze", "केरोसिन या engine oil", "निर्देशानुसार vet-labeled tick product"],
+        "mr": ["स्वच्छ saline", "स्वच्छ gauze", "केरोसिन किंवा engine oil", "निर्देशानुसार vet-labeled tick product"]
+      },
+      "correct_index": 2,
+      "explanation": {
+        "en": "Right. Harsh chemicals burn tissue and can poison the animal if licked.",
+        "hi": "सही। ऐसे रसायन tissue जला सकते हैं और चाटने पर जानवर को ज़हरीले हो सकते हैं।",
+        "mr": "बरोबर. असे रसायन tissue जाळू शकतात आणि चाटल्यास प्राण्याला विषारी ठरू शकतात."
+      }
+    }
+  ],
+  "puppies": [
+    {
+      "source_entry_id": "learn:puppies",
+      "q": {
+        "en": "A weak puppy has bloody diarrhea. What is the best next step?",
+        "hi": "कमज़ोर पिल्ले को खून वाले दस्त हैं। सबसे अच्छा अगला कदम क्या है?",
+        "mr": "अशक्त पिल्लाला रक्ताळ जुलाब आहेत. सर्वोत्तम पुढची कृती कोणती?"
+      },
+      "options": {
+        "en": ["Keep warm and get urgent vet/rescue help", "Give cow milk first", "Give a human diarrhea tablet", "Wait two days"],
+        "hi": ["गर्म रखें और तुरंत vet/rescue help लें", "पहले गाय का दूध दें", "मानव diarrhea tablet दें", "दो दिन इंतज़ार करें"],
+        "mr": ["उबदार ठेवा आणि तातडीने vet/rescue help घ्या", "आधी गायीचे दूध द्या", "मानवी diarrhea tablet द्या", "दोन दिवस थांबा"]
+      },
+      "correct_index": 0,
+      "explanation": {
+        "en": "Puppies can deteriorate quickly. Warmth helps, but bloody diarrhea needs urgent help.",
+        "hi": "पिल्ले बहुत जल्दी बिगड़ सकते हैं। गर्म रखना मदद करता है, लेकिन खून वाले दस्त में तुरंत मदद चाहिए।",
+        "mr": "पिल्ले पटकन खालावू शकतात. उब मदत करते, पण रक्ताळ जुलाबात तातडीची मदत हवी."
+      }
+    }
+  ],
+  "bleeding": [
+    {
+      "source_entry_id": "kit:bleeding",
+      "q": {
+        "en": "A cloth is soaked while you are pressing a bleeding wound. What should you do?",
+        "hi": "खून वाले घाव पर दबाव देते समय कपड़ा भीग गया। क्या करें?",
+        "mr": "रक्तस्त्रावाच्या जखमेवर दाब देताना कापड भिजले. काय करावे?"
+      },
+      "options": {
+        "en": ["Peel it off to check", "Add another cloth on top and keep pressure", "Pour powder into the wound", "Stop pressure and wait"],
+        "hi": ["देखने के लिए कपड़ा हटा दें", "ऊपर दूसरा कपड़ा रखें और दबाव जारी रखें", "घाव में powder डालें", "दबाव रोककर इंतज़ार करें"],
+        "mr": ["पाहण्यासाठी कापड काढा", "वर दुसरे कापड ठेवा आणि दाब सुरू ठेवा", "जखमेत powder टाका", "दाब थांबवून थांबा"]
+      },
+      "correct_index": 1,
+      "explanation": {
+        "en": "Keep the clot undisturbed. Add layers and maintain firm pressure while arranging help.",
+        "hi": "Clot को न छेड़ें। ऊपर layers जोड़ें और मदद arrange करते समय दबाव बनाए रखें।",
+        "mr": "Clot न हलवता ठेवा. वर layers जोडा आणि मदत arrange करताना दाब कायम ठेवा."
+      }
+    }
+  ],
+  "choking": [
+    {
+      "source_entry_id": "kit:choking",
+      "q": {
+        "en": "If an animal is coughing and air is moving, what should you avoid?",
+        "hi": "अगर जानवर खांस रहा है और हवा जा रही है, तो क्या टालना चाहिए?",
+        "mr": "प्राणी खोकत आहे आणि हवा जात आहे, तर काय टाळावे?"
+      },
+      "options": {
+        "en": ["Let them cough while staying ready", "Keep the scene calm", "Push fingers deep into the throat", "Call a vet if breathing worsens"],
+        "hi": ["तैयार रहते हुए खांसने दें", "माहौल शांत रखें", "उंगलियां गले में अंदर तक डालें", "सांस बिगड़े तो vet को कॉल करें"],
+        "mr": ["तयार राहून खोकू द्या", "परिसर शांत ठेवा", "बोटे घशात खोलवर घाला", "श्वास बिघडल्यास vet ला कॉल करा"]
+      },
+      "correct_index": 2,
+      "explanation": {
+        "en": "Deep finger sweeps can push the object farther in or cause injury.",
+        "hi": "गले में अंदर तक उंगलियां डालने से चीज और अंदर जा सकती है या चोट लग सकती है।",
+        "mr": "घशात खोलवर बोटे घातल्याने वस्तू आणखी आत जाऊ शकते किंवा इजा होऊ शकते."
+      }
+    }
+  ],
+  "wound-cleaning": [
+    {
+      "source_entry_id": "kit:wound-cleaning",
+      "q": {
+        "en": "For a minor surface wound after bleeding is controlled, what is a safer cleaning choice?",
+        "hi": "खून रुकने के बाद छोटे surface wound को साफ करने के लिए सुरक्षित विकल्प क्या है?",
+        "mr": "रक्त थांबल्यानंतर छोट्या surface wound साठी सुरक्षित स्वच्छता पर्याय कोणता?"
+      },
+      "options": {
+        "en": ["Kerosene", "Clean saline", "Chili paste", "Undiluted harsh disinfectant"],
+        "hi": ["केरोसिन", "साफ saline", "मिर्च paste", "बिना पतला harsh disinfectant"],
+        "mr": ["केरोसिन", "स्वच्छ saline", "मिरची paste", "न पातळ केलेले harsh disinfectant"]
+      },
+      "correct_index": 1,
+      "explanation": {
+        "en": "Saline is a gentle first-aid choice. Deep, dirty, painful, or bite wounds still need veterinary care.",
+        "hi": "Saline हल्का first-aid विकल्प है। गहरे, गंदे, दर्दनाक या bite wounds में फिर भी veterinary care चाहिए।",
+        "mr": "Saline हा सौम्य first-aid पर्याय आहे. खोल, घाण, दुखरी किंवा bite wounds साठी तरी veterinary care हवी."
+      }
+    }
+  ],
+  "fracture": [
+    {
+      "source_entry_id": "kit:fracture",
+      "q": {
+        "en": "For a suspected fracture, which is usually more helpful than a bad splint?",
+        "hi": "शक वाले fracture में खराब splint से ज़्यादा मददगार क्या है?",
+        "mr": "संशयित fracture मध्ये चुकीच्या splint पेक्षा अधिक मदत करणारे काय?"
+      },
+      "options": {
+        "en": ["Keep the animal still and supported", "Pull the limb straight", "Make them walk to test it", "Give a human painkiller"],
+        "hi": ["जानवर को स्थिर और supported रखें", "पैर खींचकर सीधा करें", "चलाकर test करें", "मानव painkiller दें"],
+        "mr": ["प्राण्याला स्थिर आणि supported ठेवा", "पाय ओढून सरळ करा", "चालवून test करा", "मानवी painkiller द्या"]
+      },
+      "correct_index": 0,
+      "explanation": {
+        "en": "Stillness is safer. Bad splints, walking tests, and human painkillers can worsen harm.",
+        "hi": "स्थिर रखना सुरक्षित है। खराब splint, चलाकर test और मानव painkillers नुकसान बढ़ा सकते हैं।",
+        "mr": "स्थिर ठेवणे सुरक्षित आहे. चुकीचे splint, चालवून test आणि मानवी painkillers नुकसान वाढवू शकतात."
+      }
+    }
+  ],
+  "dehydration": [
+    {
+      "source_entry_id": "kit:dehydration",
+      "q": {
+        "en": "When is it safer to offer tiny sips of water or ORS-style fluid?",
+        "hi": "पानी या ORS-style fluid के छोटे घूंट कब देना सुरक्षित है?",
+        "mr": "पाणी किंवा ORS-style fluid चे छोटे घोट कधी देणे सुरक्षित आहे?"
+      },
+      "options": {
+        "en": ["When alert and swallowing", "When unconscious", "During repeated vomiting", "By forcing the mouth open"],
+        "hi": ["जब होश में हो और निगल सके", "बेहोश हो तब", "बार-बार उल्टी के दौरान", "मुंह जबरदस्ती खोलकर"],
+        "mr": ["शुद्धीत आणि गिळू शकत असेल तेव्हा", "बेशुद्ध असताना", "वारंवार उलटी होताना", "तोंड जबरदस्ती उघडून"]
+      },
+      "correct_index": 0,
+      "explanation": {
+        "en": "Fluids help only when swallowing is safe. Forcing water can cause choking or aspiration.",
+        "hi": "Fluid तभी मदद करता है जब निगलना सुरक्षित हो। जबरदस्ती पानी choking या aspiration करा सकता है।",
+        "mr": "Fluid तेव्हाच मदत करते जेव्हा गिळणे सुरक्षित असते. जबरदस्ती पाणी choking किंवा aspiration करू शकते."
+      }
+    }
+  ],
+  "otc-medicine": [
+    {
+      "source_entry_id": "kit:otc-medicine",
+      "q": {
+        "en": "A person asks if they can give ibuprofen for animal pain. What should IndieAid say?",
+        "hi": "कोई पूछता है कि animal pain के लिए ibuprofen दे सकते हैं या नहीं। IndieAid क्या कहे?",
+        "mr": "कोणी विचारते की animal pain साठी ibuprofen देता येईल का. IndieAid ने काय सांगावे?"
+      },
+      "options": {
+        "en": ["Give a small human dose", "Use only with milk", "Do not give it; call a vet for pain control", "Crush it into food"],
+        "hi": ["छोटा human dose दें", "केवल दूध के साथ दें", "न दें; pain control के लिए vet को कॉल करें", "food में crush करें"],
+        "mr": ["छोटा human dose द्या", "फक्त दुधासोबत द्या", "देऊ नका; pain control साठी vet ला कॉल करा", "food मध्ये crush करा"]
+      },
+      "correct_index": 2,
+      "explanation": {
+        "en": "Correct. Human painkillers can be dangerous for animals; pain control should be vet-directed.",
+        "hi": "सही। Human painkillers जानवरों के लिए खतरनाक हो सकते हैं; pain control vet-directed होना चाहिए।",
+        "mr": "बरोबर. Human painkillers प्राण्यांसाठी धोकादायक असू शकतात; pain control vet-directed असावे."
+      }
+    }
+  ]
+}
