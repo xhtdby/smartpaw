@@ -26,6 +26,23 @@ class FirstAidStep(BaseModel):
     instruction: str
 
 
+class SourceCitation(BaseModel):
+    title: str
+    url: str
+
+
+class MedicineSuggestion(BaseModel):
+    id: str
+    status: str
+    home_use_ok: bool
+    requires_vet: bool
+    guidance: str
+    friendly_next_step: str
+    safer_alternatives: list[str] = []
+    red_flags: list[str] = []
+    sources: list[SourceCitation] = []
+
+
 class AnalysisResponse(BaseModel):
     dog_detected: bool
     analysis_status: str = "complete"  # "complete", "uncertain", "no_dog_visible", "unavailable"
@@ -41,6 +58,7 @@ class AnalysisResponse(BaseModel):
     empathetic_summary: str = ""
     when_to_call_professional: str = ""
     approach_tips: str = ""
+    otc_suggestion: Optional[MedicineSuggestion] = None
     disclaimer: str = (
         "This is AI-based guidance, not a veterinary diagnosis. "
         "When in doubt, please contact a veterinary professional immediately."
@@ -172,4 +190,5 @@ class MultilingualAnalysisResponse(BaseModel):
     urgency_signals: list[str] = []
     unknown_factors: list[str] = []
     scenario_type: str = "unclear"
+    otc_suggestion: Optional[MedicineSuggestion] = None
     languages: dict[str, LanguageResult] = {}

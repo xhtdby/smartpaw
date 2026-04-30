@@ -19,6 +19,7 @@ from app.models.schemas import (
 from app.services.condition_analyzer import analyze_condition
 from app.services.dog_detector import detect_dog
 from app.services.emotion_classifier import classify_emotion
+from app.services.medicine_kb import suggest_medicine_for_analysis
 from app.services.response_generator import generate_fast_empathetic_response
 from app.services.triage import heuristic_classify_situation
 from app.services.vision_analyzer import analyze_vision, unavailable_result
@@ -263,6 +264,11 @@ async def analyze_dog_image(
         condition_result,
     )
     localized_condition = localized_payload.get("condition", condition_result)
+    otc_suggestion = suggest_medicine_for_analysis(
+        vision_metadata.get("scenario_type", "unclear"),
+        condition_result,
+        user_context,
+    )
 
     return AnalysisResponse(
         dog_detected=True,
@@ -285,6 +291,7 @@ async def analyze_dog_image(
         empathetic_summary=localized_payload.get("empathetic_summary", ""),
         when_to_call_professional=localized_payload.get("when_to_call_professional", ""),
         approach_tips=localized_payload.get("approach_tips", ""),
+        otc_suggestion=otc_suggestion,
         disclaimer=localized_payload.get("disclaimer", ""),
         language=language,
     )
@@ -335,6 +342,11 @@ async def analyze_dog_image_multilingual(
     en_payload = _ensure_payload_condition(en_raw, condition_result)
     hi_payload = _ensure_payload_condition(hi_raw, condition_result)
     mr_payload = _ensure_payload_condition(mr_raw, condition_result)
+    otc_suggestion = suggest_medicine_for_analysis(
+        vision_metadata.get("scenario_type", "unclear"),
+        condition_result,
+        user_context,
+    )
 
     return MultilingualAnalysisResponse(
         dog_detected=True,
@@ -348,6 +360,7 @@ async def analyze_dog_image_multilingual(
         urgency_signals=vision_metadata.get("urgency_signals", []),
         unknown_factors=vision_metadata.get("unknown_factors", []),
         scenario_type=vision_metadata.get("scenario_type", "unclear"),
+        otc_suggestion=otc_suggestion,
         languages={
             "en": _build_language_result(en_payload),
             "hi": _build_language_result(hi_payload),

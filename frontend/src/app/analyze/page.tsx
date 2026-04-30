@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult, type AnalysisContext } from "@/lib/api";
+import { analyzeImageMultilingual, type MultilingualAnalysisResult, type AnalysisResult, type AnalysisContext, type MedicineInfo } from "@/lib/api";
 import { useLanguage, LanguageSelector } from "@/lib/language";
 import { createImageThreadFromAnalysis } from "@/lib/thread-storage";
 
@@ -52,6 +52,33 @@ const unavailableAnalysisCopy = (language: string) => {
   return "I could not analyze this photo right now because the vision model is unavailable. If the dog may be in danger, open chat and describe what you can see.";
 };
 
+function OtcSuggestionCallout({ suggestion }: { suggestion: MedicineInfo }) {
+  const { t } = useLanguage();
+  const source = suggestion.sources.find((item) => item.url.startsWith("http"));
+
+  return (
+    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+      <h3 className="font-bold text-emerald-800 mb-2">{t("chat.medicine.title")}</h3>
+      <p className="text-sm text-emerald-900 leading-relaxed">{suggestion.guidance}</p>
+      {suggestion.friendly_next_step && (
+        <p className="text-sm text-emerald-900 leading-relaxed mt-2">
+          {suggestion.friendly_next_step}
+        </p>
+      )}
+      {source && (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-block text-xs text-emerald-700 underline"
+        >
+          {t("chat.medicine.source")}: {source.title}
+        </a>
+      )}
+    </div>
+  );
+}
+
 export default function AnalyzePage() {
   const { language, t } = useLanguage();
   const router = useRouter();
@@ -82,6 +109,7 @@ export default function AnalyzePage() {
             urgency_signals: mlResult.urgency_signals,
             unknown_factors: mlResult.unknown_factors,
             scenario_type: mlResult.scenario_type,
+            otc_suggestion: mlResult.otc_suggestion,
             safety: langData.safety,
             first_aid: langData.first_aid,
             triage_questions: langData.triage_questions,
@@ -99,6 +127,7 @@ export default function AnalyzePage() {
           urgency_signals: mlResult.urgency_signals,
           unknown_factors: mlResult.unknown_factors,
           scenario_type: mlResult.scenario_type,
+          otc_suggestion: null,
           first_aid: [],
           triage_questions: [],
           empathetic_summary:
@@ -514,6 +543,10 @@ export default function AnalyzePage() {
                     ))}
                   </ol>
                 </div>
+              )}
+
+              {result.otc_suggestion && (
+                <OtcSuggestionCallout suggestion={result.otc_suggestion} />
               )}
 
               {result.when_to_call_professional && (

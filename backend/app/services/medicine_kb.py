@@ -83,6 +83,61 @@ def medicine_public_payload(entry: dict[str, Any] | None) -> dict[str, Any] | No
     }
 
 
+def _entry_by_id(entry_id: str) -> dict[str, Any] | None:
+    for entry in load_medicine_kb():
+        if entry.get("id") == entry_id:
+            return dict(entry)
+    return None
+
+
+def suggest_medicine_for_analysis(
+    scenario_type: str,
+    condition: dict[str, Any] | None,
+    user_context: str | None = None,
+) -> dict[str, Any] | None:
+    """Return a conservative sourced OTC/first-aid suggestion for image analysis."""
+    text_parts = [scenario_type, user_context or ""]
+    if condition:
+        text_parts.extend(
+            [
+                str(condition.get("physical_condition", "")),
+                " ".join(str(item) for item in condition.get("visible_injuries", [])),
+                " ".join(str(item) for item in condition.get("health_concerns", [])),
+                str(condition.get("body_language", "")),
+            ]
+        )
+    normalized = _normalize(" ".join(text_parts))
+
+    explicit = find_medicine_entry(normalized)
+    if explicit and (
+        any(term in normalized for term in ["can i", "should i", "give", "use", "ate", "eaten", "swallowed"])
+        or explicit.get("status") in {"toxin", "unsafe", "unsafe_home_remedy"}
+    ):
+        return medicine_public_payload(explicit)
+
+    if scenario_type == "maggot_wound" or any(
+        term in normalized
+        for term in [
+            "abrasion",
+            "cut",
+            "maggot",
+            "maggots",
+            "open wound",
+            "sore",
+            "wound",
+        ]
+    ):
+        return medicine_public_payload(_entry_by_id("saline_wound_flush"))
+
+    if scenario_type in {"vomiting_diarrhea", "puppy_gi"} or any(
+        term in normalized
+        for term in ["dehydration", "dehydrated", "diarrhea", "diarrhoea", "vomit", "vomiting"]
+    ):
+        return medicine_public_payload(_entry_by_id("oral_electrolyte_solution"))
+
+    return None
+
+
 def medicine_context(entry: dict[str, Any] | None) -> str:
     if not entry:
         return "No exact medicine KB match. Do not invent dosing; explain that a vet should confirm medicine safety."

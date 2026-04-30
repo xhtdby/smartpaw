@@ -188,6 +188,7 @@ export interface AnalysisResult {
   empathetic_summary: string;
   when_to_call_professional?: string;
   approach_tips?: string;
+  otc_suggestion?: MedicineInfo | null;
   disclaimer: string;
   language: string;
 }
@@ -208,6 +209,7 @@ export interface MultilingualAnalysisResult {
   urgency_signals?: string[];
   unknown_factors?: string[];
   scenario_type?: string;
+  otc_suggestion?: MedicineInfo | null;
   languages: {
     [lang: string]: {
       condition?: {
